@@ -36,14 +36,14 @@ trait GeneratesRoutes
             ],
         ];
 
-        if (Macros::hasMacro('resourceDefaultRoutes')) {
-            $defaultRoutes = Macros::resourceDefaultRoutes($defaultRoutes, static::class);
-        }
-
         // Additional Rotues
         $defaultRoutes['destroyMany'] = [
             'url' => $prefix,
             'method' => 'delete',
+        ];
+        $defaultRoutes['restoreMany'] = [
+            'url' => $prefix,
+            'method' => 'put',
         ];
 
         if (Traits::classUses(static::class, Importable::class)) {

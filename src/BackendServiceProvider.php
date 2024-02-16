@@ -18,14 +18,13 @@ class BackendServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
 
+    }
+    
+    public function register()
+    {
         $this->publishes([
             __DIR__ . '/../config/luminix.php' => config_path('luminix.php'),
         ], 'luminix-config');
-
-    }
-
-    public function register()
-    {
 
     }
 }

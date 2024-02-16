@@ -4,17 +4,17 @@ namespace Luminix\Backend\Services;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Doctrine\DBAL\Exception;
+use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
-use Spatie\ModelInfo\ModelFinder;
 use Illuminate\Support\Str;
 use Luminix\Backend\Macros;
 use Luminix\Backend\Support\Traits;
-use Spatie\ModelInfo\ModelInfo;
 
 class Manifest
 {
@@ -36,9 +36,34 @@ class Manifest
     public function luminixModels()
     {
         if (!isset($this->luminixModels)) {
-            $this->luminixModels = ModelFinder::all()
-                ->filter(fn ($model) => Traits::classUses($model, \Luminix\Backend\Model\LuminixModel::class))
-                ->values();
+            /** @var mixed */
+            $container = Container::getInstance();
+
+            $models = collect(File::allFiles(app_path('Models')))
+                ->map(function ($item) use ($container) {
+                    $path = 'Models\\' . $item->getRelativePathName();
+
+                    return sprintf(
+                        '\%s%s',
+                        $container->getNamespace(),
+                        strtr(substr($path, 0, strrpos($path, '.')), DIRECTORY_SEPARATOR, '\\')
+                    );
+                })
+                ->filter(function ($class) {
+                    $valid = false;
+
+                    if (class_exists($class)) {
+                        $reflection = new \ReflectionClass($class);
+
+                        $valid = $reflection->isSubclassOf(Model::class)
+                            && !$reflection->isAbstract()
+                            && Traits::classUses($class, \Luminix\Backend\Model\LuminixModel::class);
+                    }
+
+                    return $valid;
+                });
+
+            $this->luminixModels = $models->values();
         }
         return $this->luminixModels;
     }
@@ -55,11 +80,14 @@ class Manifest
         if (!isset($this->models)) {
             $modelList = $this->luminixModels();
             $models = [];
-
+            
             foreach ($modelList as $model) {
                 $snakeName = Str::snake(class_basename($model));
-                $modelInfo = ModelInfo::forModel($model);
 
+                if (!$this->app->runningInConsole() && !Auth::check() && !in_array($snakeName, Config::get('luminix.public.models', []))) {
+                    continue;
+                }
+                
                 /** @var Model */
                 $instance = new $model;
 
@@ -67,11 +95,12 @@ class Manifest
                     'fillable' => $instance->getFillable(),
                     'casts' => $instance->getCasts(),
                     'primaryKey' => $instance->getKeyName(),
+                    'labeledBy' => $instance->getLabel(),
                     'timestamps' => $instance->usesTimestamps(),
                     'softDeletes' => Traits::classUses($model, \Illuminate\Database\Eloquent\SoftDeletes::class),
                     'importable' => Traits::classUses($model, \Luminix\Backend\Model\Importable::class),
                     'exportable' => Traits::classUses($model, \Luminix\Backend\Model\Exportable::class),
-                    'relations' => $modelInfo->relations->toArray(),
+                    'relations' => $instance->getRelationships(),
                     // 'attributes' => $modelInfo->attributes->toArray(),
                 ];
 
@@ -82,7 +111,11 @@ class Manifest
                     $models[$snakeName] = Macros::{'model' . class_basename($model) . 'Manifest'}($models[$snakeName], $model);
                 }
             }
-            $this->models = $models;
+            if (empty($models)) {
+                $this->models = new \stdClass();
+            } else {
+                $this->models = $models;
+            }
         }
 
         return $this->models;
@@ -96,15 +129,21 @@ class Manifest
             $routeList = Route::getRoutes()->getRoutesByName();
 
             foreach ($routeList as $name => $route) {
-                if (in_array($name, Config::get('luminix.routing.exclude', []))) {
+                if (in_array($name, Config::get('luminix.routing.exclude', []) + ['luminix.init'])) {
                     continue;
                 }
 
-                // if (!$this->app->runningInConsole() && !Auth::check() && !in_array($name, Config::get('luminix.routing.public', []))) {
-                //     continue;
-                // }
+                if (!$this->app->runningInConsole() && !Auth::check() && !in_array($name, Config::get('luminix.public.routes', []))) {
+                    continue;
+                }
 
-                Arr::set($routes, $name, $route->uri());
+                Arr::set($routes, $name, [
+                    $route->uri(),
+                    ...collect($route->methods())
+                        ->filter(fn ($method) => !in_array($method, ['HEAD', 'OPTIONS']))
+                        ->map(fn ($method) => Str::lower($method))
+                        ->values()
+                ]);
             }
 
             $this->routes = $routes;

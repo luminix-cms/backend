@@ -5,22 +5,25 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Luminix\Backend\Services\Manifest;
 
+if (Config::get('luminix.boot.method', 'api') === 'api') {
+    Route::middleware(Config::get('luminix.routing.middleware.init', ['api']))
+        ->get('api/' . Config::get('luminix.routing.prefix', 'luminix') . '/init', 'Luminix\Backend\Controllers\InitController@init')
+        ->name('luminix.init');
+}
+
 Route::group([
-    'middleware' => Config::get('luminix.routing.middleware', ['api', 'auth', 'can:access-luminix']),
+    'middleware' => Config::get('luminix.routing.middleware.api', ['api', 'auth', 'can:access-luminix']),
     'prefix' => 'api/' . Config::get('luminix.routing.prefix', 'luminix'),
 ], function () {
 
     /** @var Manifest */
     $manifest = app(Manifest::class);
 
-    if (Config::get('luminix.boot.method', 'api') === 'api') {
-        Route::get('init', 'Luminix\Backend\Controllers\InitController@init')->name('luminix.init');
-    }
 
     foreach ($manifest->luminixModels() as $model) {
         $routes = $model::getLuminixRoutes();
 
-        foreach ($routes as $page => $url) {
+        foreach ($routes as $action => $url) {
             $method = 'get';
 
             if (is_array($url)) {
@@ -28,11 +31,13 @@ Route::group([
                 $url = $url['url'];
             }
 
-            $overrides = Config::get('luminix.routing.controller', []);
+            $overrides = Config::get('luminix.routing.controller_overrides', []);
 
-            $controller = $overrides[$model] ?? 'Luminix\Backend\Controllers\ResourceController';
+            $controller = $overrides[$model] ?? Config::get('luminix.routing.controller', 'Luminix\Backend\Controllers\ResourceController');
 
-            Route::$method($url, $controller . '@' . $page)->name('luminix.' . Str::snake(class_basename($model)) . '.' . $page);
+            $modelName = Str::snake(class_basename($model));
+
+            Route::$method($url, $controller . '@' . $action)->name('luminix.' . $modelName . '.' . $action);
         }
 
     }
