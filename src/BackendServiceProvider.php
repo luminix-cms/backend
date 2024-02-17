@@ -2,6 +2,7 @@
 
 namespace Luminix\Backend;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Luminix\Backend\Services\Manifest;
 
@@ -18,6 +19,11 @@ class BackendServiceProvider extends ServiceProvider
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
 
+        $this->loadViewsFrom(__DIR__ . '/../views', 'luminix');
+
+        Blade::directive('luminixEmbed', function () {
+            return "<?php echo view('luminix::embed')->render(); ?>";
+        });
     }
     
     public function register()

@@ -152,4 +152,26 @@ class Manifest
         return $this->routes;
     }
 
+    public function makeBoot()
+    {
+        $response = [
+            'data' => [
+                'user' => auth()->user(),
+            ],
+        ];
+
+        if (Macros::hasMacro('onInit')) {
+            $response['data'] += Macros::onInit();
+        }
+
+        if (Config::get('luminix.boot.includes_manifest_data', true)) {
+            $response += [
+                'models' => $this->models(),
+                'routes' => $this->routes(),
+            ];
+        }
+
+        return $response;
+    }
+
 }
