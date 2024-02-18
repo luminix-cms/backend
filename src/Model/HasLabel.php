@@ -14,7 +14,7 @@ trait HasLabel
         if ($this->labeledBy ?? false) {
             return $this->labeledBy;
         }
-        
+
         return $this->fillable[0];
     }
 }

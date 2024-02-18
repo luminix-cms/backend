@@ -101,7 +101,6 @@ class Manifest
                     'importable' => Traits::classUses($model, \Luminix\Backend\Model\Importable::class),
                     'exportable' => Traits::classUses($model, \Luminix\Backend\Model\Exportable::class),
                     'relations' => $instance->getRelationships(),
-                    // 'attributes' => $modelInfo->attributes->toArray(),
                 ];
 
                 if (Macros::hasMacro('modelManifest')) {
