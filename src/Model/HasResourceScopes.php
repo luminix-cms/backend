@@ -2,41 +2,45 @@
 
 namespace Luminix\Backend\Model;
 
-trait QueryScopes
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+
+trait HasResourceScopes
 {
 
-    public function scopeBeforeLuminix($query, $request)
+    public function scopeBeforeLuminix(Builder $query, Request $request)
     {}
 
-    public function scopeAfterLuminix($query, $request)
+    public function scopeAfterLuminix(Builder $query, Request $request)
+    {
+    }
+
+    public function scopeAllowed(Builder $query, string $permission)
     {}
 
-    public function scopeAllowed($query, $permission)
-    {}
-
-    public function scopeSearch($query, $search)
+    public function scopeSearch(Builder $query, string $search)
     {
         foreach ($this->getFillable() as $fillable) {
             $query->orWhere($fillable, 'like', '%' . implode('%', explode(' ', $search)) . '%');
         }
     }
 
-    public function scopeWhereBelongsToTab($query, $tab)
+    public function scopeWhereBelongsToTab(Builder $query, string $tab)
     {
         if ('trashed' == $tab) {
             $query->onlyTrashed();
         }
     }
 
-    public function scopeWhereMatchesFilter($query, $filters)
+    public function scopeWhereMatchesFilter(Builder $query, array $filters)
     {}
 
-    public function scopeApplyOrderBy($query, $column, $direction)
+    public function scopeApplyOrderBy(Builder $query, string $column, string $direction)
     {
         $query->orderBy($column, $direction)->orderBy($this->getKeyName(), 'asc');
     }
 
-    public function scopeLuminixQuery($query, $request, $permission)
+    public function scopeLuminixQuery(Builder $query, Request $request, ?string $permission)
     {
         $query->beforeLuminix($request);
 

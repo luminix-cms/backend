@@ -7,7 +7,7 @@ use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
 trait LuminixModel
 {
 
-    use GeneratesRoutes, QueryScopes, HasLabel;
-    use RelationshipAware, HasEagerLimit, ValidatesRequests;
+    use HasRestApi, HasResourceScopes, HasIndentifiers;
+    use HasRelationHandler, HasEagerLimit, ValidatesRequests;
 
 }

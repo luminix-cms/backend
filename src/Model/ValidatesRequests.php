@@ -2,6 +2,8 @@
 
 namespace Luminix\Backend\Model;
 
+use Illuminate\Http\Request;
+
 trait ValidatesRequests
 {
     /**
@@ -10,16 +12,16 @@ trait ValidatesRequests
      * @param 'store'|'update' $for
      * @return array
      */
-    public function getValidationRules($for)
+    public function getValidationRules(string $for): array
     {
         return [];
     }
 
-    public function validateRequest($request, $for)
+    public function validateRequest(Request $request, string $for)
     {
         if (empty($this->getValidationRules($for))) {
-            return $request->all();
+            return;
         }
-        return $request->validate($this->getValidationRules($for));
+        $request->validate($this->getValidationRules($for));
     }
 }

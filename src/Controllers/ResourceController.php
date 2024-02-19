@@ -24,7 +24,7 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        $permission = config('luminix.routing.permissions.' . $method, null);
+        $permission = config('luminix.backend.security.permissions.' . $method, null);
 
         return [
             'class' => $class,
@@ -64,7 +64,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
             abort(403);
         }
 
@@ -113,7 +113,7 @@ class ResourceController extends Controller
             ->afterLuminix($request)
             ->firstOrFail();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias, $item)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
         }
 
@@ -133,7 +133,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
             abort(403);
         }
 
@@ -175,7 +175,7 @@ class ResourceController extends Controller
             ->afterLuminix($request)
             ->firstOrFail();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias, $item)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
         }
 
@@ -221,7 +221,7 @@ class ResourceController extends Controller
             $item = $item->firstOrFail();
         }
 
-        if ($permission && !Gate::allows($permission . '-' . $alias, $item)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
         }
 
@@ -248,7 +248,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
             abort(403);
         }
 
@@ -302,7 +302,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
             abort(403);
         }
 

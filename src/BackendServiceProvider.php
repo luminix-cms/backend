@@ -7,42 +7,25 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Luminix\Backend\Services\Js;
 use Luminix\Backend\Services\Manifest;
+use Luminix\Backend\Services\ModelFinder;
 
 class BackendServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-
-        
-        $this->app->singleton(Manifest::class, function () {
-            return new Manifest($this->app);
-        });
-        
-        $this->app->singleton(Js::class, function () {
-            return new Js();
-        });
-        
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         
-        $this->loadViewsFrom(__DIR__ . '/../views', 'luminix');
-        
-        Blade::directive('luminixEmbed', function () {
-            return "<?php echo view('luminix::embed')->render(); ?>";
-        });
-
-        View::composer('luminix::embed', function ($_) {
-            if (config('luminix.boot.method', 'api') === 'embed') {
-                app(Js::class)->set('boot', app(Manifest::class)->makeBoot());
-            }
+        $this->app->singleton(ModelFinder::class, function () {
+            return new ModelFinder($this->app);
         });
     }
     
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/luminix.php', 'luminix');
+        $this->mergeConfigFrom(__DIR__ . '/../config/backend.php', 'luminix.backend');
 
         $this->publishes([
-            __DIR__ . '/../config/luminix.php' => config_path('luminix.php'),
+            __DIR__ . '/../config/backend.php' => config_path('luminix/backend.php'),
         ], 'luminix-config');
 
     }

@@ -5,9 +5,9 @@ namespace Luminix\Backend\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
-trait RelationshipAware
+trait HasRelationHandler
 {
-    public function getRelationships()
+    public function getRelationships(): array
     {
         $class = new \ReflectionClass($this);
 
@@ -50,7 +50,7 @@ trait RelationshipAware
             : $relations;
     }
 
-    public function getSyncs()
+    public function getSyncs(): array
     {
         if (!isset($this->syncs)) {
             return [];

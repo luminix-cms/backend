@@ -3,10 +3,9 @@
 namespace Luminix\Backend\Model;
 
 use Illuminate\Support\Str;
-use Luminix\Backend\Macros;
-use Luminix\Backend\Support\Traits;
+use Luminix\Backend\Services\ModelFinder;
 
-trait GeneratesRoutes
+trait HasRestApi
 {
     /**
      * Merge the default routes with the given routes array.
@@ -46,14 +45,14 @@ trait GeneratesRoutes
             'method' => 'put',
         ];
 
-        if (Traits::classUses(static::class, Importable::class)) {
+        if (app(ModelFinder::class)->classUses(static::class, Importable::class)) {
             $defaultRoutes['import'] = [
                 'url' => $prefix . '/import',
                 'method' => 'post',
             ];
         }
 
-        if (Traits::classUses(static::class, Exportable::class)) {
+        if (app(ModelFinder::class)->classUses(static::class, Exportable::class)) {
             $defaultRoutes['export'] = [
                 'url' => $prefix . '/export',
                 'method' => 'get',
@@ -68,7 +67,7 @@ trait GeneratesRoutes
      * 
      * @return string[]
      */
-    static function getLuminixRoutes()
+    static function getLuminixRoutes(): array
     {
         return static::mergeDefaultRoutes([]);
     }

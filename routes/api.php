@@ -2,26 +2,17 @@
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
-use Luminix\Backend\Services\Manifest;
-
-if (Config::get('luminix.boot.method', 'api') === 'api') {
-    Route::middleware(Config::get('luminix.routing.middleware.init', ['api']))
-        ->get('api/' . Config::get('luminix.routing.prefix', 'luminix') . '/init', 'Luminix\Backend\Controllers\InitController@init')
-        ->name('luminix.init');
-}
+use Luminix\Backend\Services\ModelFinder;
 
 Route::group([
-    'middleware' => Config::get('luminix.routing.middleware.api', ['api', 'auth', 'can:access-luminix']),
-    'prefix' => 'api/' . Config::get('luminix.routing.prefix', 'luminix'),
+    'middleware' => Config::get('luminix.backend.security.middleware', ['api', 'auth']),
+    'prefix' => Config::get('luminix.backend.api.prefix', 'luminix-api'),
 ], function () {
+    /** @var ModelFinder */
+    $modelFinder = app(ModelFinder::class);
 
-    /** @var Manifest */
-    $manifest = app(Manifest::class);
-
-
-    foreach ($manifest->luminixModels() as $model) {
-        $routes = $model::getLuminixRoutes();
+    $modelFinder->all()->each(function ($class, $alias) {
+        $routes = $class::getLuminixRoutes();
 
         foreach ($routes as $action => $url) {
             $method = 'get';
@@ -31,16 +22,11 @@ Route::group([
                 $url = $url['url'];
             }
 
-            $overrides = Config::get('luminix.routing.controller_overrides', []);
+            $overrides = Config::get('luminix.backend.api.controller_overrides', []);
 
-            $controller = $overrides[$model] ?? Config::get('luminix.routing.controller', 'Luminix\Backend\Controllers\ResourceController');
+            $controller = $overrides[$class] ?? Config::get('luminix.backend.api.controller', 'Luminix\Backend\Controllers\ResourceController');
 
-            $modelName = Str::snake(class_basename($model));
-
-            Route::$method($url, $controller . '@' . $action)->name('luminix.' . $modelName . '.' . $action);
+            Route::$method($url, $controller . '@' . $action)->name('luminix.' . $alias . '.' . $action);
         }
-
-    }
-
+    });
 });
-
