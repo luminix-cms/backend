@@ -27,13 +27,13 @@ Com apenas essas linhas de código, você terá um CRUD completo para a model Us
 
 | URL | Rota | Método | Descrição |
 | --- | ---- | ------ | --------- |
-| /api/users | luminix.users.index | GET | Listar os usuários |
-| /api/users | luminix.users.store | POST | Criar um novo usuário |
-| /api/users/{id} | luminix.users.show | GET | Exibir um usuário |
-| /api/users/{id} | luminix.users.update | PUT | Atualizar um usuário |
-| /api/users/{id} | luminix.users.destroy | DELETE | Deletar um usuário |
-| /api/users | luminix.users.destroyMany | DELETE | Deletar vários usuários |
-| /api/users | luminix.users.restoreMany | PUT | Restaurar vários usuários |
+| /api/users | luminix.user.index | GET | Listar os usuários |
+| /api/users | luminix.user.store | POST | Criar um novo usuário |
+| /api/users/{id} | luminix.user.show | GET | Exibir um usuário |
+| /api/users/{id} | luminix.user.update | PUT | Atualizar um usuário |
+| /api/users/{id} | luminix.user.destroy | DELETE | Deletar um usuário |
+| /api/users | luminix.user.destroyMany | DELETE | Deletar vários usuários |
+| /api/users | luminix.user.restoreMany | PUT | Restaurar vários usuários |
 
 ## Documentação
 
