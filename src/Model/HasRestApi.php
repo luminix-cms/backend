@@ -17,6 +17,8 @@ trait HasRestApi
     {
         $prefix = Str::plural(Str::snake(class_basename(static::class)));
 
+        $primaryKey = (new static)->getKeyName();
+
         // Default Laravel Resource Routes
         $defaultRoutes = [
             'index' => $prefix,
@@ -24,16 +26,21 @@ trait HasRestApi
                 'url' => $prefix,
                 'method' => 'post',
             ],
-            'show' => $prefix . '/{id}',
-            'update' => [
-                'url' => $prefix . '/{id}',
-                'method' => 'put',
-            ],
-            'destroy' => [
-                'url' => $prefix . '/{id}',
-                'method' => 'delete',
-            ],
         ];
+
+        if ($primaryKey) {
+            $defaultRoutes += [
+                'show' => $prefix . '/{' . $primaryKey . '}',
+                'update' => [
+                    'url' => $prefix . '/{' . $primaryKey . '}',
+                    'method' => 'put',
+                ],
+                'destroy' => [
+                    'url' => $prefix . '/{' . $primaryKey . '}',
+                    'method' => 'delete',
+                ],
+            ];
+        }
 
         // Additional Rotues
         $defaultRoutes['destroyMany'] = [

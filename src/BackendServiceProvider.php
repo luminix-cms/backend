@@ -16,10 +16,10 @@ class BackendServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         
         $this->app->singleton(ModelFinder::class, function () {
-            return new ModelFinder($this->app);
+            return new ModelFinder();
         });
     }
-    
+
     public function register()
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/backend.php', 'luminix.backend');

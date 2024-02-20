@@ -2,6 +2,8 @@
 
 namespace Luminix\Backend\Controllers;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
@@ -33,23 +35,100 @@ class ResourceController extends Controller
         ];
     }
 
-    public function afterModelSaved(Request $request, $item)
+    public function fillRelationships(Request $request, $item)
+    {
+        
+        $data = $request->all();
+        $item->fill($data);
+
+        foreach ($data as $key => $value)
+        {
+
+            $method = Str::camel($key);
+
+            if (!method_exists($item, $method) && method_exists($item, $key)) {
+                $method = $key;
+            }
+            
+            $fillable = $item->getFillable();
+
+            if (
+                in_array($key, $fillable)
+                || !method_exists($item, $method)
+                || (!is_array($value) && !is_null($value))
+            ) 
+            {
+                continue;
+            }
+
+            // check if is a "BelongsTo" relation
+            // and if true, sets `{$key}_id` attribute
+            $reflection = new \ReflectionMethod($item, $method);
+            if ($reflection->hasReturnType() 
+                && (
+                    $reflection->getReturnType()->getName() == BelongsTo::class 
+                    || is_subclass_of($reflection->getReturnType()->getName(), BelongsTo::class)
+                )
+            ) 
+            {
+                /** @var BelongsTo */
+                $relation = $item->{$method}();
+                $foreignKey = $relation->getForeignKeyName();
+
+                if (is_null($value)) {
+                    $item->{$foreignKey} = null;
+                    continue;
+                }
+
+                $ownerKey = $relation->getOwnerKeyName();
+
+                if (!isset($value[$ownerKey]) || !in_array($foreignKey, $fillable))
+                {
+                    continue;
+                }
+                $item->{$foreignKey} = $value[$ownerKey];
+            }
+        }
+    }
+    
+    public function syncRelationships(Request $request, $item)
     {
         foreach ($item->getSyncs() as $relation) {
             if ($request->has($relation) && method_exists($item, $relation)) {
+                $reflection = new \ReflectionMethod($item, $relation);
+                if (!$reflection->hasReturnType() 
+                    || ($reflection->getReturnType()->getName() !== BelongsToMany::class 
+                        && !is_subclass_of($reflection->getReturnType()->getName(), BelongsToMany::class)
+                )) {
+                    continue;
+                }
                 $key = -1;
-                $item->{$relation}()->sync(
-                    collect($request->{$relation})->mapWithKeys(function ($item) use (&$key) {
-                        if (!isset($item['pivot'])) {
+                /** @var BelongsToMany */
+                $relation = $item->{$relation}();
+
+                $related = $relation->getRelated();
+                $ownerKey = $related->getKeyName();
+
+                $relation->sync(
+                    collect($request->{$relation})->mapWithKeys(function ($relationItem) use (&$key, $ownerKey) {
+                        if (!isset($relationItem['pivot'])) {
                             $key++;
-                            return [$key => $item['id']];
+                            return [$key => $relationItem[$ownerKey]];
                         }
-                        $key = $item['id'];
-                        return [$item['id'] => $item['pivot']];
+                        $key = $relationItem[$ownerKey];
+                        return [$relationItem[$ownerKey] => $relationItem['pivot']];
                     })
                 );
             }
         }
+    }
+
+    public function beforeSave(Request $request, $item)
+    {
+    }
+
+    public function afterSave(Request $request, $item)
+    {
     }
 
     /**
@@ -133,7 +212,10 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission 
+                && config('luminix.backend.security.gates_enabled', true) 
+                && !Gate::allows($permission . '-' . $alias)
+        ) {
             abort(403);
         }
 
@@ -143,10 +225,14 @@ class ResourceController extends Controller
 
         $item->fill($request->all());
 
-        DB::transaction(function () use ($item, $request) {
-            $item->save();
+        $this->fillRelationships($request, $item);
 
-            $this->afterModelSaved($request, $item);
+        DB::transaction(function () use ($item, $request) {
+            $this->beforeSave($request, $item);
+
+            $item->save();
+            $this->syncRelationships($request, $item);
+            $this->afterSave($request, $item);
         });
 
         return response()->json($item, 201);
@@ -166,8 +252,10 @@ class ResourceController extends Controller
 
         $item = new $class;
         $item->validateRequest($request, 'update');
+
+        $query = $request->query('restore') ? $class::onlyTrashed() : $class::query();
         
-        $item = $class::beforeLuminix($request)
+        $item = $query::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
                 $query->allowed($permission);
             })
@@ -183,12 +271,14 @@ class ResourceController extends Controller
         $item->fill($request->all());
         
         DB::transaction(function () use ($item, $request) {
+            $this->beforeSave($request, $item);
+
             if ($request->query('restore')) {
                 $item->restore();
             }
             $item->save();
-
-            $this->afterModelSaved($request, $item);
+            $this->syncRelationships($request, $item);
+            $this->afterSave($request, $item);
         });
 
         return response()->json($item);

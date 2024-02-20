@@ -38,7 +38,7 @@ trait HasRelationHandler
 
                 $relations[Str::snake($methodName)] = [
                     'type' => $type,
-                    'model' => Str::snake(class_basename($model)),
+                    'model' => $model::getAlias(),
                 ];
             } catch (\Throwable $th) {
                 continue;

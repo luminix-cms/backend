@@ -15,11 +15,6 @@ class ModelFinder {
     /** @var Collection<string,string> */
     private $classes;
 
-    public function __construct(
-        private Application $app
-    ) {
-    }
-
     function classUses($class, $trait, $recursive = true)
     {
         return in_array(
@@ -59,12 +54,4 @@ class ModelFinder {
         }
         return $this->classes;
     }
-
-    // function active()
-    // {
-    //     return $this->all()
-    //         ->filter(function($_, $key) {
-    //             return $this->app->runningInConsole() || Auth::check() || in_array($key, config('luminix.backend.models.include', []) );
-    //         });
-    // }
 }
