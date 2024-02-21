@@ -35,23 +35,24 @@ Configurações dentro de `luminix.backend`:
 | `api.controller_overrides` | Controladores específicos para cada modelo | `[]` |
 | `security.gates_enabled` | Habilita ou desabilita o uso de Gates | `true` |
 | `security.middleware` | Middleware aplicada a todas as rotas | `['api', 'auth']` |
-| `security.permissions` | Mapeamento de ações a permissões | `['index' => 'read', 'show' => 'read', 'store' => 'create', 'update' => 'update', 'destroy' => 'delete', 'destroyMany' => 'delete', 'restoreMany' => 'update', 'import' => 'create', 'export' => 'read']` |
+| `security.permissions` | Mapeamento de ações a permissões que serão aplicados nos Gates e na consulta de permitidos | `['index' => 'read', 'show' => 'read', 'store' => 'create', 'update' => 'update', 'destroy' => 'delete', 'destroyMany' => 'delete', 'restoreMany' => 'update', 'import' => 'create', 'export' => 'read']` |
 
 ## Conteúdos
 
  - [Modelos Luminix](./2-Modelos-luminix.md)
    - [Campos preenchíveis](./2-Modelos-luminix.md#Campos-preenchíveis)
    - [Relacionamentos](./2-Modelos-luminix.md#Relacionamentos)
- - Ajustando a API
-   - Modificando rotas
-   - Validação de dados
-   - Saída dos dados
-   - Abas
-   - Busca
-   - Filtros e ordenação
-   - Eager Loading
-   - Importação e exportação
-   - Criando um controlador
+ - [Ajustando a API](./3-Ajustando-a-api.md)
+   - [Modificando rotas](./3-Ajustando-a-api.md#Modificando-rotas)
+   - [Validação de dados](./3-Ajustando-a-api.md#Validação-de-dados)
+   - [Saída dos dados](./3-Ajustando-a-api.md#Saída-dos-dados)
+   - [Abas](./3-Ajustando-a-api.md#Abas)
+   - [Busca](./3-Ajustando-a-api.md#Busca)
+   - [Filtros e ordenação](./3-Ajustando-a-api.md#Filtros-e-ordenacao)
+   - [Eager Loading](./3-Ajustando-a-api.md#Eager-Loading)
+   - [Importação e exportação](./3-Ajustando-a-api.md#Importação-e-exportação)
+   - [Criando um controlador](./3-Ajustando-a-api.md#Criando-um-controlador)
+   - [Recursos](./3-Ajustando-a-api.md#Recursos)
  - Segurança
    - Consulta de permissão
    - Gates

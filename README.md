@@ -27,17 +27,17 @@ Com apenas essas linhas de código, você terá um CRUD completo para a model Us
 
 | URL | Rota | Método | Descrição |
 | --- | ---- | ------ | --------- |
-| /api/users | luminix.user.index | GET | Listar os usuários |
-| /api/users | luminix.user.store | POST | Criar um novo usuário |
-| /api/users/{id} | luminix.user.show | GET | Exibir um usuário |
-| /api/users/{id} | luminix.user.update | PUT | Atualizar um usuário |
-| /api/users/{id} | luminix.user.destroy | DELETE | Deletar um usuário |
-| /api/users | luminix.user.destroyMany | DELETE | Deletar vários usuários |
-| /api/users | luminix.user.restoreMany | PUT | Restaurar vários usuários |
+| /luminix-api/users | luminix.user.index | GET | Listar os usuários |
+| /luminix-api/users | luminix.user.store | POST | Criar um novo usuário |
+| /luminix-api/users/{id} | luminix.user.show | GET | Exibir um usuário |
+| /luminix-api/users/{id} | luminix.user.update | PUT | Atualizar um usuário |
+| /luminix-api/users/{id} | luminix.user.destroy | DELETE | Deletar um usuário |
+| /luminix-api/users | luminix.user.destroyMany | DELETE | Deletar vários usuários |
+| /luminix-api/users | luminix.user.restoreMany | PUT | Restaurar vários usuários |
 
 ## Documentação
 
-Para mais detalhes sobre como configurar e personalizar a API, consulte a [documentação](https://luminix.arandutech.com.br/docs).
+Para mais detalhes sobre como configurar e personalizar a API, consulte a [documentação](./docs/1-Início.md).
 
 ## Licença
 
