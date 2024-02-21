@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Luminix\Backend\Requests\IndexRequest;
+use Luminix\Backend\Resources\DefaultCollection;
 
 class ResourceController extends Controller
 {
@@ -442,15 +443,15 @@ class ResourceController extends Controller
 
         if (class_exists($namespace . 'Http\Resources\\' . $class . 'Collection')) {
             $resource = $namespace . 'Http\Resources\\' . $class . 'Collection';
-            return response()->json(new $resource($items), $status);
+            return new $resource($items);
         }
 
         if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
             $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
-            return response()->json($resource::collection($items), $status);
+            return $resource::collection($items);
         }
 
-        return response()->json($items, $status);
+        return new DefaultCollection($items);
     }
 
     public function findItem(Request $request, $id)
