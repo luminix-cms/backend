@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -32,6 +33,7 @@ class ResourceController extends Controller
             'class' => $class,
             'alias' => $name,
             'permission' => $permission,
+            'method' => $method
         ];
     }
 
@@ -165,10 +167,11 @@ class ResourceController extends Controller
             );
         }
         
-        return response()->json(
+        return $this->respondWithCollection(
             $class::luminixQuery($request, $permission)
                 ->paginate($per_page)
         );
+        
     }
 
     /**
@@ -177,26 +180,17 @@ class ResourceController extends Controller
     public function show(Request $request, $id)
     {
         [
-            'class' => $class,
             'alias' => $alias,
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        $item = new $class;
-
-        $item = $class::beforeLuminix($request)
-            ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
-            })
-            ->where($item->getKeyName(), $id)
-            ->afterLuminix($request)
-            ->firstOrFail();
+        $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
         }
 
-        return response()->json($item);
+        return $this->respondWithItem($item);
     }
 
 
@@ -235,7 +229,10 @@ class ResourceController extends Controller
             $this->afterSave($request, $item);
         });
 
-        return response()->json($item, 201);
+        return $this->respondWithItem(
+            $this->findItem($request, $item->getKey()),
+            201
+        );
     }
 
     /**
@@ -245,23 +242,13 @@ class ResourceController extends Controller
     public function update(Request $request, $id)
     {
         [
-            'class' => $class,
             'alias' => $alias,
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        $item = new $class;
-        $item->validateRequest($request, 'update');
+        $item = $this->findItem($request, $id);
 
-        $query = $request->query('restore') ? $class::onlyTrashed() : $class::query();
-        
-        $item = $query::beforeLuminix($request)
-            ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
-            })
-            ->where($item->getKeyName(), $id)
-            ->afterLuminix($request)
-            ->firstOrFail();
+        $item->validateRequest($request, 'update');
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
@@ -281,7 +268,9 @@ class ResourceController extends Controller
             $this->afterSave($request, $item);
         });
 
-        return response()->json($item);
+        return response()->json(
+            $this->findItem($request, $id)
+        );
     }
 
     /**
@@ -291,25 +280,11 @@ class ResourceController extends Controller
     public function destroy(Request $request, $id)
     {
         [
-            'class' => $class,
             'alias' => $alias,
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        $item = new $class;
-
-        $item = $class::beforeLuminix($request)
-            ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
-            })
-            ->where($item->getKeyName(), $id)
-            ->afterLuminix($request);
-        
-        if ($request->force) {
-            $item = $item->withTrashed()->firstOrFail();
-        } else {
-            $item = $item->firstOrFail();
-        }
+        $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
             abort(403);
@@ -422,7 +397,7 @@ class ResourceController extends Controller
             $items->each->restore();
         });
 
-        return response()->json(null, 204);
+        return $this->respondWithCollection($items);
     }
 
     /**
@@ -441,5 +416,70 @@ class ResourceController extends Controller
     public function export(Request $request)
     {
         abort(500, 'Not implemented');
+    }
+
+    public function respondWithItem($item, $status = 200)
+    {
+        ['class' => $class] = $this->inferRequestParameters();
+        $class = class_basename($class);
+
+        $namespace = App::getNamespace();
+
+        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
+            $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
+            return response()->json(new $resource($item), $status);
+        }
+
+        return response()->json($item, $status);
+    }
+
+    public function respondWithCollection($items, $status = 200)
+    {
+        ['class' => $class] = $this->inferRequestParameters();
+        $class = class_basename($class);
+
+        $namespace = App::getNamespace();
+
+        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Collection')) {
+            $resource = $namespace . 'Http\Resources\\' . $class . 'Collection';
+            return response()->json(new $resource($items), $status);
+        }
+
+        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
+            $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
+            return response()->json($resource::collection($items), $status);
+        }
+
+        return response()->json($items, $status);
+    }
+
+    public function findItem(Request $request, $id)
+    {
+        [
+            'class' => $class,
+            'permission' => $permission,
+            'method' => $method
+        ] = $this->inferRequestParameters();
+
+        $item = new $class;
+
+        $query = $class::beforeLuminix($request)
+            ->where(function ($query) use ($permission) {
+                $query->allowed($permission);
+            })
+            ->where($item->getKeyName(), $id)
+            ->afterLuminix($request);
+        
+        if ($method === 'update' && $request->query('restore')) {
+            $query = $query->onlyTrashed();
+        }
+
+        if ($method === 'destroy' && $request->query('force')) {
+            $query = $query->withTrashed();
+        }
+
+        $item = $query->firstOrFail();
+
+        return $item;
     }
 }

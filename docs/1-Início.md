@@ -56,3 +56,13 @@ Configurações dentro de `luminix.backend`:
  - Segurança
    - Consulta de permissão
    - Gates
+ - API
+    - [Listar](./5-API.md#Listar)
+    - [Exibir](./5-API.md#Exibir)
+    - [Criar](./5-API.md#Criar)
+    - [Atualizar](./5-API.md#Atualizar)
+    - [Deletar](./5-API.md#Deletar)
+    - [Deletar vários](./5-API.md#Deletar-vários)
+    - [Restaurar vários](./5-API.md#Restaurar-vários)
+    - [Importar](./5-API.md#Importar)
+    - [Exportar](./5-API.md#Exportar)
