@@ -401,7 +401,7 @@ Existem alguns métodos que são úteis para personalizar internamente o control
 
 ### Recursos
 
-O Luminix Backend permite que você crie um [recurso](https://laravel.com/docs/10.x/eloquent-resources) para personalizar a saída dos dados. Para que um recurso seja aplicado, basta que ele seja criado em `app/Http/Resources` e que ele seja criado com o nome `{$Model}Resource`, onde `{$Model}` é o nome do modelo. Por exemplo, para criar um recurso para o modelo `Post`, crie o arquivo `app/Http/Resources/PostResource.php`:
+O Luminix Backend permite que você crie um [recurso](https://laravel.com/docs/10.x/eloquent-resources) para personalizar a saída dos dados. Para que um recurso seja aplicado, basta que ele seja criado em `app/Http/Resources` e que ele seja criado com o nome `{$Model}Resource` ou `{$Model}Collection`, onde `{$Model}` é o nome do modelo. Por exemplo, para criar um recurso para o modelo `Post`, crie o arquivo `app/Http/Resources/PostResource.php`.
 
 O Luminix irá automaticamente aplicar o recurso ao retornar os dados do modelo. Para mais detalhes sobre como criar um recurso, consulte a [documentação do Laravel](https://laravel.com/docs/10.x/eloquent-resources).
 

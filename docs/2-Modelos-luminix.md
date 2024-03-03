@@ -1,9 +1,12 @@
-
 ## Modelos Luminix
 
-Os modelos Luminix são modelos que utilizam o trait `LuminixModel` ou implementam a interface `LuminixModelInterface`. Eles possuem algumas funcionalidades a mais que os modelos comuns do Laravel.
+Os modelos Luminix, baseados no Laravel, são enriquecidos por meio da adoção do trait `LuminixModel` ou pela implementação da interface `LuminixModelInterface`. Esta abordagem permite funcionalidades adicionais em comparação aos modelos padrão do Laravel.
 
-Quando um modelo Luminix é descoberto pelo Luminix Backend, serão gerados os endpoints da API para ele. Além disso, o Luminix Backend irá detectar os relacionamentos do modelo e permitir que eles sejam preenchidos através da API.
+### Integração Automatizada com Luminix Backend
+
+Quando identificados pelo Luminix Backend, os modelos Luminix automaticamente ganham endpoints de API correspondentes. Este processo inclui a identificação e a integração de relações do modelo, facilitando operações através da API.
+
+#### Exemplo Prático: Modelo `Post`
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
@@ -12,28 +15,27 @@ class Post extends Model
 {
     use LuminixModel;
 
-    protected $fillable = [
-        'title',
-        'content',
-    ];
+    protected $fillable = ['title', 'content'];
 }
 ```
 
-Isso é tudo que é necessário para criar um CRUD completo para a model `Post`. O Luminix Backend irá criar os seguintes endpoints:
+Com a simples declaração acima, o Luminix Backend cria um conjunto completo de CRUD (Create, Read, Update, Delete) para o modelo `Post`, com os seguintes endpoints:
 
-| URL | Rota | Método | Descrição |
-| --- | ---- | ------ | --------- |
-| /luminix-api/posts | luminix.post.index | GET | Listar os posts |
-| /luminix-api/posts | luminix.post.store | POST | Criar um novo post |
-| /luminix-api/posts/{id} | luminix.post.show | GET | Exibir um post |
-| /luminix-api/posts/{id} | luminix.post.update | PUT | Atualizar um post |
-| /luminix-api/posts/{id} | luminix.post.destroy | DELETE | Deletar um post |
-| /luminix-api/posts | luminix.post.destroyMany | DELETE | Deletar vários posts |
-| /luminix-api/posts | luminix.post.restoreMany | PUT | Restaurar vários posts |
+| URL                  | Rota                 | Método | Descrição                |
+|----------------------|----------------------|--------|--------------------------|
+| /luminix-api/posts   | luminix.post.index   | GET    | Listar os posts          |
+| /luminix-api/posts   | luminix.post.store   | POST   | Criar um novo post       |
+| /luminix-api/posts/{id} | luminix.post.show | GET    | Exibir um post           |
+| /luminix-api/posts/{id} | luminix.post.update | PUT    | Atualizar um post        |
+| /luminix-api/posts/{id} | luminix.post.destroy | DELETE | Deletar um post         |
+| /luminix-api/posts   | luminix.post.destroyMany | DELETE | Deletar vários posts   |
+| /luminix-api/posts   | luminix.post.restoreMany | PUT    | Restaurar vários posts  |
 
-### Campos preenchíveis
+### Definição de Campos Preenchíveis
 
-A configuração do atributo `$fillable` na model é essencial para o funcionamento do Luminix Backend. Ele é utilizado para definir quais campos podem ser preenchidos nos métodos `create` e `update` do controlador.
+A especificação dos campos preenchíveis na model, utilizando `$fillable`, é crucial para o funcionamento adequado do Luminix Backend, impactando diretamente nos métodos `create` e `update` do controlador.
+
+#### Exemplo com o Modelo `User`
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
@@ -42,17 +44,15 @@ class User extends Model
 {
     use LuminixModel;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name', 'email', 'password'];
 }
 ```
 
-### Relacionamentos
+### Gestão de Relacionamentos
 
-Para que os relacionamentos sejam detectados pelo Luminix Backend, é necessário que eles sejam declarados com tipos de retorno. Isso é necessário para que o Luminix Backend saiba como tratar os dados.
+A detecção de relações pelo Luminix Backend requer que elas sejam declaradas com tipos de retorno explícitos, permitindo ao Backend processar os dados de maneira adequada.
+
+#### Exemplo de Relacionamentos no Modelo `Post`
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
@@ -61,11 +61,17 @@ class Post extends Model
 {
     use LuminixModel;
 
+    protected $fillable = ['name', 'category_id'];
+
+    protected $syncs = ['tags'];
+
+                        //: TipoObrigatório
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
     }
 
+                            //: TipoObrigatório
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -73,7 +79,7 @@ class Post extends Model
 }
 ```
 
-Com isso será possível fazer requisições que incluam os relacionamentos, como no exemplo abaixo:
+Exemplo de requisição com relacionamentos inclusos:
 
 ```json
 // POST /luminix-api/posts
@@ -164,6 +170,8 @@ Em relações `BelongsToMany`, é necessário que o atributo `$syncs` esteja def
     ],
 }
 ```
+
+ > Esta operação irá sincronizar as tags do post, removendo as tags que eventualmente não estiverem presentes na requisição.
 
 Cada elemento dentro do array também pode conter um atributo `pivot` para definir os atributos da tabela pivô.
 
