@@ -14,19 +14,19 @@ Route::group([
     $modelFinder->all()->each(function ($class, $alias) {
         $routes = $class::getLuminixRoutes();
 
-        foreach ($routes as $action => $url) {
+        foreach ($routes as $action => $path) {
             $method = 'get';
 
-            if (is_array($url)) {
-                $method = $url['method'];
-                $url = $url['url'];
+            if (is_array($path)) {
+                $method = $path['method'];
+                $path = $path['path'];
             }
 
             $overrides = Config::get('luminix.backend.api.controller_overrides', []);
 
             $controller = $overrides[$class] ?? Config::get('luminix.backend.api.controller', 'Luminix\Backend\Controllers\ResourceController');
 
-            Route::$method($url, $controller . '@' . $action)->name('luminix.' . $alias . '.' . $action);
+            Route::$method($path, $controller . '@' . $action)->name('luminix.' . $alias . '.' . $action);
         }
     });
 });

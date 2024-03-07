@@ -27,7 +27,7 @@ class Post extends Model
         return self::mergeDefaultRoutes([
             'customAction' => [
                 'method' => 'post',
-                'url' => 'posts/{id}/custom',
+                'path' => 'posts/{id}/custom',
             ],
         ]);
     }
@@ -48,13 +48,13 @@ O método `mergeDefaultRoutes` é utilizado para mesclar as rotas padrão com as
 
 Para assinalar um método para a rota criada, é necessário que o controlador da API seja sobrescrito e que exista um método com mesmo nome da ação declarado (ex: `customAction`). Veremos como fazer isso na seção [Criando um controlador](#Criando-um-controlador).
 
-Se o método da ação for 'get', a ação pode ser declarada apenas com uma string indicando a URL. Se o método for 'post', 'put' ou 'delete', a ação deve ser declarada como um array com as chaves `method` e `url`.
+Se o método da ação for 'get', a ação pode ser declarada apenas com uma string indicando a URL. Se o método for 'post', 'put' ou 'delete', a ação deve ser declarada como um array com as chaves `method` e `path`.
 
 ```php
 'customAction' => 'posts/{id}/custom', // Método 'get'
 'customAction' => [ // Método 'post'
     'method' => 'post',
-    'url' => 'posts/{id}/custom',
+    'path' => 'posts/{id}/custom',
 ],
 ```
 

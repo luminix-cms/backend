@@ -10,11 +10,14 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Support\Traits\Macroable;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
 
 class ResourceController extends Controller
 {
+
+    use Macroable;
 
     private function inferRequestParameters()
     {
