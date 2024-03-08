@@ -2,12 +2,13 @@
 
 namespace Luminix\Backend\Services;
 
+use Arandu\Reducible\Reducible;
 use Illuminate\Support\Str;
-use Luminix\Backend\Contracts\Reduceable;
+
 
 class RouteGenerator
 {
-    use Reduceable;
+    use Reducible;
 
     static function make(string $Model)
     {

@@ -22,7 +22,8 @@
         "illuminate/support": "^10.40",
         "illuminate/database": "^10.40",
         "staudenmeir/eloquent-eager-limit": "^1.8",
-        "haydenpierce/class-finder": "^0.5.3"
+        "haydenpierce/class-finder": "^0.5.3",
+        "arandu/reducible": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5",
