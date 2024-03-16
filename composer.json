@@ -8,7 +8,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Luminix\\Backend\\Tests\\": "tests/"
+            "Luminix\\Backend\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
         }
     },
     "authors": [
@@ -30,7 +33,22 @@
         "orchestra/testbench": "^8.0"
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve"
+        ],
+        "lint": [
+            "@php vendor/bin/phpstan analyse"
+        ]
     },
     "extra": {
         "laravel": {
