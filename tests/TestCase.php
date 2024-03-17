@@ -26,6 +26,15 @@ class TestCase extends TestbenchTestCase
     protected function defineEnvironment($app)
     {
         $app['config']->set('app.debug', true);
+        $app['config']->set('luminix.backend.security.middleware', ['web']);
+        $app['config']->set('luminix.backend.models.include', [
+            'Workbench\App\Models\User',
+            'Workbench\App\Models\ToDo',
+        ]);
+        $app['config']->set('luminix.backend.api.controller_overrides', [
+            'Workbench\App\Models\ToDo' => 'Workbench\App\Http\Controllers\ToDoController',
+        ]);
+        $app['config']->set('auth', require __DIR__.'/../workbench/config/auth.ci.php');
     }
 
 
