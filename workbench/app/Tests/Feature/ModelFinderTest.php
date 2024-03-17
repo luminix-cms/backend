@@ -15,6 +15,7 @@ class ModelFinderTest extends TestCase
         $this->assertEquals([
             'user' => 'Workbench\App\Models\User',
             'to_do' => 'Workbench\App\Models\ToDo',
+            'category' => 'Workbench\App\Models\Category',
         ], $models->toArray());
 
     }

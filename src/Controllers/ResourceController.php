@@ -104,9 +104,9 @@ class ResourceController extends Controller
     
     public function syncRelationships(Request $request, $item)
     {
-        foreach ($item->getSyncs() as $relation) {
-            if ($request->has($relation) && method_exists($item, $relation)) {
-                $reflection = new \ReflectionMethod($item, $relation);
+        foreach ($item->getSyncs() as $relationKey) {
+            if ($request->has($relationKey) && method_exists($item, $relationKey)) {
+                $reflection = new \ReflectionMethod($item, $relationKey);
                 if (!$reflection->hasReturnType() 
                     || ($reflection->getReturnType()->getName() !== BelongsToMany::class 
                         && !is_subclass_of($reflection->getReturnType()->getName(), BelongsToMany::class)
@@ -115,13 +115,13 @@ class ResourceController extends Controller
                 }
                 $key = -1;
                 /** @var BelongsToMany */
-                $relation = $item->{$relation}();
+                $relation = $item->{$relationKey}();
 
                 $related = $relation->getRelated();
                 $ownerKey = $related->getKeyName();
 
                 $relation->sync(
-                    collect($request->{$relation})->mapWithKeys(function ($relationItem) use (&$key, $ownerKey) {
+                    collect($request->{$relationKey})->mapWithKeys(function ($relationItem) use (&$key, $ownerKey) {
                         if (!isset($relationItem['pivot'])) {
                             $key++;
                             return [$key => $relationItem[$ownerKey]];

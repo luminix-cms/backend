@@ -36,6 +36,22 @@ class RestApiTest extends TestCase
 
         $this->json('DELETE', '/luminix-api/to_dos/1')
             ->assertStatus(401);
+
+        $this->json('GET', '/luminix-api/categories')
+            ->assertStatus(401);
+
+        $this->json('GET', '/luminix-api/categories/1')
+            ->assertStatus(401);
+
+        $this->json('POST', '/luminix-api/categories')
+            ->assertStatus(401);
+
+        $this->json('PUT', '/luminix-api/categories/1')
+            ->assertStatus(401);
+        
+        $this->json('DELETE', '/luminix-api/categories/1')
+            ->assertStatus(401);
+
     }
 
     public function test_users_can_interact_with_apis()
@@ -128,6 +144,41 @@ class RestApiTest extends TestCase
             'id' => $user->toDos->first()->id,
             'completed' => 1,
         ]);
+
+        // can add categories to self to_do
+        $categories = collect($this->json('GET', '/luminix-api/categories')->json('data'));
+        $selected = $categories->random(3)->toArray();
+        
+        $this->json('PUT', "/luminix-api/to_dos/{$todoId}", [
+            'categories' => $selected,
+        ])->assertStatus(200);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id' => $todoId,
+            'category_id' => $selected[0]['id'],
+        ]);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id' => $todoId,
+            'category_id' => $selected[1]['id'],
+        ]);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id' => $todoId,
+            'category_id' => $selected[2]['id'],
+        ]);
+
+        // can get minified to_dos
+        $response = $this->json('GET', '/luminix-api/to_dos?minified=1');
+        // Verify $labeledBy is used
+        $response->assertJsonPath('0.title', 'Buy milk');
+        $response->assertStatus(200);
+
+        // can get minified categories
+        $response = $this->json('GET', '/luminix-api/categories?minified=1');
+        // Verify first fillable field is used
+        $response->assertJsonPath('0.name', $categories[0]['name']);
+        $response->assertStatus(200);
 
         // can delete self to_do
         $this->json('DELETE', "/luminix-api/to_dos/{$todoId}")

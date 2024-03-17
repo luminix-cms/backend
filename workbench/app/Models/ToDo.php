@@ -13,11 +13,17 @@ class ToDo extends Model
 {
     use HasFactory, LuminixModel;
 
+    protected $labeledBy = 'title';
+
     protected $fillable = [
-        'title',
         'description',
+        'title',
         'completed',
         'user_id',
+    ];
+
+    protected $syncs = [
+        'categories',
     ];
 
     public function user(): BelongsTo

@@ -5,6 +5,7 @@ namespace Workbench\App\Providers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
 
@@ -73,6 +74,10 @@ class WorkbenchServiceProvider extends ServiceProvider
         });
 
         Gate::define('create-to_do', function (?User $currentUser, ?ToDo $toDo) {
+            return !is_null($currentUser);
+        });
+
+        Gate::define('read-category', function (?User $currentUser, ?Category $category) {
             return !is_null($currentUser);
         });
     }

@@ -24,25 +24,21 @@ trait HasRelationHandler
 
         $relations = [];
         foreach ($methods as $method) {
-            try {
-                $methodName = $method->getName();
-                $returnType = $method->getReturnType()->getName();
+            $methodName = $method->getName();
+            $returnType = $method->getReturnType()->getName();
 
-                $type = (new \ReflectionClass($returnType))->getShortName();
+            $type = (new \ReflectionClass($returnType))->getShortName();
 
-                /** @var Relation */
-                $relation = $this->{$methodName}();
-                $relatedModel = $relation->getRelated();
+            /** @var Relation */
+            $relation = $this->{$methodName}();
+            $relatedModel = $relation->getRelated();
 
-                $model = get_class($relatedModel);
+            $model = get_class($relatedModel);
 
-                $relations[Str::snake($methodName)] = [
-                    'type' => $type,
-                    'model' => $model::getAlias(),
-                ];
-            } catch (\Throwable $th) {
-                continue;
-            }
+            $relations[Str::snake($methodName)] = [
+                'type' => $type,
+                'model' => $model::getAlias(),
+            ];
         }
 
         return empty($relations)

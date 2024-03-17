@@ -28,5 +28,33 @@ class DatabaseSeeder extends Seeder
             'completed' => false,
             'user_id' => 1,
         ]);
+
+        DB::table('categories')->insert([
+            'name' => 'Important',
+        ]);
+
+        DB::table('categories')->insert([
+            'name' => 'Urgent',
+        ]);
+
+        DB::table('categories')->insert([
+            'name' => 'Personal',
+        ]);
+
+        DB::table('categories')->insert([
+            'name' => 'Work',
+        ]);
+
+        DB::table('categories')->insert([
+            'name' => 'School',
+        ]);
+
+        DB::table('categories')->insert([
+            'name' => 'Home',
+        ]);
+
+
+
+
     }
 }
