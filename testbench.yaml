@@ -1,6 +1,5 @@
 providers:
   - Workbench\App\Providers\WorkbenchServiceProvider
-  - Laravel\Sanctum\SanctumServiceProvider
 
 migrations:
   - workbench/database/migrations

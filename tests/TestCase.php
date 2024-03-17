@@ -20,17 +20,12 @@ class TestCase extends TestbenchTestCase
         return [
             \Luminix\Backend\BackendServiceProvider::class,
             \Workbench\App\Providers\WorkbenchServiceProvider::class,
-            \Workbench\App\Providers\FortifyServiceProvider::class,
         ];
     }
 
     protected function defineEnvironment($app)
     {
         $app['config']->set('app.debug', true);
-        // $app['config']->set('luminix.backend', require __DIR__ . '/../skeleton/config/backend.php');
-        // $app['config']->set('fortify', require __DIR__ . '/../skeleton/config/fortify.php');
-        // $app['config']->set('sanctum', require __DIR__ . '/../skeleton/config/sanctum.php');
-        // $app['config']->set('auth', require __DIR__ . '/../skeleton/config/auth.php');
     }
 
 
