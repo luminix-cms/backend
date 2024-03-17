@@ -30,7 +30,11 @@ class ModelFinder {
         if (!isset($this->classes)) {
             ClassFinder::disablePSR4Vendors();
 
-            $models = ClassFinder::getClassesInNamespace(config('luminix.backend.models.namespace', 'App\Models'));
+            $namespace = config('luminix.backend.models.namespace', 'App\Models');
+
+            $models = $namespace
+                ? ClassFinder::getClassesInNamespace($namespace)
+                : [];
 
             $models += config('luminix.backend.models.include', []);
 

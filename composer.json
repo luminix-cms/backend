@@ -30,10 +30,13 @@
     },
     "require-dev": {
         "phpunit/phpunit": "~10.0",
-        "orchestra/testbench": "^8.0"
+        "orchestra/testbench": "^8.0",
+        "laravel/fortify": "^1.21",
+        "laravel/sanctum": "^3.3",
+        "nunomaduro/collision": "^7.8"
     },
     "scripts": {
-        "test": "phpunit",
+        "test": "@php vendor/bin/testbench package:test",
         "post-autoload-dump": [
             "@clear",
             "@prepare"
@@ -48,7 +51,8 @@
         ],
         "lint": [
             "@php vendor/bin/phpstan analyse"
-        ]
+        ],
+        "artisan": "@php vendor/bin/testbench"
     },
     "extra": {
         "laravel": {

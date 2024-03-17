@@ -2,11 +2,7 @@
 
 namespace Luminix\Backend;
 
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Luminix\Backend\Services\Js;
-use Luminix\Backend\Services\Manifest;
 use Luminix\Backend\Services\ModelFinder;
 
 class BackendServiceProvider extends ServiceProvider

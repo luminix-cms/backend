@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
+use Luminix\Backend\Services\ModelFinder;
 
 class ResourceController extends Controller
 {
@@ -25,7 +26,11 @@ class ResourceController extends Controller
 
         [, $name, $method] = explode('.', $name);
 
-        $class = 'App\\Models\\' . Str::studly($name);
+        /** @var ModelFinder */
+        $modelFinder = app(ModelFinder::class);
+
+        $models = $modelFinder->all();
+        $class = $models[$name];
 
         if (!class_exists($class)) {
             abort(404);
@@ -150,7 +155,7 @@ class ResourceController extends Controller
         ] = $this->inferRequestParameters();
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
-            abort(403);
+            abort(401);
         }
 
         
@@ -191,7 +196,7 @@ class ResourceController extends Controller
         $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
-            abort(403);
+            abort(401);
         }
 
         return $this->respondWithItem($item);
@@ -214,7 +219,7 @@ class ResourceController extends Controller
                 && config('luminix.backend.security.gates_enabled', true) 
                 && !Gate::allows($permission . '-' . $alias)
         ) {
-            abort(403);
+            abort(401);
         }
 
         $item = new $class;
@@ -255,7 +260,7 @@ class ResourceController extends Controller
         $item->validateRequest($request, 'update');
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
-            abort(403);
+            abort(401);
         }
 
         
@@ -291,7 +296,7 @@ class ResourceController extends Controller
         $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
-            abort(403);
+            abort(401);
         }
 
         DB::transaction(function () use ($item, $request) {
@@ -318,7 +323,7 @@ class ResourceController extends Controller
         ] = $this->inferRequestParameters();
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
-            abort(403);
+            abort(401);
         }
 
         $instance = new $class;
@@ -372,7 +377,7 @@ class ResourceController extends Controller
         ] = $this->inferRequestParameters();
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
-            abort(403);
+            abort(401);
         }
 
         $instance = new $class;

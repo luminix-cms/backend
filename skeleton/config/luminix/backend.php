@@ -24,9 +24,11 @@ return [
     |
     */
     'models' => [
-        'namespace' => 'App\Models', 
+        'namespace' => null, 
         'include' => [
-            // 'App\Models\User',
+            'Workbench\App\Models\User',
+            'Workbench\App\Models\ToDo',
+
         ],
     ],
 
@@ -84,7 +86,7 @@ return [
         | setting to enforce permissions for each controller action.
         |
         */
-        'gates_enabled' => true,
+        'gates_enabled' => false,
 
 
         /*
@@ -96,7 +98,7 @@ return [
         | efficient interactions with Luminix's API endpoints.
         |
         */
-        'middleware' => ['api', 'auth'],
+        'middleware' => ['web', 'auth'],// ['auth:web'],
 
         /*
         |--------------------------------------------------------------------------

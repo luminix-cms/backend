@@ -1,5 +1,6 @@
 providers:
-  # - Workbench\App\Providers\WorkbenchServiceProvider
+  - Workbench\App\Providers\WorkbenchServiceProvider
+  - Laravel\Sanctum\SanctumServiceProvider
 
 migrations:
   - workbench/database/migrations
@@ -7,9 +8,12 @@ migrations:
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder
 
+laravel: ./skeleton
+
 workbench:
   start: '/'
   install: true
+  guard: web
   discovers:
     web: true
     api: true
