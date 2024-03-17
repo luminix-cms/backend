@@ -154,7 +154,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
             abort(401);
         }
 
@@ -190,14 +190,17 @@ class ResourceController extends Controller
     {
         [
             'alias' => $alias,
-            'permission' => $permission
+            'permission' => $permission,
+            'class' => $class,
         ] = $this->inferRequestParameters();
 
-        $item = $this->findItem($request, $id);
+        $supposedItem = $class::findOrFail($id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
             abort(401);
         }
+
+        $item = $this->findItem($request, $id);
 
         return $this->respondWithItem($item);
     }
@@ -217,7 +220,7 @@ class ResourceController extends Controller
 
         if ($permission 
                 && config('luminix.backend.security.gates_enabled', true) 
-                && !Gate::allows($permission . '-' . $alias)
+                && !Gate::allows($permission . '-' . $alias, [null])
         ) {
             abort(401);
         }
@@ -252,17 +255,19 @@ class ResourceController extends Controller
     {
         [
             'alias' => $alias,
-            'permission' => $permission
+            'permission' => $permission,
+            'class' => $class,
         ] = $this->inferRequestParameters();
 
+        $supposedItem = $class::findOrFail($id);
+
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
+            abort(401);
+        }
+    
         $item = $this->findItem($request, $id);
 
         $item->validateRequest($request, 'update');
-
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
-            abort(401);
-        }
-
         
         $item->fill($request->all());
         
@@ -290,14 +295,17 @@ class ResourceController extends Controller
     {
         [
             'alias' => $alias,
-            'permission' => $permission
+            'permission' => $permission,
+            'class' => $class,
         ] = $this->inferRequestParameters();
 
-        $item = $this->findItem($request, $id);
+        $supposedItem = $class::findOrFail($id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, $item)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
             abort(401);
         }
+
+        $item = $this->findItem($request, $id);
 
         DB::transaction(function () use ($item, $request) {
             if ($request->force) {
@@ -322,7 +330,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
             abort(401);
         }
 
@@ -376,7 +384,7 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias)) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
             abort(401);
         }
 

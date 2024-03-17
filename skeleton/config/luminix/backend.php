@@ -61,6 +61,7 @@ return [
         'controller' => 'Luminix\Backend\Controllers\ResourceController',
         'controller_overrides' => [
             // 'App\Models\User' => 'App\Http\Controllers\UserController',
+            'Workbench\App\Models\ToDo' => 'Workbench\App\Http\Controllers\ToDoController',
         ],
     ],
 
@@ -86,7 +87,7 @@ return [
         | setting to enforce permissions for each controller action.
         |
         */
-        'gates_enabled' => false,
+        'gates_enabled' => true,
 
 
         /*
@@ -98,7 +99,7 @@ return [
         | efficient interactions with Luminix's API endpoints.
         |
         */
-        'middleware' => ['web', 'auth'],// ['auth:web'],
+        'middleware' => ['api'],// ['api', 'auth'],
 
         /*
         |--------------------------------------------------------------------------

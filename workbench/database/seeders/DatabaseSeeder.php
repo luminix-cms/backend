@@ -21,5 +21,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@example.com',
             'password' => Hash::make('password'),
         ]);
+
+        DB::table('to_dos')->insert([
+            'title' => 'Test To Do',
+            'description' => 'This is a test to do.',
+            'completed' => false,
+            'user_id' => 1,
+        ]);
     }
 }
