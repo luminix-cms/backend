@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminix\Backend\Tests;
+namespace Workbench\App\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
@@ -34,7 +34,7 @@ class TestCase extends TestbenchTestCase
         $app['config']->set('luminix.backend.api.controller_overrides', [
             'Workbench\App\Models\ToDo' => 'Workbench\App\Http\Controllers\ToDoController',
         ]);
-        $app['config']->set('auth', require __DIR__.'/../workbench/config/auth.ci.php');
+        $app['config']->set('auth', require __DIR__.'/../../config/auth.ci.php');
     }
 
 

@@ -1,10 +1,8 @@
 <?php
 
-namespace Luminix\Backend\Tests\Feature;
+namespace Workbench\App\Tests\Feature;
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Luminix\Backend\Tests\TestCase;
+use Workbench\App\Tests\TestCase;
 use Workbench\App\Models\User;
 
 class RestApiTest extends TestCase

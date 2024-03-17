@@ -1,9 +1,9 @@
 <?php
 
-namespace Luminix\Backend\Tests\Feature;
+namespace Workbench\App\Tests\Feature;
 
 use Luminix\Backend\Services\ModelFinder;
-use Luminix\Backend\Tests\TestCase;
+use Workbench\App\Tests\TestCase;
 use Workbench\App\Models\User;
 
 class ModelFinderTest extends TestCase
