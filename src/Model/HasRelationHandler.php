@@ -2,6 +2,7 @@
 
 namespace Luminix\Backend\Model;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
@@ -35,9 +36,23 @@ trait HasRelationHandler
 
             $model = get_class($relatedModel);
 
+            if (method_exists($relation, 'getForeignKeyName')) {
+                $foreignKey = $relation->getForeignKeyName();
+            } else {
+                $foreignKey = null;
+            }
+
+            if (method_exists($relation, 'getOwnerKeyName')) {
+                $ownerKey = $relation->getOwnerKeyName();
+            } else {
+                $ownerKey = null;
+            }
+
             $relations[Str::snake($methodName)] = [
                 'type' => $type,
                 'model' => $model::getAlias(),
+                'foreignKey' => $foreignKey,
+                'ownerKey' => $ownerKey,
             ];
         }
 

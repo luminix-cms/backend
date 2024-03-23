@@ -147,26 +147,43 @@ class RestApiTest extends TestCase
 
         // can add categories to self to_do
         $categories = collect($this->json('GET', '/luminix-api/categories')->json('data'));
-        $selected = $categories->random(3)->toArray();
+        $selected = $categories->random(3)->pluck('id')->toArray();
         
-        $this->json('PUT', "/luminix-api/to_dos/{$todoId}", [
-            'categories' => $selected,
-        ])->assertStatus(200);
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
-            'category_id' => $selected[0]['id'],
+            'category_id' => $selected[0],
         ]);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
-            'category_id' => $selected[1]['id'],
+            'category_id' => $selected[1],
         ]);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
-            'category_id' => $selected[2]['id'],
+            'category_id' => $selected[2],
         ]);
+
+        // can detach categories from self to_do
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/detach", [$selected[0]])
+            ->assertStatus(200);
+
+        $this->assertDatabaseMissing('category_to_do', [
+            'to_do_id' => $todoId,
+            'category_id' => $selected[0],
+        ]);
+
+        // can attach categories to self to_do
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/attach", [$selected[0]])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id' => $todoId,
+            'category_id' => $selected[0],
+        ]);
+
 
         // can get minified to_dos
         $response = $this->json('GET', '/luminix-api/to_dos?minified=1');

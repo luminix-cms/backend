@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 use Luminix\Backend\Requests\IndexRequest;
@@ -101,37 +103,95 @@ class ResourceController extends Controller
             }
         }
     }
-    
-    public function syncRelationships(Request $request, $item)
+
+    private function getRequestedRelation(Request $request, $id, $relationName)
     {
-        foreach ($item->getSyncs() as $relationKey) {
-            if ($request->has($relationKey) && method_exists($item, $relationKey)) {
-                $reflection = new \ReflectionMethod($item, $relationKey);
-                if (!$reflection->hasReturnType() 
-                    || ($reflection->getReturnType()->getName() !== BelongsToMany::class 
-                        && !is_subclass_of($reflection->getReturnType()->getName(), BelongsToMany::class)
-                )) {
-                    continue;
-                }
-                $key = -1;
-                /** @var BelongsToMany */
-                $relation = $item->{$relationKey}();
+        [
+            'class' => $class,
+            'alias' => $alias,
+            'permission' => $permission
+        ] = $this->inferRequestParameters();
 
-                $related = $relation->getRelated();
-                $ownerKey = $related->getKeyName();
+        $item = $class::findOrFail($id);
 
-                $relation->sync(
-                    collect($request->{$relationKey})->mapWithKeys(function ($relationItem) use (&$key, $ownerKey) {
-                        if (!isset($relationItem['pivot'])) {
-                            $key++;
-                            return [$key => $relationItem[$ownerKey]];
-                        }
-                        $key = $relationItem[$ownerKey];
-                        return [$relationItem[$ownerKey] => $relationItem['pivot']];
-                    })
-                );
-            }
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
+            abort(401);
         }
+
+
+        if (!in_array($relationName, $item->getSyncs())) {
+            abort(404);
+        }
+
+        $relation = $item->{$relationName}();
+
+        if (!($relation instanceof BelongsToMany)) {
+            abort(404);
+        }
+
+        Validator::make($request->all(), [
+            '*' => 'luminix_sync:' . $class . ',' . $relationName,
+        ])->validate();
+
+        return $relation;
+    }
+
+    public function sync(Request $request, $id, $relationName)
+    {
+        $relation = $this->getRequestedRelation($request, $id, $relationName);
+
+        $key = -1;
+
+        $relation->sync(
+            collect($request->all())->mapWithKeys(function ($relationItem) use (&$key, $relation) {
+                if (is_int($relationItem)) {
+                    $key++;
+                    return [$key => $relationItem];
+                }
+                $key = $relationItem[$relation->getRelated()->getKeyName()];
+                $pivot = Arr::except($relationItem, $relation->getRelated()->getKeyName());
+                return [$relationItem[$relation->getRelated()->getKeyName()] => $pivot];
+                
+            })
+        );
+
+        return $this->respondWithItem($this->findItem($request, $id));
+    }
+
+    public function attach(Request $request, $id, $relationName)
+    {
+        $relation = $this->getRequestedRelation($request, $id, $relationName);
+
+        $key = -1;
+
+        $relation->attach(
+            collect($request->all())->mapWithKeys(function ($relationItem) use (&$key, $relation) {
+                if (is_int($relationItem)) {
+                    $key++;
+                    return [$key => $relationItem];
+                }
+                $key = $relationItem[$relation->getRelated()->getKeyName()];
+                $pivot = Arr::except($relationItem, $relation->getRelated()->getKeyName());
+                return [$relationItem[$relation->getRelated()->getKeyName()] => $pivot];
+            })
+        );
+
+        return $this->respondWithItem($this->findItem($request, $id));
+    }
+
+    public function detach(Request $request, $id, $relationName)
+    {
+        $relation = $this->getRequestedRelation($request, $id, $relationName);
+
+        $items = $request->all();
+
+        if (empty($items)) {
+            $relation->detach();
+        } else {
+            $relation->detach($items);
+        }
+
+        return $this->respondWithItem($this->findItem($request, $id));
     }
 
     public function beforeSave(Request $request, $item)
@@ -237,7 +297,7 @@ class ResourceController extends Controller
             $this->beforeSave($request, $item);
 
             $item->save();
-            $this->syncRelationships($request, $item);
+            // $this->syncRelationships($request, $item);
             $this->afterSave($request, $item);
         });
 
@@ -278,7 +338,7 @@ class ResourceController extends Controller
                 $item->restore();
             }
             $item->save();
-            $this->syncRelationships($request, $item);
+            // $this->syncRelationships($request, $item);
             $this->afterSave($request, $item);
         });
 
@@ -345,7 +405,9 @@ class ResourceController extends Controller
 
         $items = $class::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
+                if ($permission) {
+                    $query->allowed($permission);
+                }
             })
             ->whereIn($instance->getKeyName(), $ids)
             ->afterLuminix($request);
@@ -399,7 +461,9 @@ class ResourceController extends Controller
 
         $items = $class::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
+                if ($permission) {
+                    $query->allowed($permission);
+                }
             })
             ->withTrashed()
             ->whereIn($instance->getKeyName(), $ids)
@@ -482,7 +546,9 @@ class ResourceController extends Controller
 
         $query = $class::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
-                $query->allowed($permission);
+                if ($permission) {
+                    $query->allowed($permission);
+                }
             })
             ->where($item->getKeyName(), $id)
             ->afterLuminix($request);

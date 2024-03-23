@@ -119,6 +119,9 @@ return [
             'restoreMany' => 'update',
             'import' => 'create',
             'export' => 'read',
+            'sync' => 'update',
+            'attach' => 'update',
+            'detach' => 'update',
         ],
 
     ],

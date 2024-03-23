@@ -4,7 +4,7 @@ namespace Luminix\Backend\Services;
 
 use Arandu\Reducible\Reducible;
 use Illuminate\Support\Str;
-
+use Luminix\Backend\Contracts\LuminixModelInterface;
 
 class RouteGenerator
 {
@@ -22,7 +22,8 @@ class RouteGenerator
 
         $prefix = Str::plural(Str::snake(class_basename($Model)));
 
-        $primaryKey = (new $Model)->getKeyName();
+        $instance = new $Model;
+        $primaryKey = $instance->getKeyName();
 
         // Default Laravel Resource Routes
         $defaultRoutes = [
@@ -56,6 +57,24 @@ class RouteGenerator
             'path' => $prefix,
             'method' => 'put',
         ];
+
+        // Relation Routes
+        if (!empty($instance->getSyncs())) {
+            $defaultRoutes['sync'] = [
+                'path' => $prefix . '/{id}/{relation}/sync',
+                'method' => 'post',
+            ];
+
+            $defaultRoutes['attach'] = [
+                'path' => $prefix . '/{id}/{relation}/attach',
+                'method' => 'post',
+            ];
+
+            $defaultRoutes['detach'] = [
+                'path' => $prefix . '/{id}/{relation}/detach',
+                'method' => 'post',
+            ];
+        }
 
         $defaultRoutes = static::modelRoutes($defaultRoutes, $prefix);
 

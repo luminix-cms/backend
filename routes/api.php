@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
+use Luminix\Backend\Contracts\LuminixModelInterface;
 use Luminix\Backend\Services\ModelFinder;
 
 Route::group([
