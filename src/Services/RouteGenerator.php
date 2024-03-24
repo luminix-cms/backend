@@ -59,20 +59,20 @@ class RouteGenerator
         ];
 
         // Relation Routes
-        if (!empty($instance->getSyncs())) {
-            $defaultRoutes['sync'] = [
-                'path' => $prefix . '/{id}/{relation}/sync',
+        foreach ($instance->getSyncs() as $relation) {
+            $defaultRoutes[$relation . ':sync'] = [
+                'path' => "$prefix/{{$primaryKey}}/$relation/sync",
+                'method' => 'put',
+            ];
+
+            $defaultRoutes[$relation . ':attach'] = [
+                'path' => "$prefix/{{$primaryKey}}/$relation/{itemId}",
                 'method' => 'post',
             ];
 
-            $defaultRoutes['attach'] = [
-                'path' => $prefix . '/{id}/{relation}/attach',
-                'method' => 'post',
-            ];
-
-            $defaultRoutes['detach'] = [
-                'path' => $prefix . '/{id}/{relation}/detach',
-                'method' => 'post',
+            $defaultRoutes[$relation . ':detach'] = [
+                'path' => "$prefix/{{$primaryKey}}/$relation/{itemId}",
+                'method' => 'delete',
             ];
         }
 

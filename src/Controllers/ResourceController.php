@@ -104,13 +104,17 @@ class ResourceController extends Controller
         }
     }
 
-    private function getRequestedRelation(Request $request, $id, $relationName)
+    private function getRequestedRelation(Request $request, $id)
     {
+        
         [
             'class' => $class,
             'alias' => $alias,
-            'permission' => $permission
+            'permission' => $permission,
+            'method' => $method
         ] = $this->inferRequestParameters();
+
+        [$relationName, $action] = explode(':', $method);
 
         $item = $class::findOrFail($id);
 
@@ -129,16 +133,18 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        Validator::make($request->all(), [
-            '*' => 'luminix_sync:' . $class . ',' . $relationName,
-        ])->validate();
+        if ($action === 'sync') {
+            Validator::make($request->all(), [
+                '*' => 'luminix_sync:' . $class . ',' . $relationName,
+            ])->validate();
+        }
 
         return $relation;
     }
 
-    public function sync(Request $request, $id, $relationName)
+    public function sync(Request $request, $id)
     {
-        $relation = $this->getRequestedRelation($request, $id, $relationName);
+        $relation = $this->getRequestedRelation($request, $id);
 
         $key = -1;
 
@@ -158,38 +164,22 @@ class ResourceController extends Controller
         return $this->respondWithItem($this->findItem($request, $id));
     }
 
-    public function attach(Request $request, $id, $relationName)
+    public function attach(Request $request, $id, $itemId)
     {
-        $relation = $this->getRequestedRelation($request, $id, $relationName);
+        $relation = $this->getRequestedRelation($request, $id);
 
-        $key = -1;
+        $relation->getRelated()->findOrFail($itemId);
 
-        $relation->attach(
-            collect($request->all())->mapWithKeys(function ($relationItem) use (&$key, $relation) {
-                if (is_int($relationItem)) {
-                    $key++;
-                    return [$key => $relationItem];
-                }
-                $key = $relationItem[$relation->getRelated()->getKeyName()];
-                $pivot = Arr::except($relationItem, $relation->getRelated()->getKeyName());
-                return [$relationItem[$relation->getRelated()->getKeyName()] => $pivot];
-            })
-        );
+        $relation->attach($itemId, $request->json());
 
         return $this->respondWithItem($this->findItem($request, $id));
     }
 
-    public function detach(Request $request, $id, $relationName)
+    public function detach(Request $request, $id, $itemId)
     {
-        $relation = $this->getRequestedRelation($request, $id, $relationName);
+        $relation = $this->getRequestedRelation($request, $id);
 
-        $items = $request->all();
-
-        if (empty($items)) {
-            $relation->detach();
-        } else {
-            $relation->detach($items);
-        }
+        $relation->detach($itemId);
 
         return $this->respondWithItem($this->findItem($request, $id));
     }

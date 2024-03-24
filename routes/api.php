@@ -27,7 +27,9 @@ Route::group([
 
             $controller = $overrides[$class] ?? Config::get('luminix.backend.api.controller', 'Luminix\Backend\Controllers\ResourceController');
 
-            Route::$method($path, $controller . '@' . $action)->name('luminix.' . $alias . '.' . $action);
+            $endpoint = str_contains($action, ':') ? explode(':', $action)[1] : $action;
+
+            Route::$method($path, $controller . '@' . $endpoint)->name('luminix.' . $alias . '.' . $action);
         }
     });
 });
