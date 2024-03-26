@@ -25,7 +25,8 @@
         "illuminate/database": "^10.0",
         "staudenmeir/eloquent-eager-limit": "^1.8",
         "haydenpierce/class-finder": "^0.5.3",
-        "arandu/reducible": "^1.0"
+        "arandu/reducible": "^1.0",
+        "spatie/laravel-model-info": "^1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "~10.0",

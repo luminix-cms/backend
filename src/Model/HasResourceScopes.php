@@ -4,6 +4,8 @@ namespace Luminix\Backend\Model;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Luminix\Backend\Services\ModelFilter;
+use Illuminate\Support\Str;
 
 trait HasResourceScopes
 {
@@ -33,11 +35,15 @@ trait HasResourceScopes
     }
 
     public function scopeWhereMatchesFilter(Builder $query, array $filters)
-    {}
+    {
+        $filter = new ModelFilter(static::class, $filters);
+        
+        $filter->apply($query);
+    }
 
     public function scopeApplyOrderBy(Builder $query, string $column, string $direction)
     {
-        $query->orderBy($column, $direction)->orderBy($this->getKeyName(), 'asc');
+        $query->orderBy(Str::snake($column), $direction)->orderBy($this->getKeyName(), 'asc');
     }
 
     public function scopeLuminixQuery(Builder $query, Request $request, ?string $permission)
@@ -56,7 +62,6 @@ trait HasResourceScopes
                 $query->search($request->q);
             });
         }
-
         if ($request->has('filters')) {
             $query->where(function ($query) use ($request) {
                 $query->whereMatchesFilter($request->filters);

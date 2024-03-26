@@ -16,15 +16,6 @@ class IndexRequest extends FormRequest
         return true;
     }
 
-    public function prepareForValidation()
-    {
-        if ($this->has('filters')) {
-            $this->merge([
-                'filters' => json_decode($this->filters, true),
-            ]);
-        }
-    }
-
     /**
      * Get the validation rules that apply to the request.
      * 

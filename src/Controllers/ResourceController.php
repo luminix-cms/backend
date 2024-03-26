@@ -207,7 +207,6 @@ class ResourceController extends Controller
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
             abort(401);
         }
-
         
         $per_page = $request->per_page ?? 15;
         $minified = $request->minified ?? false;
