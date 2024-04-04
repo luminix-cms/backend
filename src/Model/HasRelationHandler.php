@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 trait HasRelationHandler
 {
-    public function getRelationships(): array
+    public function getRelationships(): ?array
     {
         $class = new \ReflectionClass($this);
 

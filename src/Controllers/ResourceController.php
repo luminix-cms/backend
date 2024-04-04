@@ -2,6 +2,7 @@
 
 namespace Luminix\Backend\Controllers;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
@@ -204,30 +205,32 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
-            abort(401);
-        }
-        
         $per_page = $request->per_page ?? 15;
         $minified = $request->minified ?? false;
-        
+
+        $columns = $minified ? [$class::getKeyName(), $class::getLabel()] : ['*'];
+
+        /** @var Builder */
+        $query = $class::luminixQuery($request, $permission);
+
         if ($minified) {
-            $page = $request->page ?? 1;
-            $model = new $class;
-            $model->appends = [];
-            return response()->json(
-                $model->query()
-                    ->luminixQuery($request, $permission)
-                    ->withOnly([])
-                    ->limit($per_page)
-                    ->offset(($page - 1) * $per_page)
-                    ->get([$model->getKeyName(), $model->getLabel()])
-            );
+            $query->withOnly([]);
         }
         
-        return $this->respondWithCollection(
-            $class::luminixQuery($request, $permission)
-                ->paginate($per_page)
+        $data = $query->paginate($per_page, $columns);
+    
+        if ($permission && config('luminix.backend.security.gates_enabled', true)) {
+            collect($data->items())->each(function ($item) use ($permission, $alias) {
+                if (!Gate::allows($permission . '-' . $alias, [$item])) {
+                    abort(401);
+                }
+            });
+        }
+
+        return response()->json(
+            $this->respondWithCollection(
+                $data
+            )
         );
         
     }
