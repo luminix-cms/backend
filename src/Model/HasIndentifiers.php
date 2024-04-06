@@ -12,6 +12,16 @@ trait HasIndentifiers
         return Str::snake(class_basename(static::class));
     }
 
+
+    static function getDisplayName(): array
+    {
+        return [
+            'singular' => Str::title(Str::snake(Str::singular(class_basename(static::class)), ' ')),
+            'plural' => Str::title(Str::snake(Str::plural(class_basename(static::class)), ' ')),
+        ];
+    }
+
+
     /**
      * Get the key for the model's label.
      * 

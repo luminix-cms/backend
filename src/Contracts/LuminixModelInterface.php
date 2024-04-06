@@ -35,4 +35,6 @@ interface LuminixModelInterface {
 
     static function getAlias(): string;
 
+    static function getDisplayName(): array;
+
 }
