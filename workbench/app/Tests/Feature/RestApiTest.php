@@ -5,6 +5,8 @@ namespace Workbench\App\Tests\Feature;
 use Workbench\App\Tests\TestCase;
 use Workbench\App\Models\User;
 
+use function Orchestra\Testbench\artisan;
+
 class RestApiTest extends TestCase
 {
     public function test_apis_are_protected()
@@ -22,8 +24,10 @@ class RestApiTest extends TestCase
         $this->json('DELETE', '/luminix-api/users/1')
             ->assertStatus(401);
 
-        $this->json('GET', '/luminix-api/to_dos')
-            ->assertStatus(401);
+        $toDosResponse = $this->json('GET', '/luminix-api/to_dos');
+
+        $toDosResponse->assertStatus(200);
+        $toDosResponse->assertContent('{"data":[],"meta":{"current_page":1,"from":null,"last_page":1,"per_page":15,"to":null,"total":0,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"http:\/\/localhost\/luminix-api\/to_dos?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}]},"links":{"first":"http:\/\/localhost\/luminix-api\/to_dos?page=1","last":"http:\/\/localhost\/luminix-api\/to_dos?page=1","prev":null,"next":null}}');
 
         $this->json('GET', '/luminix-api/to_dos/1')
             ->assertStatus(401);
@@ -148,6 +152,8 @@ class RestApiTest extends TestCase
         // can add categories to self to_do
         $categories = collect($this->json('GET', '/luminix-api/categories')->json('data'));
         $selected = $categories->random(3)->pluck('id')->toArray();
+
+        //artisan($this, 'route:list');
         
         $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
 

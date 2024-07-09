@@ -7,11 +7,13 @@ use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as TestbenchTestCase;
 use Workbench\Database\Seeders\DatabaseSeeder;
 
+use function Orchestra\Testbench\artisan;
+
 class TestCase extends TestbenchTestCase
 {
 
     use WithWorkbench;
-    use RefreshDatabase;
+    # use RefreshDatabase;
 
     protected function getPackageProviders($app)
     {
@@ -46,4 +48,17 @@ class TestCase extends TestbenchTestCase
         $this->seed(DatabaseSeeder::class);
     }
 
+    /**
+     * Define database migrations.
+     *
+     * @return void
+     */
+    protected function defineDatabaseMigrations() 
+    {
+        artisan($this, 'migrate', ['--database' => 'testing']);
+
+        $this->beforeApplicationDestroyed(
+            fn () => artisan($this, 'migrate:rollback', ['--database' => 'testing'])
+        );
+    }
 }
