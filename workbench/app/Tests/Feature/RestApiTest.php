@@ -155,7 +155,7 @@ class RestApiTest extends TestCase
 
         //artisan($this, 'route:list');
         
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
+        $this->json('PUT', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
@@ -173,7 +173,7 @@ class RestApiTest extends TestCase
         ]);
 
         // can detach categories from self to_do
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/detach", [$selected[0]])
+        $this->json('DELETE', "/luminix-api/to_dos/{$todoId}/categories/{$selected[0]}")
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('category_to_do', [
@@ -182,7 +182,7 @@ class RestApiTest extends TestCase
         ]);
 
         // can attach categories to self to_do
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/attach", [$selected[0]])
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/{$selected[0]}")
             ->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
@@ -193,14 +193,15 @@ class RestApiTest extends TestCase
 
         // can get minified to_dos
         $response = $this->json('GET', '/luminix-api/to_dos?minified=1');
+
         // Verify $labeledBy is used
-        $response->assertJsonPath('0.title', 'Buy milk');
+        $response->assertJsonPath('data.0.title', 'Buy milk');
         $response->assertStatus(200);
 
         // can get minified categories
         $response = $this->json('GET', '/luminix-api/categories?minified=1');
         // Verify first fillable field is used
-        $response->assertJsonPath('0.name', $categories[0]['name']);
+        $response->assertJsonPath('data.0.name', $categories[0]['name']);
         $response->assertStatus(200);
 
         // can delete self to_do

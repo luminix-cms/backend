@@ -171,7 +171,7 @@ class ResourceController extends Controller
 
         $relation->getRelated()->findOrFail($itemId);
 
-        $relation->attach($itemId, $request->json());
+        $relation->attach($itemId, $request->all());
 
         return $this->respondWithItem($this->findItem($request, $id));
     }
@@ -207,8 +207,9 @@ class ResourceController extends Controller
 
         $per_page = $request->per_page ?? 15;
         $minified = $request->minified ?? false;
+        $instance = new $class;
 
-        $columns = $minified ? [$class::getKeyName(), $class::getLabel()] : ['*'];
+        $columns = $minified ? [$instance->getKeyName(), $instance->getLabel()] : ['*'];
 
         /** @var Builder */
         $query = $class::luminixQuery($request, $permission);
@@ -220,7 +221,19 @@ class ResourceController extends Controller
         $data = $query->paginate($per_page, $columns);
     
         if ($permission && config('luminix.backend.security.gates_enabled', true)) {
-            collect($data->items())->each(function ($item) use ($permission, $alias) {
+
+            $items = collect($data->items());
+
+            if ($minified) {
+
+                // For minified queries, the models should be retrieved with all
+                // attributes for proper permission checks.
+
+                $items = $class::whereIn($instance->getKeyName(), $items->pluck($instance->getKeyName()))
+                    ->get();
+            }
+
+            $items->each(function ($item) use ($permission, $alias) {
                 if (!Gate::allows($permission . '-' . $alias, [$item])) {
                     abort(401);
                 }
