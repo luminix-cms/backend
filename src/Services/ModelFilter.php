@@ -12,7 +12,7 @@ class ModelFilter {
 
     use Macroable;
 
-    protected array $relations;
+    protected ?array $relations;
     protected ModelInfo $modelInfo;
 
     public function __construct(
@@ -126,7 +126,7 @@ class ModelFilter {
 
     public function apply(Builder $query): Builder
     {
-        $relations = collect(array_keys($this->relations));
+        $relations = collect(array_keys($this->relations ?? []));
 
         foreach ($this->filters as $column => $value) {
             $foundRelation = false;

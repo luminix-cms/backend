@@ -531,6 +531,7 @@ class ResourceController extends Controller
             return new $resource($items);
         }
 
+        // checar aplicação de resource dentro do collection
         if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
             $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
             return $resource::collection($items);

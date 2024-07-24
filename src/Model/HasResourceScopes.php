@@ -62,9 +62,9 @@ trait HasResourceScopes
                 $query->search($request->q);
             });
         }
-        if ($request->has('filters')) {
+        if ($request->has('where')) {
             $query->where(function ($query) use ($request) {
-                $query->whereMatchesFilter($request->filters);
+                $query->whereMatchesFilter($request->where);
             });
         }
 
