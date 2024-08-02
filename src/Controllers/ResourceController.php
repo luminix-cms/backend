@@ -25,7 +25,11 @@ class ResourceController extends Controller
 
     private function inferRequestParameters()
     {
-        $name = request()->route()->getName();
+
+        /** @var Request */
+        $request = request();
+
+        $name = $request->route()->getName();
 
         [, $name, $method] = explode('.', $name);
 
@@ -53,7 +57,7 @@ class ResourceController extends Controller
     {
         
         $data = $request->all();
-        $item->fill($data);
+        //$item->fill($data);
 
         foreach ($data as $key => $value)
         {
@@ -335,6 +339,8 @@ class ResourceController extends Controller
         $item->validateRequest($request, 'update');
         
         $item->fill($request->all());
+
+        $this->fillRelationships($request, $item);
         
         DB::transaction(function () use ($item, $request) {
             $this->beforeSave($request, $item);
@@ -347,7 +353,7 @@ class ResourceController extends Controller
             $this->afterSave($request, $item);
         });
 
-        return response()->json(
+        return $this->respondWithItem(
             $this->findItem($request, $id)
         );
     }
@@ -508,15 +514,27 @@ class ResourceController extends Controller
     {
         ['class' => $class] = $this->inferRequestParameters();
         $class = class_basename($class);
+        
+        /** @var Request */
+        $request = request();
+        
+        if ($request->wantsJson()) {
 
-        $namespace = App::getNamespace();
+            $namespace = App::getNamespace();
 
-        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
-            $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
-            return response()->json(new $resource($item), $status);
+            if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
+                $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
+                return response()->json(new $resource($item), $status);
+            }
+
+            return response()->json($item, $status);
         }
 
-        return response()->json($item, $status);
+        if ($request->query('redirectTo')) {
+            return redirect($request->query('redirectTo'));
+        }
+
+        return back();
     }
 
     public function respondWithCollection($items, $status = 200)

@@ -39,7 +39,7 @@ class RouteGenerator
                 'show' => $prefix . '/{' . $primaryKey . '}',
                 'update' => [
                     'path' => $prefix . '/{' . $primaryKey . '}',
-                    'method' => 'put',
+                    'method' => 'post',
                 ],
                 'destroy' => [
                     'path' => $prefix . '/{' . $primaryKey . '}',
@@ -54,15 +54,15 @@ class RouteGenerator
             'method' => 'delete',
         ];
         $defaultRoutes['restoreMany'] = [
-            'path' => $prefix,
-            'method' => 'put',
+            'path' => $prefix . '/restore',
+            'method' => 'post',
         ];
 
         // Relation Routes
         foreach ($instance->getSyncs() as $relation) {
             $defaultRoutes[$relation . ':sync'] = [
                 'path' => $prefix . '/{' . $primaryKey . '}/' . $relation . '/sync',
-                'method' => 'put',
+                'method' => 'post',
             ];
 
             $defaultRoutes[$relation . ':attach'] = [
