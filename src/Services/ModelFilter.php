@@ -106,9 +106,9 @@ class ModelFilter {
         return $query->whereNotNull($column);
     }
 
-    private function methodExists(string $method): bool
+    public static function operators(): array
     {
-        return in_array($method, [
+        return [
             'relation',
             'equals',
             'like',
@@ -121,7 +121,12 @@ class ModelFilter {
             'notBetween',
             'null',
             'notNull',
-        ]) || in_array($method, array_keys(static::$macros));
+        ] + array_keys(static::$macros);
+    }
+
+    private function methodExists(string $method): bool
+    {
+        return in_array($method, static::operators());
     }
 
     public function apply(Builder $query): Builder
