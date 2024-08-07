@@ -34,6 +34,8 @@ class ModelFilter {
         $relatedModelAlias = $this->relations[$relation]['model'];
         $relatedModel = app(ModelFinder::class)->all()[$relatedModelAlias];
 
+        //dd('hit relation method');
+
         $instance = new $relatedModel();
         return $query->whereHas($relation, function ($query) use ($value, $instance, $relation) {
             if (is_array($value)) {
@@ -139,11 +141,11 @@ class ModelFilter {
                 if (Str::startsWith(Str::snake($column), $relation)) {
                     $suffix = Str::after($column, Str::camel($relation));
 
-                    if ($this->methodExists('relation' . $suffix)) {
-                        $this->{'relation' . $suffix}($query, $relation, $value);
+                    //if ($this->methodExists('relation' . $suffix)) {
+                        $this->relation($query, $relation, $value);
                         $foundRelation = true;
                         break;
-                    }
+                    //}
                 }
             }
 
