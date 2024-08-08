@@ -69,9 +69,7 @@ trait HasResourceScopes
         }
 
         if ($request->has('tab')) {
-            $query->where(function ($query) use ($request) {
-                $query->whereBelongsToTab($request->tab);
-            });
+            $query->whereBelongsToTab($request->tab);
         }
 
         if ($request->has('order_by')) {

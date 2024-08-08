@@ -16,6 +16,7 @@ class DefaultCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
+
         return [
             'data' => $this->collection, // aplicar resource ?
             'meta' => [

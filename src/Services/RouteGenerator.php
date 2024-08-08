@@ -3,12 +3,14 @@
 namespace Luminix\Backend\Services;
 
 use Arandu\Reducible\Reducible;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Luminix\Backend\Contracts\LuminixModelInterface;
 
 class RouteGenerator
 {
     use Reducible;
+
 
     static function make(string $Model)
     {
@@ -34,6 +36,13 @@ class RouteGenerator
             ],
         ];
 
+        if (app(ModelFinder::class)->classUses($Model, SoftDeletes::class)) {
+            $defaultRoutes['restoreMany'] = [
+                'path' => $prefix . '/restore',
+                'method' => 'post',
+            ];
+        }
+
         if ($primaryKey) {
             $defaultRoutes += [
                 'show' => $prefix . '/{' . $primaryKey . '}',
@@ -53,10 +62,7 @@ class RouteGenerator
             'path' => $prefix,
             'method' => 'delete',
         ];
-        $defaultRoutes['restoreMany'] = [
-            'path' => $prefix . '/restore',
-            'method' => 'post',
-        ];
+        
 
         // Relation Routes
         foreach ($instance->getSyncs() as $relation) {

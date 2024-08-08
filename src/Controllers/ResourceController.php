@@ -409,7 +409,7 @@ class ResourceController extends Controller
 
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
+            'ids.*' => 'exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
         ]);
         
         $ids = $request->ids;
@@ -465,7 +465,7 @@ class ResourceController extends Controller
 
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'integer|exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
+            'ids.*' => 'exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
         ]);
         
         $ids = $request->ids;
@@ -476,7 +476,7 @@ class ResourceController extends Controller
                     $query->allowed($permission);
                 }
             })
-            ->withTrashed()
+            ->onlyTrashed()
             ->whereIn($instance->getKeyName(), $ids)
             ->afterLuminix($request)
             ->get();
@@ -489,7 +489,7 @@ class ResourceController extends Controller
             $items->each->restore();
         });
 
-        return $this->respondWithCollection($items);
+        return response()->json(null, 204);
     }
 
     /**
