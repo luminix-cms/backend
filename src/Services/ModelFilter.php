@@ -3,6 +3,7 @@
 namespace Luminix\Backend\Services;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Str;
 use Spatie\ModelInfo\Attributes\Attribute;
@@ -131,9 +132,37 @@ class ModelFilter {
         return in_array($method, static::operators());
     }
 
+    private function getValidAttributes(): Collection
+    {
+        $excluded = collect(config('luminix.backend.api.filter.exclude', [
+            'App\Models\User:password,remember_token',
+        ]));
+
+        $entry = $excluded->first(function ($entry) {
+            return Str::startsWith($entry, $this->model . ':');
+        });
+
+        if (!$entry) {
+            return $this->modelInfo->attributes
+                ->where('hidden', false)
+                ->pluck('name');
+        }
+
+        [, $columns] = explode(':', $entry);
+        $excludedColumns = explode(',', $columns);
+
+        return $this->modelInfo->attributes
+            ->pluck('name')
+            ->filter(function ($attribute) use ($excludedColumns) {
+                return !in_array($attribute, $excludedColumns);
+            });
+
+    }
+
     public function apply(Builder $query): Builder
     {
         $relations = collect(array_keys($this->relations ?? []));
+        $attributes = $this->getValidAttributes();
 
         foreach ($this->filters as $column => $value) {
             $foundRelation = false;

@@ -36,9 +36,10 @@ trait HasResourceScopes
 
     public function scopeWhereMatchesFilter(Builder $query, array $filters)
     {
-        $filter = new ModelFilter(static::class, $filters);
-        
-        $filter->apply($query);
+        if (config('luminix.backend.api.filter.enable', true)) {
+            $filter = new ModelFilter(static::class, $filters);
+            $filter->apply($query);
+        }
     }
 
     public function scopeApplyOrderBy(Builder $query, string $column, string $direction)

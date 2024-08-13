@@ -60,6 +60,48 @@ return [
         'controller_overrides' => [
             // 'App\Models\User' => 'App\Http\Controllers\UserController',
         ],
+
+        /*
+        |--------------------------------------------------------------------------
+        | API Filtering
+        |--------------------------------------------------------------------------
+        |
+        | 'filter' configures the filtering behavior of Luminix's API routes.
+        |
+        */
+        'filter' => [
+
+            /*
+            |--------------------------------------------------------------------------
+            | Enable Filtering
+            |--------------------------------------------------------------------------
+            |
+            | The 'enable' setting controls whether or not Luminix's API routes
+            | apply filtering. By default, filtering is enabled.
+            |
+            */
+            'enable' => true,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Exclude Columns
+            |--------------------------------------------------------------------------
+            |
+            | The 'exclude' setting controls which columns are excluded from filtering.
+            | By default, the model's '$hidden' attribute is used to determine excluded
+            | columns. Use the 'exclude' setting to override this behavior.
+            |
+            | Format: 
+            | 'ModelClassName:column1,column2,...'.
+            |
+            */
+            'exclude' => [
+                // Example:
+                // 'App\Models\User:password,remember_token'
+                // Excludes 'password' and 'remember_token' from filtering for the User model.
+
+            ]
+        ]
     ],
 
     /*
