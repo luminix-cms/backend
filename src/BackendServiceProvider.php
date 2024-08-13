@@ -18,7 +18,22 @@ class BackendServiceProvider extends ServiceProvider
             return new ModelFinder();
         });
 
+        $this->extendValidator();
+        
+    }
 
+    public function register()
+    {
+        $this->mergeConfigFrom(__DIR__ . '/../config/backend.php', 'luminix.backend');
+
+        $this->publishes([
+            __DIR__ . '/../config/backend.php' => config_path('luminix/backend.php'),
+        ], 'luminix-config');
+
+    }
+
+
+    private function extendValidator() {
         Validator::extend('luminix_sync', function ($attribute, $value, $parameters, $validator) {
             $class = $parameters[0];
             $relationName = $parameters[1];
@@ -33,7 +48,7 @@ class BackendServiceProvider extends ServiceProvider
                     $query->allowed(config('luminix.backend.security.permissions.index', 'read'));
                 });
 
-            if (is_int($value)) {
+            if (is_int($value) || is_string($value)) {
                 return $query
                     ->where($relation->getRelated()->getKeyName(), $value)
                     ->exists();
@@ -52,15 +67,5 @@ class BackendServiceProvider extends ServiceProvider
                 ->exists();
 
         });
-    }
-
-    public function register()
-    {
-        $this->mergeConfigFrom(__DIR__ . '/../config/backend.php', 'luminix.backend');
-
-        $this->publishes([
-            __DIR__ . '/../config/backend.php' => config_path('luminix/backend.php'),
-        ], 'luminix-config');
-
     }
 }
