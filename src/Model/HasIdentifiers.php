@@ -4,7 +4,7 @@ namespace Luminix\Backend\Model;
 
 use Illuminate\Support\Str;
 
-trait HasIndentifiers
+trait HasIdentifiers
 {
 
     static function getAlias(): string

@@ -76,8 +76,8 @@ return [
             | Enable Filtering
             |--------------------------------------------------------------------------
             |
-            | The 'enable' setting controls whether or not Luminix's API routes
-            | apply filtering. By default, filtering is enabled.
+            | The 'enable' setting controls whether or not Luminix's API routes can
+            | apply filtering using the 'where' param. By default, filtering is enabled.
             |
             */
             'enable' => true,
@@ -100,7 +100,20 @@ return [
                 // 'App\Models\User:password,remember_token'
                 // Excludes 'password' and 'remember_token' from filtering for the User model.
 
-            ]
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Throw Exceptions
+            |--------------------------------------------------------------------------
+            |
+            | 'throw' specifies whether or not Luminix should throw exceptions
+            | when filtering fails, e.g. when an invalid column is specified.
+            |
+            | By default, exceptions are thrown in production.
+            |
+            */
+            'throw' => env('APP_ENV', 'production') === 'production',
         ]
     ],
 

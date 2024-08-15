@@ -5,7 +5,7 @@ namespace Luminix\Backend\Model;
 trait LuminixModel
 {
 
-    use HasRestApi, HasResourceScopes, HasIndentifiers;
+    use HasRestApi, HasResourceScopes, HasIdentifiers;
     use HasRelationHandler, ValidatesRequests;
 
 }

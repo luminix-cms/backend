@@ -2,8 +2,10 @@
 
 namespace Luminix\Backend\Services;
 
+use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Str;
 use Spatie\ModelInfo\Attributes\Attribute;
@@ -164,17 +166,16 @@ class ModelFilter {
         $relations = collect(array_keys($this->relations ?? []));
         $attributes = $this->getValidAttributes();
 
-        foreach ($this->filters as $column => $value) {
+        foreach ($this->filters as $columnOperator => $value) {
             $foundRelation = false;
+            $foundColumn = false;
             foreach ($relations as $relation) {
-                if (Str::startsWith(Str::snake($column), $relation)) {
-                    $suffix = Str::after($column, Str::camel($relation));
+                if (Str::startsWith(Str::snake($columnOperator), $relation)) {
+                    $suffix = Str::after($columnOperator, Str::camel($relation));
 
-                    //if ($this->methodExists('relation' . $suffix)) {
-                        $this->relation($query, $relation, $value);
-                        $foundRelation = true;
-                        break;
-                    //}
+                    $this->relation($query, $relation, $value);
+                    $foundRelation = true;
+                    break;
                 }
             }
 
@@ -183,8 +184,8 @@ class ModelFilter {
             }
 
             foreach ($this->modelInfo->attributes as $attribute) {
-                if (Str::startsWith(Str::snake($column), $attribute->name)) {
-                    $suffix = Str::after($column, Str::camel($attribute->name));
+                if (Str::startsWith(Str::snake($columnOperator), $attribute->name)) {
+                    $suffix = Str::after($columnOperator, Str::camel($attribute->name));
 
                     $suffix == '' && $suffix = 'Equals';
 
@@ -193,13 +194,25 @@ class ModelFilter {
                     }
 
                     $this->{Str::camel($suffix)}($query, $attribute->name, $value);
+                    $foundColumn = true;
 
                     break;
                 }
             }
 
-
+            if (!$foundColumn
+                && !$foundRelation
+                && config(
+                    'luminix.backend.api.filter.throw',
+                    'production' === config('app.env', 'production')
+                ))
+            {
+                throw new Exception('[Luminix] Invalid filter provided');
+            } else {
+                Log::warning('[Luminix] Invalid filter provided ' . $columnOperator);
+            }
         }
+
         return $query;
     }
 
