@@ -328,13 +328,11 @@ class ResourceController extends Controller
             'class' => $class,
         ] = $this->inferRequestParameters();
 
-        $supposedItem = $class::findOrFail($id);
+        $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
             abort(401);
         }
-    
-        $item = $this->findItem($request, $id);
 
         $item->validateRequest($request, 'update');
         
@@ -348,6 +346,7 @@ class ResourceController extends Controller
             if ($request->query('restore')) {
                 $item->restore();
             }
+
             $item->save();
             // $this->syncRelationships($request, $item);
             $this->afterSave($request, $item);
@@ -370,13 +369,11 @@ class ResourceController extends Controller
             'class' => $class,
         ] = $this->inferRequestParameters();
 
-        $supposedItem = $class::findOrFail($id);
+        $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
             abort(401);
         }
-
-        $item = $this->findItem($request, $id);
 
         DB::transaction(function () use ($item, $request) {
             if ($request->force) {
@@ -576,12 +573,9 @@ class ResourceController extends Controller
             })
             ->where($item->getKeyName(), $id)
             ->afterLuminix($request);
-        
-        if ($method === 'update' && $request->query('restore')) {
-            $query = $query->onlyTrashed();
-        }
 
-        if ($method === 'destroy' && $request->query('force')) {
+        if (($method === 'destroy' && $request->query('force'))
+            || ($method === 'update' && $request->query('restore'))) {
             $query = $query->withTrashed();
         }
 

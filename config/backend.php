@@ -114,7 +114,7 @@ return [
             |
             */
             'throw' => env('APP_ENV', 'production') === 'production',
-        ]
+        ],
     ],
 
     /*
