@@ -63,6 +63,16 @@ class ModelFilter {
         return $query->where($column, 'like', $value);
     }
 
+    public function startsWith(Builder $query, string $column, mixed $value): Builder
+    {
+        return $query->where($column, 'like', $value . '%');
+    }
+
+    public function endsWith(Builder $query, string $column, mixed $value): Builder
+    {
+        return $query->where($column, 'like', '%' . $value);
+    }
+
     public function notEquals(Builder $query, string $column, mixed $value): Builder
     {
         if (is_array($value)) {
@@ -114,10 +124,11 @@ class ModelFilter {
     public static function operators(): array
     {
         return [
-            'relation',
             'equals',
-            'like',
             'notEquals',
+            'like',
+            'startsWith', 
+            'endsWith',
             'greaterThan',
             'greaterThanOrEquals',
             'lessThan',
@@ -126,6 +137,7 @@ class ModelFilter {
             'notBetween',
             'null',
             'notNull',
+            'relation',
         ] + array_keys(static::$macros);
     }
 
@@ -169,8 +181,10 @@ class ModelFilter {
         $attributes = $this->getValidAttributes();
 
         foreach ($this->filters as $columnOperator => $value) {
+
             $foundRelation = false;
             $foundColumn = false;
+
             foreach ($relations as $relation) {
                 if (Str::startsWith(Str::snake($columnOperator), $relation)) {
                     $suffix = Str::after($columnOperator, Str::camel($relation));
