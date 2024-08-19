@@ -23,6 +23,9 @@ trait HasResourceScopes
     public function scopeSearch(Builder $query, string $search)
     {
         foreach ($this->getFillable() as $fillable) {
+            if (in_array($fillable, $this->getHidden())) {
+                continue;
+            }
             $query->orWhere($fillable, 'like', '%' . implode('%', explode(' ', $search)) . '%');
         }
     }
