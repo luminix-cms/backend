@@ -63,6 +63,11 @@ class ModelFilter {
         return $query->where($column, 'like', $value);
     }
 
+    public function contains(Builder $query, string $column, mixed $value): Builder
+    {
+        return $query->where($column, 'like', '%' . $value . '%');
+    }
+
     public function startsWith(Builder $query, string $column, mixed $value): Builder
     {
         return $query->where($column, 'like', $value . '%');
@@ -127,6 +132,7 @@ class ModelFilter {
             'equals',
             'notEquals',
             'like',
+            'contains', 
             'startsWith', 
             'endsWith',
             'greaterThan',
