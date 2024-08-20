@@ -147,6 +147,7 @@ class ModelFilter {
         if (!$entry) {
             return $this->modelInfo->attributes
                 ->where('hidden', false)
+                ->where('appended', false)
                 ->pluck('name');
         }
 
@@ -154,6 +155,7 @@ class ModelFilter {
         $excludedColumns = explode(',', $columns);
 
         return $this->modelInfo->attributes
+            ->where('appended', false)
             ->pluck('name')
             ->filter(function ($attribute) use ($excludedColumns) {
                 return !in_array($attribute, $excludedColumns);
@@ -183,9 +185,9 @@ class ModelFilter {
                 continue;
             }
 
-            foreach ($this->modelInfo->attributes as $attribute) {
-                if (Str::startsWith(Str::snake($columnOperator), $attribute->name)) {
-                    $suffix = Str::after($columnOperator, Str::camel($attribute->name));
+            foreach ($attributes as $attribute) {
+                if (Str::startsWith(Str::snake($columnOperator), $attribute)) {
+                    $suffix = Str::after($columnOperator, Str::camel($attribute));
 
                     $suffix == '' && $suffix = 'Equals';
 
@@ -193,7 +195,7 @@ class ModelFilter {
                         continue;
                     }
 
-                    $this->{Str::camel($suffix)}($query, $attribute->name, $value);
+                    $this->{Str::camel($suffix)}($query, $attribute, $value);
                     $foundColumn = true;
 
                     break;
