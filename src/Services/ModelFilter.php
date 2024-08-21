@@ -193,8 +193,6 @@ class ModelFilter {
 
             foreach ($relations as $relation) {
                 if (Str::startsWith(Str::snake($columnOperator), $relation)) {
-                    $suffix = Str::after($columnOperator, Str::camel($relation));
-
                     $this->relation($query, $relation, $value);
                     $foundRelation = true;
                     break;
