@@ -72,17 +72,18 @@ class Post extends Model
 
     public function getValidationRules(string $for): array
     {
-        if ($for === 'store') {
-            return [
+        return match ($for) {
+            'store' => [
                 'title' => 'required|string|max:255',
                 'content' => 'required|string',
-            ];
-        }
-        // update
-        return [
-            'title' => 'string|max:255',
-            'content' => 'string',
-        ];
+            ],
+            // update
+            default => [
+                'title' => 'string|max:255',
+                'content' => 'string',
+            ],
+        };
+
     }
 }
 ```
@@ -251,7 +252,7 @@ class Post extends Model
 }
 ```
 
-A criação de filtros deve ser implementada pelo desenvolvedor, oferecendo uma forma flexível de filtrar os registros. Nas requisições, os filtros são passados como uma string JSON no parâmetro `filters`. Por exemplo:
+~~A criação de filtros deve ser implementada pelo desenvolvedor, oferecendo uma forma flexível de filtrar os registros. Nas requisições, os filtros são passados como uma string JSON no parâmetro `filters`. Por exemplo:~~
 
 ```json
 // GET /luminix-api/posts?filters={"tags":[1,2]}
@@ -269,7 +270,7 @@ A criação de filtros deve ser implementada pelo desenvolvedor, oferecendo uma 
 }
 ```
 
-Para que os filtros funcionem, é necessário sobrescrever o método `scopeWhereMatchesFilter` no modelo:
+~~Para que os filtros funcionem, é necessário sobrescrever o método `scopeWhereMatchesFilter` no modelo:~~
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
@@ -307,7 +308,7 @@ class Post extends Model
 }
 ```
 
-Recomendamos no entanto, que sejam utilizados relacionamentos com limitações de carga antecipada, para evitar a carga antecipada de muitos registros. Para que isso seja possível, o Luminix Backend utiliza o pacote [Eloquent Eager Limit](https://github.com/staudenmeir/eloquent-eager-limit).
+Recomendamos no entanto, que sejam utilizados relacionamentos com limitações de carga antecipada, para evitar a carga antecipada de muitos registros. ~~Para que isso seja possível, o Luminix Backend utiliza o pacote [Eloquent Eager Limit](https://github.com/staudenmeir/eloquent-eager-limit).~~
 
 Um exemplo de implementação que leva em conta a limitação de carga antecipada, e só aplica o carregamento para relacionamentos selecionados:
 

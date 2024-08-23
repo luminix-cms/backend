@@ -1,5 +1,7 @@
 # Luminix Backend
 
+ > Atenção: projeto em BETA. Não recomendado para produção. A documentação pode estar desatualizada, imprecisa e incompleta.
+
 Inicie rapidamente seu projeto Laravel com o Luminix Backend.
 
 ## Instalação

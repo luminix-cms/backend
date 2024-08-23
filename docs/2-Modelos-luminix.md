@@ -154,7 +154,7 @@ class Post extends Model
 }
 ```
 
-Em relações `BelongsToMany`, é necessário que o atributo `$syncs` esteja definido e contenha o nome do relacionamento a ser sincronizado. Então, o Luminix Backend espera que o relacionamento seja passado como um array de objetos com a chave primária. Esta requisição criaria um post com as tags de id 1 e 2:
+~~Em relações `BelongsToMany`, é necessário que o atributo `$syncs` esteja definido e contenha o nome do relacionamento a ser sincronizado. Então, o Luminix Backend espera que o relacionamento seja passado como um array de objetos com a chave primária. Esta requisição criaria um post com as tags de id 1 e 2:~~
 
 ```json
 // POST /luminix-api/posts
@@ -171,9 +171,9 @@ Em relações `BelongsToMany`, é necessário que o atributo `$syncs` esteja def
 }
 ```
 
- > Esta operação irá sincronizar as tags do post, removendo as tags que eventualmente não estiverem presentes na requisição.
+ > ~~Esta operação irá sincronizar as tags do post, removendo as tags que eventualmente não estiverem presentes na requisição.~~
 
-Cada elemento dentro do array também pode conter um atributo `pivot` para definir os atributos da tabela pivô.
+~~Cada elemento dentro do array também pode conter um atributo `pivot` para definir os atributos da tabela pivô.~~
 
 ```json
 // POST /luminix-api/posts
@@ -255,7 +255,7 @@ class Post extends Model
 }
 ```
 
-A requisição para criar um post com tags seria:
+~~A requisição para criar um post com tags seria:~~
 
 ```json
 // POST /luminix-api/posts
