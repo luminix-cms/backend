@@ -5,6 +5,7 @@ namespace Luminix\Backend\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
+use Luminix\Backend\Services\ModelFinder;
 
 trait HasRelationHandler
 {
@@ -35,6 +36,10 @@ trait HasRelationHandler
             $relatedModel = $relation->getRelated();
 
             $model = get_class($relatedModel);
+
+            if (!app(ModelFinder::class)->classUses($model, LuminixModel::class)) {
+                continue;
+            }
 
             if (method_exists($relation, 'getForeignKeyName')) {
                 $foreignKey = $relation->getForeignKeyName();

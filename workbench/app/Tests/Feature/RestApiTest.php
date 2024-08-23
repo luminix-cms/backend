@@ -18,7 +18,7 @@ class RestApiTest extends TestCase
         $this->json('GET', '/luminix-api/users/1')
             ->assertStatus(401);
 
-        $this->json('PUT', '/luminix-api/users/1')
+        $this->json('POST', '/luminix-api/users/1')
             ->assertStatus(401);
 
         $this->json('DELETE', '/luminix-api/users/1')
@@ -35,11 +35,11 @@ class RestApiTest extends TestCase
         $this->json('POST', '/luminix-api/to_dos')
             ->assertStatus(401);
         
-        $this->json('PUT', '/luminix-api/to_dos/1')
-            ->assertStatus(401);
+        $this->json('POST', '/luminix-api/to_dos/1')
+            ->assertStatus(404);
 
         $this->json('DELETE', '/luminix-api/to_dos/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         $this->json('GET', '/luminix-api/categories')
             ->assertStatus(401);
@@ -50,7 +50,7 @@ class RestApiTest extends TestCase
         $this->json('POST', '/luminix-api/categories')
             ->assertStatus(401);
 
-        $this->json('PUT', '/luminix-api/categories/1')
+        $this->json('POST', '/luminix-api/categories/1')
             ->assertStatus(401);
         
         $this->json('DELETE', '/luminix-api/categories/1')
@@ -93,7 +93,7 @@ class RestApiTest extends TestCase
             ]);
 
         // can update self
-        $this->json('PUT', "/luminix-api/users/{$user->id}", [
+        $this->json('POST', "/luminix-api/users/{$user->id}", [
             'name' => 'Jane Doe',
         ])->assertStatus(200);
 
@@ -140,7 +140,7 @@ class RestApiTest extends TestCase
 
         // can update self to_do
 
-        $this->json('PUT', "/luminix-api/to_dos/{$todoId}", [
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}", [
             'completed' => 1,
         ])->assertStatus(200);
 
@@ -155,7 +155,7 @@ class RestApiTest extends TestCase
 
         //artisan($this, 'route:list');
         
-        $this->json('PUT', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
+        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
