@@ -5,7 +5,7 @@ namespace Luminix\Backend\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
-use Luminix\Backend\Services\ModelFinder;
+use Luminix\Backend\Facades\Finder;
 
 trait HasRelationHandler
 {
@@ -37,7 +37,7 @@ trait HasRelationHandler
 
             $model = get_class($relatedModel);
 
-            if (!app(ModelFinder::class)->classUses($model, LuminixModel::class)) {
+            if (!Finder::isLuminixModel($model)) {
                 continue;
             }
 

@@ -25,6 +25,18 @@ class ModelFinder {
         );
     }
 
+    function isLuminixModel(string|object $class): bool
+    {
+        $reflection = new \ReflectionClass($class);
+
+        return $reflection->isSubclassOf(Model::class)
+            && !$reflection->isAbstract()
+            && (
+                $this->classUses($class, LuminixModel::class)
+                || $reflection->implementsInterface(LuminixModelInterface::class)
+            ); 
+    }
+
     function all()
     {
         if (!isset($this->classes)) {
@@ -45,12 +57,7 @@ class ModelFinder {
                     }
                     $reflection = new \ReflectionClass($model);
 
-                    return $reflection->isSubclassOf(Model::class)
-                        && !$reflection->isAbstract()
-                        && (
-                            $this->classUses($model, LuminixModel::class)
-                            || $reflection->implementsInterface(LuminixModelInterface::class)
-                        ); 
+                    return $this->isLuminixModel($model);
                 })
                 ->mapWithKeys(function($model) {
                     return [$model::getAlias() => $model];
@@ -58,4 +65,15 @@ class ModelFinder {
         }
         return $this->classes;
     }
+
+    function toAlias(string $model): string
+    {
+        return $this->all()->search($model);
+    }
+
+    function toClass(string $alias): string
+    {
+        return $this->all()[$alias];
+    }
+
 }

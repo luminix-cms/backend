@@ -2,8 +2,6 @@
 
 namespace Luminix\Backend\Model;
 
-use Illuminate\Support\Str;
-use Luminix\Backend\Services\ModelFinder;
 use Luminix\Backend\Services\RouteGenerator;
 
 trait HasRestApi

@@ -2,17 +2,15 @@
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
-use Luminix\Backend\Contracts\LuminixModelInterface;
-use Luminix\Backend\Services\ModelFinder;
+use Luminix\Backend\Facades\Finder;
 
 Route::group([
     'middleware' => Config::get('luminix.backend.security.middleware', ['api', 'auth']),
     'prefix' => Config::get('luminix.backend.api.prefix', 'luminix-api'),
 ], function () {
-    /** @var ModelFinder */
-    $modelFinder = app(ModelFinder::class);
 
-    $modelFinder->all()->each(function ($class, $alias) {
+
+    Finder::all()->each(function ($class, $alias) {
         $routes = $class::getLuminixRoutes();
 
         foreach ($routes as $action => $path) {

@@ -6,6 +6,7 @@ use Arandu\Reducible\Reducible;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Luminix\Backend\Contracts\LuminixModelInterface;
+use Luminix\Backend\Facades\Finder;
 
 class RouteGenerator
 {
@@ -36,7 +37,7 @@ class RouteGenerator
             ],
         ];
 
-        if (app(ModelFinder::class)->classUses($Model, SoftDeletes::class)) {
+        if (Finder::classUses($Model, SoftDeletes::class)) {
             $defaultRoutes['restoreMany'] = [
                 'path' => $prefix . '/restore',
                 'method' => 'post',

@@ -108,12 +108,13 @@ return [
             |--------------------------------------------------------------------------
             |
             | 'throw' specifies whether or not Luminix should throw exceptions
-            | when filtering fails, e.g. when an invalid column is specified.
+            | when filtering fails, e.g. when an invalid column or operator is
+            | specified.
             |
-            | By default, exceptions are thrown in production.
+            | By default, exceptions are thrown.
             |
             */
-            'throw' => env('APP_ENV', 'production') === 'production',
+            'throw' => true,
         ],
     ],
 

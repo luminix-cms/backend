@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Luminix\Backend\Facades\Finder;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
-use Luminix\Backend\Services\ModelFinder;
 
 class ResourceController extends Controller
 {
@@ -33,10 +33,7 @@ class ResourceController extends Controller
 
         [, $name, $method] = explode('.', $name);
 
-        /** @var ModelFinder */
-        $modelFinder = app(ModelFinder::class);
-
-        $models = $modelFinder->all();
+        $models = Finder::all();
         $class = $models[$name];
 
         if (!class_exists($class)) {
