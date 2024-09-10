@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Str;
+use Luminix\Backend\Exceptions\InvalidFilterException;
+use Luminix\Backend\Facades\Finder;
 use Spatie\ModelInfo\Attributes\Attribute;
 use Spatie\ModelInfo\ModelInfo;
 
@@ -31,16 +33,14 @@ class ModelFilter {
 
     public function relation(Builder $query, string $relation, mixed $value): Builder
     {
-        if ($value === 'any') {
+        if ($value === '*') {
             return $query->has($relation);
         }
         $relatedModelAlias = $this->relations[$relation]['model'];
-        $relatedModel = app(ModelFinder::class)->all()[$relatedModelAlias];
-
-        //dd('hit relation method');
+        $relatedModel = Finder::toClass($relatedModelAlias);
 
         $instance = new $relatedModel();
-        return $query->whereHas($relation, function ($query) use ($value, $instance, $relation) {
+        return $query->whereHas($relation, function ($query) use ($value, $instance) {
             if (is_array($value)) {
                 $query->whereIn($instance->getKeyName(), $value);
                 return;
@@ -152,11 +152,14 @@ class ModelFilter {
         return in_array($method, static::operators());
     }
 
+    private function attributeExists(string $attribute): bool
+    {
+        return $this->getValidAttributes()->contains('name', $attribute);
+    }
+
     private function getValidAttributes(): Collection
     {
-        $excluded = collect(config('luminix.backend.api.filter.exclude', [
-            'App\Models\User:password,remember_token',
-        ]));
+        $excluded = collect(config('luminix.backend.api.filter.exclude', []));
 
         $entry = $excluded->first(function ($entry) {
             return Str::startsWith($entry, $this->model . ':');
@@ -177,63 +180,67 @@ class ModelFilter {
             ->pluck('name')
             ->filter(function ($attribute) use ($excludedColumns) {
                 return !in_array($attribute, $excludedColumns);
-            });
+            })
+            ->values();
 
     }
 
     public function apply(Builder $query): Builder
     {
         $relations = collect(array_keys($this->relations ?? []));
-        $attributes = $this->getValidAttributes();
 
         foreach ($this->filters as $columnOperator => $value) {
-
-            $foundRelation = false;
-            $foundColumn = false;
-
-            foreach ($relations as $relation) {
-                if (Str::startsWith(Str::snake($columnOperator), $relation)) {
-                    $this->relation($query, $relation, $value);
-                    $foundRelation = true;
-                    break;
-                }
+            
+            if (Str::contains($columnOperator, ':')) {
+                [$column, $operator] = explode(':', $columnOperator);
+            } else {
+                $column = $columnOperator;
+            }
+            
+            $isRelation = $relations->contains(Str::snake($column));
+            
+            if (!isset($operator)) {
+                $operator = $isRelation
+                    ? 'relation'
+                    : 'equals';
             }
 
-            if ($foundRelation) {
+            if ($isRelation) {
+                $column = Str::snake($column);
+            }
+
+            if (!$this->methodExists($operator) || (!$isRelation && !$this->attributeExists($column))) {
+                $this->handleInvalidFilter($column, $operator, $value);
+
+                unset($operator);
                 continue;
             }
 
-            foreach ($attributes as $attribute) {
-                if (Str::startsWith(Str::snake($columnOperator), $attribute)) {
-                    $suffix = Str::after($columnOperator, Str::camel($attribute));
+            $this->{$operator}($query, $column, $value);
 
-                    $suffix == '' && $suffix = 'Equals';
-
-                    if (!$this->methodExists(Str::camel($suffix))) {
-                        continue;
-                    }
-
-                    $this->{Str::camel($suffix)}($query, $attribute, $value);
-                    $foundColumn = true;
-
-                    break;
-                }
-            }
-
-            if (!$foundColumn
-                && !$foundRelation
-                && config(
-                    'luminix.backend.api.filter.throw',
-                    'production' === config('app.env', 'production')
-                ))
-            {
-                throw new Exception('[Luminix] Invalid filter provided');
-            } else {
-                Log::warning('[Luminix] Invalid filter provided ' . $columnOperator);
-            }
+            unset($operator);
         }
 
         return $query;
+    }
+
+    private function handleInvalidFilter(string $column, string $operator, mixed $value): void
+    {
+        if (config('luminix.backend.api.filter.throw', true)) {
+            throw new InvalidFilterException(
+                '[Luminix] Invalid filter provided for model "' . $this->model . '"\n'
+                . 'Column: ' . $column . '\n'
+                . 'Operator: ' . $operator . '\n'
+                . 'Value: ' . $value
+            );
+        } else {
+            Log::warning('[Luminix] Invalid filter provided', [
+                'model' => $this->model,
+                'column' => $column,
+                'operator' => $operator,
+                'value' => $value,
+            ]);
+        }
     }
 
 }
