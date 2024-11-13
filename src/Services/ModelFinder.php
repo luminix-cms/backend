@@ -2,6 +2,7 @@
 
 namespace Luminix\Backend\Services;
 
+use Arandu\Reducible\Reducible;
 use HaydenPierce\ClassFinder\ClassFinder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,8 @@ use Luminix\Backend\Model\LuminixModel;
 use Luminix\Backend\Contracts\LuminixModelInterface;
 
 class ModelFinder {
+
+    use Reducible;
 
     /** @var Collection<string,string> */
     private $classes;
@@ -37,6 +40,24 @@ class ModelFinder {
             ); 
     }
 
+    /**
+     * Add models to the list of models.
+     * 
+     * @param string|array $models - The classnames of the models to add.
+     * @return void 
+     */
+    function addModels($models)
+    {
+        static::reducer('models', function ($prevList) use ($models) {
+            if (is_string($models)) {
+                $models = [$models];
+            }
+
+            return $prevList + $models;
+        });
+
+    }
+
     function all()
     {
         if (!isset($this->classes)) {
@@ -50,12 +71,13 @@ class ModelFinder {
 
             $models += config('luminix.backend.models.include', []);
 
+            $models = $this->models($models);
+
             $this->classes = collect($models)
                 ->filter(function($model) {
                     if (!class_exists($model)) {
                         return false;
                     }
-                    $reflection = new \ReflectionClass($model);
 
                     return $this->isLuminixModel($model);
                 })
