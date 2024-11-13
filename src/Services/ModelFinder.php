@@ -46,7 +46,7 @@ class ModelFinder {
      * @param string|array $models - The classnames of the models to add.
      * @return void 
      */
-    function addModels($models)
+    static function addModels($models)
     {
         static::reducer('models', function ($prevList) use ($models) {
             if (is_string($models)) {
