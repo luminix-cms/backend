@@ -154,7 +154,7 @@ class ModelFilter {
 
     private function attributeExists(string $attribute): bool
     {
-        return $this->getValidAttributes()->contains('name', $attribute);
+        return $this->getValidAttributes()->contains($attribute);
     }
 
     private function getValidAttributes(): Collection
