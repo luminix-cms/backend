@@ -53,7 +53,7 @@ class ModelFinder {
                 $models = [$models];
             }
 
-            return $prevList + $models;
+            return array_merge($prevList, $models);
         });
 
     }
@@ -75,11 +75,7 @@ class ModelFinder {
 
             $this->classes = collect($models)
                 ->filter(function($model) {
-                    if (!class_exists($model)) {
-                        return false;
-                    }
-
-                    return $this->isLuminixModel($model);
+                    return class_exists($model) && $this->isLuminixModel($model);
                 })
                 ->mapWithKeys(function($model) {
                     return [$model::getAlias() => $model];
