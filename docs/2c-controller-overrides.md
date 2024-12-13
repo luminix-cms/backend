@@ -106,6 +106,88 @@ class UserController extends ResourceController
 }
 ```
 
+### Add custom actions
+
+If you need to add custom actions to a model API, you can do so by overriding the `getLuminixRoutes` method in the model. This method should return an array of custom routes that you want to add to the controller.
+
+```php
+use Luminix\Backend\Model\LuminixModel;
+
+class User extends Model
+{
+    use LuminixModel;
+
+    static function getLuminixRoutes(): array
+    {
+        $routes = static::getDefaultRoutes();
+
+        // Add a custom route to the profile action
+        $routes['profile'] = 'profile';
+
+        // To use a HTTP method other than GET, you should set the value as an array
+        $routes['addAvatar'] = [
+            'method' => 'post',
+            'path' => 'add-avatar/{id}',
+        ];
+
+        // Disable the default 'destroy' route
+        unset($routes['destroy']);
+
+        // Customize the path for the index route
+        $routes['index'] = 'custom-users-path';
+
+        return $routes;
+    }
+}
+```
+
+Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain model's routes. Reducers should be added in the `boot` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
+
+```php
+use Luminix\Backend\Services\RouteGenerator;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        RouteGenerator::reducer('modelUserRoutes', function ($routes) {
+            $routes['profile'] = 'profile';
+            $routes['addAvatar'] = [
+                'method' => 'post',
+                'path' => 'add-avatar/{id}',
+            ];
+            unset($routes['destroy']);
+            $routes['index'] = 'custom-users-path';
+            return $routes;
+        });
+    }
+}
+```
+
+Then, the logic for the custom action in the controller should be implemented as a new method:
+
+```php
+use Luminix\Backend\Controllers\ResourceController;
+
+class UserController extends ResourceController
+{
+    public function addAvatar(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $avatar = $request->file('avatar');
+        $filename = \Str::random(10) . '.' . $avatar->getClientOriginalExtension();
+        \Storage::disk('public')->put('avatars/' . $filename, $avatar);
+        $user->avatar = $filename;
+        $user->save();
+
+        return response()->json($user);
+    }
+}
+```
+
+ > **Note:** Any custom method in the controller should handle all the logic by itself, including validation and error handling.
+
 ## Add methods to the base controller
 
 If you need to add common behavior to all controllers, you can add methods to the base controller class. This is useful for adding functionality that should be shared across all controllers, such as custom error handling or logging.

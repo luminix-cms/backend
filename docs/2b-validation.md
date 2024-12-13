@@ -83,4 +83,7 @@ To make this process easier, you can use the `php artisan make:validator` comman
 php artisan make:validator UserValidator
 ```
 
+## Next Steps
 
+- [Controller Overrides](2c-controller-overrides.md)
+- [Back to Documentation Index](0-index.md)
