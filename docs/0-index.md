@@ -8,30 +8,25 @@
 - [Automatic Endpoint Generation](2a-api-endpoints.md)
 - [Data Validation](2b-validation.md)
 - [Customize API Behavior](2c-customize-api-behavior.md)
+- [Filtering Data](2d-filtering.md)
 
-### 3. Filtering
-- Enabling/Disabling Filtering
-- Filter Syntax
-- Excluding Sensitive Columns
-- Error Handling
-
-### 4. Security
+### 3. Security
 - Laravel Gate Integration
 - Permission Mapping
 - Middleware Configuration
 - Action-Level Permissions
 
-### 5. Advanced Usage
+### 4. Advanced Usage
 - Custom Controller Implementation
 - Overriding Default Behaviors
 - Performance Considerations
 
-### 6. Troubleshooting
+### 5. Troubleshooting
 - Common Issues
 - Debugging
 - Performance Optimization
 
-### 7. Extending Luminix
+### 6. Extending Luminix
 - Creating Custom Traits
 - Extending Core Functionality
 - Contributing to the Package

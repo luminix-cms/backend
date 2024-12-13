@@ -4,7 +4,7 @@ Luminix provides a number of ways to override the default behavior of the REST A
 
 ## Set the fillable fields
 
-By default, Luminix will use the `fillable` property of the model to determine which fields can be mass-assigned. You can override this property in the model to specify which fields are allowed to be set using the `create` and `update` methods.
+By default, Luminix will use the `fillable` property of the model to determine which fields can be mass-assigned. You can override this property in the model to specify which fields are allowed to be set using the `store` and `update` methods.
 
 ```php
 class ToDo extends Model
@@ -13,7 +13,7 @@ class ToDo extends Model
 }
 ```
 
-In this example, only the `title`, `description`, and `due_date` fields can be set using the `create` and `update` methods. All other fields will be ignored, unless they are handled manually in a custom controller.
+In this example, only the `title`, `description`, and `due_date` fields can be set using the `store` and `update` methods. All other fields will be ignored, unless they are handled manually in a custom controller.
 
 ## Add behaviors to the model itself
 
@@ -156,7 +156,7 @@ class User extends Model
 }
 ```
 
-Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain model's routes. Reducers should be added in the `boot` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
+Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain models routes. Reducers should be added in the `boot` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;
@@ -215,7 +215,7 @@ It is possible to change the default controller used by Luminix for all models. 
 ],
 ```
 
-This approach is useful when you want to add common behavior to all controllers, such as additional operations that should be performed on every model.
+This approach is useful when you want to add common behavior to all controllers, such as additional operations that should be performed on every model. It is advisable to extend the default `ResourceController` class when creating a custom controller.
 
 ### Add methods to the base controller
 

@@ -29,7 +29,7 @@ Returns a paginated list of all records for the model.
    - `per_page` (integer): The number of records per page. Should be less than or equal to the `max_per_page` configuration value.
    - `q` (string): A search query to filter records by. Searches all fillable columns by default.
    - `order_by` (string): The column to order results by. The value should be in the format `column:direction`, where `direction` is either `asc` or `desc`.
-   - `where` (array): The filter criteria to apply on the database query. Please refer to the [Filtering Data](/docs/XX-filtering.md#filter-syntax) section for more information.
+   - `where` (array): The filter criteria to apply on the database query. Please refer to the [Filtering Data](/docs/2d-filtering.md#filter-syntax) section for more information.
    - `tab` (string): If the model implements the `scopeWhereBelongsToTab` method, this parameter can be used to filter records by a specific "tab".
 
 Examples:
@@ -62,7 +62,7 @@ This is how you can make a request using Axios combining many conditions:
 ```js
 axios.get('/luminix-api/users', {
     params: {
-        page: 1,
+        page: 2,
         per_page: 10,
         order_by: 'email:desc'
         where: {
