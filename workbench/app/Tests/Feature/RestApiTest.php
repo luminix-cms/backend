@@ -24,21 +24,21 @@ class RestApiTest extends TestCase
         $this->json('DELETE', '/luminix-api/users/1')
             ->assertStatus(401);
 
-        $toDosResponse = $this->json('GET', '/luminix-api/to_dos');
+        $toDosResponse = $this->json('GET', '/luminix-api/to-dos');
 
         $toDosResponse->assertStatus(200);
-        $toDosResponse->assertContent('{"data":[],"meta":{"current_page":1,"from":null,"last_page":1,"per_page":15,"to":null,"total":0,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"http:\/\/localhost\/luminix-api\/to_dos?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}]},"links":{"first":"http:\/\/localhost\/luminix-api\/to_dos?page=1","last":"http:\/\/localhost\/luminix-api\/to_dos?page=1","prev":null,"next":null}}');
+        $toDosResponse->assertContent('{"data":[],"meta":{"current_page":1,"from":null,"last_page":1,"per_page":15,"to":null,"total":0,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"http:\/\/localhost\/luminix-api\/to-dos?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}]},"links":{"first":"http:\/\/localhost\/luminix-api\/to-dos?page=1","last":"http:\/\/localhost\/luminix-api\/to-dos?page=1","prev":null,"next":null}}');
 
-        $this->json('GET', '/luminix-api/to_dos/1')
+        $this->json('GET', '/luminix-api/to-dos/1')
             ->assertStatus(401);
         
-        $this->json('POST', '/luminix-api/to_dos')
+        $this->json('POST', '/luminix-api/to-dos')
             ->assertStatus(401);
         
-        $this->json('POST', '/luminix-api/to_dos/1')
+        $this->json('POST', '/luminix-api/to-dos/1')
             ->assertStatus(404);
 
-        $this->json('DELETE', '/luminix-api/to_dos/1')
+        $this->json('DELETE', '/luminix-api/to-dos/1')
             ->assertStatus(404);
 
         $this->json('GET', '/luminix-api/categories')
@@ -103,11 +103,11 @@ class RestApiTest extends TestCase
         ]);
 
         // cant read other users to_dos
-        $this->json('GET', '/luminix-api/to_dos/1')
+        $this->json('GET', '/luminix-api/to-dos/1')
             ->assertStatus(401);
 
         // can create to_do
-        $this->json('POST', '/luminix-api/to_dos', [
+        $this->json('POST', '/luminix-api/to-dos', [
             'title' => 'Buy milk',
             'description' => 'Buy milk from the store',
         ])->assertStatus(201);
@@ -120,7 +120,7 @@ class RestApiTest extends TestCase
         ]);
 
         // can read to_dos
-        $response = $this->json('GET', '/luminix-api/to_dos');
+        $response = $this->json('GET', '/luminix-api/to-dos');
         $response->assertStatus(200);
 
         $this->assertCount(1, $response->json('data'));
@@ -128,7 +128,7 @@ class RestApiTest extends TestCase
         $todoId = $response->json('data')[0]['id'];
 
         // can read self to_do
-        $this->json('GET', "/luminix-api/to_dos/{$todoId}")
+        $this->json('GET', "/luminix-api/to-dos/{$todoId}")
             ->assertStatus(200)
             ->assertJson([
                 'id' => $user->toDos->first()->id,
@@ -140,7 +140,7 @@ class RestApiTest extends TestCase
 
         // can update self to_do
 
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}", [
+        $this->json('POST', "/luminix-api/to-dos/{$todoId}", [
             'completed' => 1,
         ])->assertStatus(200);
 
@@ -155,7 +155,7 @@ class RestApiTest extends TestCase
 
         //artisan($this, 'route:list');
         
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
+        $this->json('POST', "/luminix-api/to-dos/{$todoId}/categories/sync", $selected)->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
             'to_do_id' => $todoId,
@@ -173,7 +173,7 @@ class RestApiTest extends TestCase
         ]);
 
         // can detach categories from self to_do
-        $this->json('DELETE', "/luminix-api/to_dos/{$todoId}/categories/{$selected[0]}")
+        $this->json('DELETE', "/luminix-api/to-dos/{$todoId}/categories/{$selected[0]}")
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('category_to_do', [
@@ -182,7 +182,7 @@ class RestApiTest extends TestCase
         ]);
 
         // can attach categories to self to_do
-        $this->json('POST', "/luminix-api/to_dos/{$todoId}/categories/{$selected[0]}")
+        $this->json('POST', "/luminix-api/to-dos/{$todoId}/categories/{$selected[0]}")
             ->assertStatus(200);
 
         $this->assertDatabaseHas('category_to_do', [
@@ -192,7 +192,7 @@ class RestApiTest extends TestCase
 
 
         // can get minified to_dos
-        $response = $this->json('GET', '/luminix-api/to_dos?minified=1');
+        $response = $this->json('GET', '/luminix-api/to-dos?minified=1');
 
         // Verify $labeledBy is used
         $response->assertJsonPath('data.0.title', 'Buy milk');
@@ -205,7 +205,7 @@ class RestApiTest extends TestCase
         $response->assertStatus(200);
 
         // can delete self to_do
-        $this->json('DELETE', "/luminix-api/to_dos/{$todoId}")
+        $this->json('DELETE', "/luminix-api/to-dos/{$todoId}")
             ->assertStatus(204);
 
         $this->assertDatabaseMissing('to_dos', [

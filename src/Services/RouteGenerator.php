@@ -23,7 +23,7 @@ class RouteGenerator
             throw new \InvalidArgumentException("Model $Model is not an Eloquent Model.");
         }
 
-        $prefix = Str::plural(Str::snake(class_basename($Model)));
+        $prefix = Str::slug(Str::plural($Model::getAlias()));
 
         $instance = new $Model;
         $primaryKey = $instance->getKeyName();
@@ -45,7 +45,7 @@ class RouteGenerator
         }
 
         if ($primaryKey) {
-            $defaultRoutes += [
+            $defaultRoutes = array_merge($defaultRoutes, [
                 'show' => $prefix . '/{' . $primaryKey . '}',
                 'update' => [
                     'path' => $prefix . '/{' . $primaryKey . '}',
@@ -55,7 +55,7 @@ class RouteGenerator
                     'path' => $prefix . '/{' . $primaryKey . '}',
                     'method' => 'delete',
                 ],
-            ];
+            ]);
         }
 
         // Additional Rotues

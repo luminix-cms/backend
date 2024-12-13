@@ -12,9 +12,9 @@ trait HasRestApi
      * @param array<string,string|array> $routes 
      * @return array<string,string|array> 
      */
-    static function mergeDefaultRoutes(array $routes)
+    static function getDefaultRoutes()
     {
-        return RouteGenerator::make(static::class) + $routes;
+        return RouteGenerator::make(static::class);
     }
 
     /**
@@ -24,7 +24,7 @@ trait HasRestApi
      */
     static function getLuminixRoutes(): array
     {
-        return static::mergeDefaultRoutes([]);
+        return static::getDefaultRoutes();
     }
 
 
