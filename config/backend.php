@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| Luminix Package Configuration
+| Luminix Backend Configuration
 |--------------------------------------------------------------------------
 |
 | This configuration file is designed to provide detailed control over the Luminix package's
@@ -173,8 +173,6 @@ return [
             'destroy' => 'delete',
             'destroyMany' => 'delete',
             'restoreMany' => 'update',
-            'import' => 'create',
-            'export' => 'read',
             'sync' => 'update',
             'attach' => 'update',
             'detach' => 'update',

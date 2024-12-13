@@ -486,24 +486,6 @@ class ResourceController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * Import resources from spreadsheet.
-     * @param Request $request 
-     */
-    public function import(Request $request)
-    {
-        abort(500, 'Not implemented');
-    }
-
-    /**
-     * Export resources to spreadsheet.
-     * @param Request $request 
-     */
-    public function export(Request $request)
-    {
-        abort(500, 'Not implemented');
-    }
-
     public function respondWithItem($item, $status = 200)
     {
         ['class' => $class] = $this->inferRequestParameters();
