@@ -213,5 +213,21 @@ class RestApiTest extends TestCase
         ]);
 
     }
+
+    public function test_validation_rules_are_working()
+    {
+        $this->json('POST', '/luminix-api/users', [
+            'name' => 'John Doe',
+            'email' => 'invalidemail',
+        ])->assertStatus(422);
+
+
+        $this->actingAs(User::first());
+
+        $this->json('POST', '/luminix-api/to-dos', [
+            'title' => 'Buy milk',
+        ])->assertStatus(422);
+    }
+
 }
 

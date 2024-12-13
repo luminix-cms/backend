@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Luminix\Backend\Model\LuminixModel;
+use Luminix\Backend\Validation\ValidatedBy;
+use Workbench\App\Validators\UserValidator;
 
+#[ValidatedBy(UserValidator::class)]
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, LuminixModel;
@@ -32,20 +35,20 @@ class User extends Authenticatable
         return $this->hasMany(ToDo::class);
     }
 
-    public function getValidationRules(string $for): array
-    {
-        return match ($for) {
-            'store' => [
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
-            ],
-            'update' => [
-                'name' => 'sometimes|string|max:255',
-                'email' => 'sometimes|string|email|max:255|unique:users,email,' . $this->id,
-                'password' => 'nullable|string|min:8|confirmed',
-            ],
-            default => [],
-        };
-    }
+    // public function getValidationRules(string $for): array
+    // {
+    //     return match ($for) {
+    //         'store' => [
+    //             'name' => 'required|string|max:255',
+    //             'email' => 'required|string|email|max:255|unique:users',
+    //             'password' => 'required|string|min:8|confirmed',
+    //         ],
+    //         'update' => [
+    //             'name' => 'sometimes|string|max:255',
+    //             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $this->id,
+    //             'password' => 'nullable|string|min:8|confirmed',
+    //         ],
+    //         default => [],
+    //     };
+    // }
 }
