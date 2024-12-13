@@ -6,10 +6,8 @@
 
 ### 2. API Endpoints
 - [Automatic Endpoint Generation](2a-api-endpoints.md)
-- Endpoint Structure
-- Supported HTTP Methods
-- Pagination
-- Custom Controller Overrides
+- [Data Validation](2b-validation.md)
+- [Controller Overrides](2c-controller-overrides.md)
 
 ### 3. Filtering
 - Enabling/Disabling Filtering

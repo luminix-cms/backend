@@ -1,5 +1,11 @@
 # Luminix Backend Configuration Reference
 
+To publish the configuration file, use the command below:
+
+```bash
+php artisan vendor:publish --tag=luminix-config
+```
+
 ## Model Discovery Configuration
 
 | Key | Default Value | Description |

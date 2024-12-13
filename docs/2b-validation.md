@@ -15,7 +15,7 @@ class User
 {
     use LuminixModel;
 
-    protected function getValidationRules($for)
+    protected function getValidationRules(string $for): array
     {
         return match ($for) {
             'store' => [
@@ -36,7 +36,7 @@ class User
 
 ## Validator Class
 
-It is possible to create a class for validation rules and use it in the model. This is a way to keep the model clean and organized. The class must have the `\Luminix\Backend\Validation\ValidatedBy` attribute, which receives the model class as an argument. In order to use this feature, the model must **not** have the `getValidationRules` method implemented.
+It is possible to create a class for validation rules and use it in the model. This is a way to separate concerns in your code. The class must have the `\Luminix\Backend\Validation\ValidatedBy` attribute, which receives the validator class as an argument. In order to use this feature, the model must **not** have the `getValidationRules` method implemented.
 
 ```php
 use Luminix\Backend\Validation\ValidatedBy;
