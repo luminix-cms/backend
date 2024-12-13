@@ -1,6 +1,6 @@
 <?php
 
-namespace {{ namespace }}\Validators;
+namespace {{ namespace }};
 
 use Luminix\Backend\Validation\Validator;
 
