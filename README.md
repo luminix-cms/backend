@@ -1,47 +1,59 @@
 # Luminix Backend
 
- > Atenção: projeto em BETA. Não recomendado para produção. A documentação pode estar desatualizada, imprecisa e incompleta.
+Luminix Backend is a powerful Laravel package that automatically generates RESTful API endpoints for your models with built-in security, filtering, and permission management.
 
-Inicie rapidamente seu projeto Laravel com o Luminix Backend.
+## Features
 
-## Instalação
+- 🚀 Automatic API Endpoint Generation
+- 🔒 Robust Security Controls
+- 🔍 Advanced API Filtering
+- 🛡️ Laravel Gate Integration
+- 🔧 Highly Configurable
+
+## Installation
+
+Install the package via Composer:
 
 ```bash
 composer require luminix/backend
 ```
 
-## Uso
+## Quick Start
+
+1. Add the `Luminix\Backend\Model\LuminixModel` trait to your models:
 
 ```php
+use Illuminate\Database\Eloquent\Model;
 use Luminix\Backend\Model\LuminixModel;
 
-class User extends Authenticatable
+class User extends Model
 {
-
     use LuminixModel;
-
-    // ...
-
+    
+    // Your model code
 }
 ```
 
-Com apenas essas linhas de código, você terá um CRUD completo para a model User.
+2. Publish the configuration file:
 
-| URL | Rota | Método | Descrição |
-| --- | ---- | ------ | --------- |
-| /luminix-api/users | luminix.user.index | GET | Listar os usuários |
-| /luminix-api/users | luminix.user.store | POST | Criar um novo usuário |
-| /luminix-api/users/{id} | luminix.user.show | GET | Exibir um usuário |
-| /luminix-api/users/{id} | luminix.user.update | PUT | Atualizar um usuário |
-| /luminix-api/users/{id} | luminix.user.destroy | DELETE | Deletar um usuário |
-| /luminix-api/users | luminix.user.destroyMany | DELETE | Deletar vários usuários |
-| /luminix-api/users | luminix.user.restoreMany | PUT | Restaurar vários usuários |
+```bash
+php artisan vendor:publish --tag=luminix-config
+```
 
-## Documentação
+3. Configure the package in `config/luminix/backend.php`
 
-Para mais detalhes sobre como configurar e personalizar a API, consulte a [documentação](./docs/1-Início.md).
+## Documentation
 
-## Licença
+Proceed to the [documentation](docs/0-index.md) for detailed instructions on using Luminix Backend.
+
+## Contributing
+
+Contributions are welcome! Please submit pull requests or open issues on our GitHub repository.
+
+## License
 
 [MIT](https://opensource.org/licenses/MIT).
 
+## Support
+
+For support, please open an issue on the GitHub repository.
