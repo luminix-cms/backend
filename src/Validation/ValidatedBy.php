@@ -13,9 +13,9 @@ class ValidatedBy
     ) {}
 
 
-    public function getValidator(Model $parent): Validator
+    public function getValidator(): Validator
     {
-        return new $this->validatorClass($parent);
+        return new $this->validatorClass();
     }
 
 }

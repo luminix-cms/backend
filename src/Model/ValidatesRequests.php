@@ -20,8 +20,8 @@ trait ValidatesRequests
         if (!$validatorAttribute) {
             return [];
         }
-        $validator = $validatorAttribute->newInstance()->getValidator($this);
-        return $validator->getValidationRules($for);
+        $validator = $validatorAttribute->newInstance()->getValidator();
+        return $validator->getValidationRules($for, $this);
     }
 
     public function validateRequest(Request $request, string $for)

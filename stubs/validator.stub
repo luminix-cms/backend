@@ -1,0 +1,18 @@
+<?php
+
+namespace {{ namespace }}\Validators;
+
+use Luminix\Backend\Validation\Validator;
+
+class {{ class }} extends Validator
+{
+    public function store(): array
+    {
+        return [];
+    }
+
+    public function update($item): array
+    {
+        return [];
+    }
+}

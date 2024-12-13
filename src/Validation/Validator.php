@@ -6,15 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class Validator {
 
-    final public function __construct(
-        protected Model $parent,
-    )
+    final public function __construct()
     {}
 
-    public function getValidationRules(string $for): array
+    public function getValidationRules(string $for, Model $item): array
     {
         if (method_exists($this, $for)) {
-            return call_user_func([$this, $for]);
+            return call_user_func([$this, $for], $item);
         }
         return [];
     }

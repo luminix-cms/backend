@@ -35,20 +35,4 @@ class User extends Authenticatable
         return $this->hasMany(ToDo::class);
     }
 
-    // public function getValidationRules(string $for): array
-    // {
-    //     return match ($for) {
-    //         'store' => [
-    //             'name' => 'required|string|max:255',
-    //             'email' => 'required|string|email|max:255|unique:users',
-    //             'password' => 'required|string|min:8|confirmed',
-    //         ],
-    //         'update' => [
-    //             'name' => 'sometimes|string|max:255',
-    //             'email' => 'sometimes|string|email|max:255|unique:users,email,' . $this->id,
-    //             'password' => 'nullable|string|min:8|confirmed',
-    //         ],
-    //         default => [],
-    //     };
-    // }
 }

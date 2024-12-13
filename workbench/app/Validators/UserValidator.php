@@ -3,6 +3,7 @@
 namespace Workbench\App\Validators;
 
 use Luminix\Backend\Validation\Validator;
+use Workbench\App\Models\User;
 
 class UserValidator extends Validator
 {
@@ -15,11 +16,11 @@ class UserValidator extends Validator
         ];
     }
 
-    public function update(): array
+    public function update(User $user): array
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $this->parent->id,
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8|confirmed',
         ];
     }

@@ -18,6 +18,10 @@ class BackendServiceProvider extends ServiceProvider
             return new ModelFinder();
         });
 
+        $this->commands([
+            Commands\MakeValidatorCommand::class,
+        ]);
+
         $this->extendValidator();
         
     }
