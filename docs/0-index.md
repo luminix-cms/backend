@@ -7,7 +7,7 @@
 ### 2. API Endpoints
 - [Automatic Endpoint Generation](2a-api-endpoints.md)
 - [Data Validation](2b-validation.md)
-- [Controller Overrides](2c-controller-overrides.md)
+- [Customize API Behavior](2c-customize-api-behavior.md)
 
 ### 3. Filtering
 - Enabling/Disabling Filtering

@@ -1,6 +1,19 @@
-# Controller Overrides
+# Customize API behavior
 
 Luminix provides a number of ways to override the default behavior of the REST API. Here are some of the most common ways to customize the behavior of your API controllers.
+
+## Set the fillable fields
+
+By default, Luminix will use the `fillable` property of the model to determine which fields can be mass-assigned. You can override this property in the model to specify which fields are allowed to be set using the `create` and `update` methods.
+
+```php
+class ToDo extends Model
+{
+    protected $fillable = ['title', 'description', 'due_date'];
+}
+```
+
+In this example, only the `title`, `description`, and `due_date` fields can be set using the `create` and `update` methods. All other fields will be ignored, unless they are handled manually in a custom controller.
 
 ## Add behaviors to the model itself
 
@@ -108,10 +121,11 @@ class UserController extends ResourceController
 
 ### Add custom actions
 
-If you need to add custom actions to a model API, you can do so by overriding the `getLuminixRoutes` method in the model. This method should return an array of custom routes that you want to add to the controller.
+If you need to add custom actions to a model API, you can do so by overriding the `getLuminixRoutes` method in the model. This method should return an array of custom routes that you want to add to the routing service.
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
+use Luminix\Backend\Services\RouteGenerator;
 
 class User extends Model
 {
@@ -119,7 +133,8 @@ class User extends Model
 
     static function getLuminixRoutes(): array
     {
-        $routes = static::getDefaultRoutes();
+        // Generate the default routes
+        $routes = RouteGenerator::make(static::class);
 
         // Add a custom route to the profile action
         $routes['profile'] = 'profile';
@@ -186,11 +201,25 @@ class UserController extends ResourceController
 }
 ```
 
+The shown method could be accessed by making a `POST` request to `/luminix-api/users/add-avatar/{id}` with the `avatar` file in the request body.
+
  > **Note:** Any custom method in the controller should handle all the logic by itself, including validation and error handling.
 
-## Add methods to the base controller
+## Change the default controller
 
-If you need to add common behavior to all controllers, you can add methods to the base controller class. This is useful for adding functionality that should be shared across all controllers, such as custom error handling or logging.
+It is possible to change the default controller used by Luminix for all models. This can be done by changing the `api.controller` key in the `config/luminix/backend.php` configuration file.
+
+```php
+'api' => [
+    'controller' => \App\Http\Controllers\CustomResourceController::class,
+],
+```
+
+This approach is useful when you want to add common behavior to all controllers, such as additional operations that should be performed on every model.
+
+### Add methods to the base controller
+
+A less drastic way to customize the behavior of all controllers is to add methods to the base controller class. This is useful for adding functionality that should be shared across all controllers, such as custom error handling or logging.
 
 To do this, you need to add a macro to the `ResourceController` class. You can do this in the `boot` method of your `App\Providers\AppServiceProvider` class:
 
@@ -207,3 +236,28 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 ```
+
+This will enable the `logRequest` action on every model route group. You still have to assign the action to a path in the model's `getLuminixRoutes` method.
+
+It is possible to add a reducer to `'modelRoutes'` to add the macro to all model controllers.
+
+```php
+use Luminix\Backend\Services\RouteGenerator;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot()
+    {
+        RouteGenerator::reducer('modelRoutes', function ($routes) {
+            // Adds the 'logRequest' action to all models, using the GET method
+            $routes['logRequest'] = 'log-request';
+            return $routes;
+        });
+    }
+}
+```
+
+## Next Steps
+
+- [Filtering](3-filtering.md)
+- [Back to Documentation Index](0-index.md)
