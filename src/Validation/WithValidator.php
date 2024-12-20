@@ -6,7 +6,7 @@ use Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class ValidatedBy
+class WithValidator
 {
     public function __construct(
         public string $validatorClass

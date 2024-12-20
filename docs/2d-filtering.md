@@ -108,7 +108,6 @@ This will filter users whose email address ends with either `@gmail.com` or `@ho
 
 ## Next Steps
 
-
-
-
+[Middleware Configuration](3a-middleware.md)
+[Back to Documentation Index](0-index.md)
 

@@ -11,15 +11,15 @@
 - [Filtering Data](2d-filtering.md)
 
 ### 3. Security
-- Laravel Gate Integration
-- Permission Mapping
-- Middleware Configuration
-- Action-Level Permissions
+- [Middleware Configuration](3a-middleware.md)
+- [Laravel Gate Integration](3b-laravel-gate.md)
+- [Query-Level Permissions](3c-query-permissions.md)
 
 ### 4. Advanced Usage
-- Custom Controller Implementation
-- Overriding Default Behaviors
-- Performance Considerations
+- [Eager loading relationships](4a-eager-loading.md)
+- [Custom Search Engine](4b-custom-search.md)
+- [Customizing Responses](4c-custom-responses.md)
+- [Reducible Elements](4d-reducers.md)
 
 ### 5. Troubleshooting
 - Common Issues

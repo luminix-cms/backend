@@ -136,13 +136,13 @@ class User extends Model
         // Generate the default routes
         $routes = RouteGenerator::make(static::class);
 
-        // Add a custom route to the profile action
-        $routes['profile'] = 'profile';
+        // Map the 'profile' method from the controller to 'users/profile' path
+        $routes['profile'] = 'users/profile';
 
         // To use a HTTP method other than GET, you should set the value as an array
         $routes['addAvatar'] = [
             'method' => 'post',
-            'path' => 'add-avatar/{id}',
+            'path' => 'users/{id}/add-avatar',
         ];
 
         // Disable the default 'destroy' route
@@ -166,10 +166,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         RouteGenerator::reducer('modelUserRoutes', function ($routes) {
-            $routes['profile'] = 'profile';
+            $routes['profile'] = 'users/profile';
             $routes['addAvatar'] = [
                 'method' => 'post',
-                'path' => 'add-avatar/{id}',
+                'path' => 'users/{id}/add-avatar',
             ];
             unset($routes['destroy']);
             $routes['index'] = 'custom-users-path';
@@ -179,7 +179,7 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-Then, the logic for the custom action in the controller should be implemented as a new method:
+Then, the logic for each custom action in the controller should be implemented as a new method:
 
 ```php
 use Luminix\Backend\Controllers\ResourceController;
@@ -198,10 +198,15 @@ class UserController extends ResourceController
 
         return response()->json($user);
     }
+
+    public function profile(Request $request)
+    {
+        // ...
+    }
 }
 ```
 
-The shown method could be accessed by making a `POST` request to `/luminix-api/users/add-avatar/{id}` with the `avatar` file in the request body.
+The shown method could be accessed by making a `POST` request to `/luminix-api/users/{id}/add-avatar` with the `avatar` file in the request body.
 
  > **Note:** Any custom method in the controller should handle all the logic by itself, including validation and error handling.
 
@@ -239,7 +244,7 @@ class AppServiceProvider extends ServiceProvider
 
 This will enable the `logRequest` action on every model route group. You still have to assign the action to a path in the model's `getLuminixRoutes` method.
 
-It is possible to add a reducer to `'modelRoutes'` to add the macro to all model controllers.
+It is possible to add a reducer to `'modelRoutes'` to assign the action to all models at once:
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;

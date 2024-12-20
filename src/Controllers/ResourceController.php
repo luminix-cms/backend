@@ -17,6 +17,7 @@ use Illuminate\Support\Traits\Macroable;
 use Luminix\Backend\Facades\Finder;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
+use Luminix\Backend\Resources\WithResource;
 
 class ResourceController extends Controller
 {
@@ -489,18 +490,21 @@ class ResourceController extends Controller
     public function respondWithItem($item, $status = 200)
     {
         ['class' => $class] = $this->inferRequestParameters();
-        $class = class_basename($class);
         
         /** @var Request */
         $request = request();
         
         if ($request->wantsJson()) {
 
-            $namespace = App::getNamespace();
+            $reflection = new \ReflectionClass($class);
+            $resourceAttribute = $reflection->getAttributes(WithResource::class)[0] ?? null;
 
-            if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
-                $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
-                return response()->json(new $resource($item), $status);
+            if ($resourceAttribute) {
+                $resource = $resourceAttribute->newInstance();
+                
+                if ($resource->single) {
+                    return new $resource->single($item);
+                }
             }
 
             return response()->json($item, $status);
@@ -510,27 +514,28 @@ class ResourceController extends Controller
             return redirect($request->query('redirectTo'));
         }
 
-        return back();
+        return back()->with(['item' => $item]);
     }
 
     public function respondWithCollection($items, $status = 200)
     {
         ['class' => $class] = $this->inferRequestParameters();
-        $class = class_basename($class);
 
-        $namespace = App::getNamespace();
+        $reflection = new \ReflectionClass($class);
+        $resourceAttribute = $reflection->getAttributes(WithResource::class)[0] ?? null;
 
-        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Collection')) {
-            $resource = $namespace . 'Http\Resources\\' . $class . 'Collection';
-            return new $resource($items);
+        if ($resourceAttribute) {
+            $resource = $resourceAttribute->newInstance();
+            
+            if ($resource->collection) {
+                return new $resource->collection($items);
+            }
+
+            if ($resource->single) {
+                return $resource->single::collection($items);
+            }
         }
-
-        // checar aplicação de resource dentro do collection
-        if (class_exists($namespace . 'Http\Resources\\' . $class . 'Resource')) {
-            $resource = $namespace . 'Http\Resources\\' . $class . 'Resource';
-            return $resource::collection($items);
-        }
-
+        
         return new DefaultCollection($items);
     }
 

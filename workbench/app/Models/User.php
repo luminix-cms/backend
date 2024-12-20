@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Luminix\Backend\Model\LuminixModel;
-use Luminix\Backend\Validation\ValidatedBy;
+use Luminix\Backend\Resources\DefaultCollection;
+use Luminix\Backend\Resources\WithResource;
+use Luminix\Backend\Validation\WithValidator;
 use Workbench\App\Validators\UserValidator;
 
-#[ValidatedBy(UserValidator::class)]
+#[WithResource(collection: DefaultCollection::class)]
+#[WithValidator(UserValidator::class)]
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, LuminixModel;

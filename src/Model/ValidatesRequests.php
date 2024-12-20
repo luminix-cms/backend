@@ -3,7 +3,7 @@
 namespace Luminix\Backend\Model;
 
 use Illuminate\Http\Request;
-use Luminix\Backend\Validation\ValidatedBy;
+use Luminix\Backend\Validation\WithValidator;
 
 trait ValidatesRequests
 {
@@ -16,7 +16,7 @@ trait ValidatesRequests
     public function getValidationRules(string $for): array
     {
         $reflection = new \ReflectionClass($this);
-        $validatorAttribute = $reflection->getAttributes(ValidatedBy::class)[0] ?? null;
+        $validatorAttribute = $reflection->getAttributes(WithValidator::class)[0] ?? null;
         if (!$validatorAttribute) {
             return [];
         }
