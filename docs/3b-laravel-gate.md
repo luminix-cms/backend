@@ -43,7 +43,7 @@ Specify the permissions required for each standard API action:
 ## Understanding Permission Naming
 
 Permissions are dynamically generated using a consistent naming pattern:
-- Format: `{action}-{model_alias}`
+- Format: `{permission}-{model_alias}`
 - Examples:
   - Reading users: `read-user`
   - Creating todos: `create-to_do`
@@ -51,7 +51,7 @@ Permissions are dynamically generated using a consistent naming pattern:
 
 ## Implementing Gate Definitions
 
-Define your permissions in the `AuthServiceProvider`:
+Define your permissions in any service provider's `boot()` method. Tipically, you can [create a dedicated service provider](https://laravel.com/docs/11.x/providers#writing-service-providers) for this purpose:
 
 ```php
 // app/Providers/AuthServiceProvider.php
@@ -63,7 +63,7 @@ public function boot()
 {
     // Only allow users to view their own profile
     Gate::define('read-user', function (?User $currentUser, User $targetUser) {
-        return $currentUser && $currentUser->id === $targetUser->id;
+        return !!$currentUser && $currentUser->id === $targetUser->id;
     });
 
     // Allow any authenticated user to create todos
@@ -73,7 +73,7 @@ public function boot()
 
     // Restrict todo updates to the todo's owner
     Gate::define('update-to_do', function (?User $user, ToDo $todo) {
-        return $user && $user->id === $todo->user_id;
+        return !!$user && $user->id === $todo->user_id;
     });
 }
 ```
@@ -87,7 +87,6 @@ public function boot()
 
 ### Debugging Permissions
 - Use Laravel's `Gate` facade methods like `allows()` and `denies()` to test permissions
-- Check your application logs for detailed permission-related errors
 
 ## Best Practices
 - Start with restrictive permissions

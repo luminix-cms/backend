@@ -32,7 +32,7 @@ class User extends Model
                 'email' => 'sometimes|email|unique:users,email,' . $this->id,
                 'password' => 'sometimes|string|min:8|confirmed',
             ],
-            // Separate rules for other contexts
+            // Separate rules for custom contexts
             'profile_update' => [
                 'bio' => 'nullable|string|max:500',
                 'avatar' => 'sometimes|image|max:2048',
@@ -87,7 +87,6 @@ class UserValidator extends Validator
                 'email', 
                 Rule::unique('users')->ignore($user->id)
             ],
-            // Complex password validation
             'password' => [
                 'sometimes', 
                 'string', 
@@ -100,7 +99,8 @@ class UserValidator extends Validator
         ];
     }
 
-    // More validation methods for different contexts...
+    // Each validation context should have a corresponding method
+    // The absence of a method will result in an empty validation array
 }
 ```
 

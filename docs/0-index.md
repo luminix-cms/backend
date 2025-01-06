@@ -9,6 +9,7 @@
 - [Data Validation](2b-validation.md)
 - [Customize API Behavior](2c-customize-api-behavior.md)
 - [Filtering Data](2d-filtering.md)
+- [Tab Based Filtering](2e-tab-filtering.md)
 
 ### 3. Security
 - [Middleware Configuration](3a-middleware.md)
@@ -17,8 +18,9 @@
 
 ### 4. Advanced Usage
 - [Eager loading relationships](4a-eager-loading.md)
-- [Custom Search Engine](4b-custom-search.md)
+- [Soft Deletes](4b--soft-deletes.md)
 - [Customizing Responses](4c-custom-responses.md)
+- [Custom Search](4b-custom-search.md)
 - [Reducible Elements](4d-reducers.md)
 
 ### 5. Troubleshooting

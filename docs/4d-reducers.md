@@ -1,6 +1,6 @@
 # Reducible Elements
 
-Luminix utilizes the [Reducible](https://github.com/AranduTech/php-reducible.git) package to allow several customizations to the package's behavior. This document outlines the available reducers and how to use them.
+Luminix utilizes the [Reducible](https://github.com/AranduTech/php-reducible.git) package to allow customizations to the package's behavior. This document outlines the available reducers and how to use them.
 
 ## Available Reducers
 
@@ -17,7 +17,7 @@ public function boot()
         return array_merge($models, [
             \Vendor\Package\Models\CustomModel::class,
         ]);
-    })
+    });
 }
 ```
 
@@ -42,7 +42,7 @@ public function boot()
 }
 ```
 
-### `RouteGenerator::model{$model}Routes()`
+### `RouteGenerator::model{$Model}Routes()`
 
 This reducer is similar to the previous one, but it allows you to add custom routes to a specific model.
 
