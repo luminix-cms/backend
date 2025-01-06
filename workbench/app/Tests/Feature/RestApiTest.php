@@ -24,10 +24,12 @@ class RestApiTest extends TestCase
         $this->json('DELETE', '/luminix-api/users/1')
             ->assertStatus(401);
 
-        $toDosResponse = $this->json('GET', '/luminix-api/to-dos');
-
-        $toDosResponse->assertStatus(200);
-        $toDosResponse->assertContent('{"data":[],"meta":{"current_page":1,"from":null,"last_page":1,"per_page":15,"to":null,"total":0,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"http:\/\/localhost\/luminix-api\/to-dos?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}]},"links":{"first":"http:\/\/localhost\/luminix-api\/to-dos?page=1","last":"http:\/\/localhost\/luminix-api\/to-dos?page=1","prev":null,"next":null}}');
+        // since ToDos have Query-Level permission,
+        // no results will be tested against
+        // the Gate, but the API will still be protected
+        $this->json('GET', '/luminix-api/to-dos')
+            ->assertStatus(200)
+            ->assertContent('{"data":[],"meta":{"current_page":1,"from":null,"last_page":1,"per_page":15,"to":null,"total":0,"links":[{"url":null,"label":"&laquo; Previous","active":false},{"url":"http:\/\/localhost\/luminix-api\/to-dos?page=1","label":"1","active":true},{"url":null,"label":"Next &raquo;","active":false}]},"links":{"first":"http:\/\/localhost\/luminix-api\/to-dos?page=1","last":"http:\/\/localhost\/luminix-api\/to-dos?page=1","prev":null,"next":null}}');
 
         $this->json('GET', '/luminix-api/to-dos/1')
             ->assertStatus(401);

@@ -9,7 +9,7 @@ abstract class Validator {
     final public function __construct()
     {}
 
-    public function getValidationRules(string $for, Model $item): array
+    final public function getValidationRules(string $for, Model $item): array
     {
         if (method_exists($this, $for)) {
             return call_user_func([$this, $for], $item);

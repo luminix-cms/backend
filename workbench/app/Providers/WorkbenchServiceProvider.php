@@ -25,60 +25,39 @@ class WorkbenchServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('read-user', function (?User $currentUser, ?User $user) {
-            if ($currentUser && $user) {
-                return $currentUser->id === $user->id;
-            }
-            return false;
-        });
+        // User rules
+        Gate::define('read-user', [$this, 'isUserReferencingItself']);
+        Gate::define('update-user', [$this, 'isUserReferencingItself']);
+        Gate::define('delete-user', [$this, 'isUserReferencingItself']);
+        Gate::define('create-user', [$this, 'allowAny']);
 
-        Gate::define('update-user', function (?User $currentUser, ?User $user) {
-            if ($currentUser && $user) {
-                return $currentUser->id === $user->id;
-            }
-            return false;
-        });
+        // ToDo rules
+        Gate::define('read-to_do', [$this, 'isUserOwnerOfToDo']);
+        Gate::define('update-to_do', [$this, 'isUserOwnerOfToDo']);
+        Gate::define('delete-to_do', [$this, 'isUserOwnerOfToDo']);
+        Gate::define('create-to_do', [$this, 'isAuthenticated']);
 
-        Gate::define('delete-user', function (?User $currentUser, ?User $user) {
-            if ($currentUser && $user) {
-                return $currentUser->id === $user->id;
-            }
-            return false;
-        });
+        // Category rules
+        Gate::define('read-category', [$this, 'isAuthenticated']);;
+    }
 
-        Gate::define('create-user', function (?User $currentUser, ?User $user) {
-            return true;
-        });
+    public function isUserReferencingItself(?User $currentUser, User $targetUser): bool
+    {
+        return !!$currentUser && $currentUser->id === $targetUser->id;
+    }
 
-        Gate::define('read-to_do', function (?User $currentUser, ?ToDo $toDo) {
-            if ($currentUser && $toDo) {
-                return $currentUser->id === $toDo->user_id;
-            }
-            return !is_null($currentUser); 
-            // if not logged in, return false
-            // results will be filtered by scopeAllowed
-        });
+    public function isUserOwnerOfToDo(?User $user, ToDo $toDo): bool
+    {
+        return !!$user && $user->id === $toDo->user_id;
+    }
 
-        Gate::define('update-to_do', function (?User $currentUser, ?ToDo $toDo) {
-            if ($currentUser && $toDo) {
-                return $currentUser->id === $toDo->user_id;
-            }
-            return false;
-        });
+    public function isAuthenticated(?User $user): bool
+    {
+        return !!$user;
+    }
 
-        Gate::define('delete-to_do', function (?User $currentUser, ?ToDo $toDo) {
-            if ($currentUser && $toDo) {
-                return $currentUser->id === $toDo->user_id;
-            }
-            return false;
-        });
-
-        Gate::define('create-to_do', function (?User $currentUser, ?ToDo $toDo) {
-            return !is_null($currentUser);
-        });
-
-        Gate::define('read-category', function (?User $currentUser, ?Category $category) {
-            return !is_null($currentUser);
-        });
+    public function allowAny(?User $user): bool
+    {
+        return true;
     }
 }
