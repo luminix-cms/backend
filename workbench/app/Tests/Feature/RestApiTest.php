@@ -50,13 +50,13 @@ class RestApiTest extends TestCase
             ->assertStatus(401);
 
         $this->json('POST', '/luminix-api/categories')
-            ->assertStatus(401);
+            ->assertStatus(405);
 
         $this->json('POST', '/luminix-api/categories/1')
-            ->assertStatus(401);
+            ->assertStatus(405);
         
         $this->json('DELETE', '/luminix-api/categories/1')
-            ->assertStatus(401);
+            ->assertStatus(405);
 
     }
 

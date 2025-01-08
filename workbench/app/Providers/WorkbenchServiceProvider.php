@@ -5,6 +5,7 @@ namespace Workbench\App\Providers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Luminix\Backend\Services\RouteGenerator;
 use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
@@ -25,6 +26,27 @@ class WorkbenchServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->bootGates();
+        $this->bootRoutes();
+    }
+
+    public function bootRoutes()
+    {
+        RouteGenerator::reducer('modelCategoryRoutes', function ($routes) {
+            unset($routes['store']);
+            unset($routes['update']);
+            unset($routes['destroy']);
+            unset($routes['destroyMany']);
+            unset($routes['restoreMany']);
+
+            return $routes;
+        });
+    }
+
+
+    public function bootGates()
+    {
+
         // User rules
         Gate::define('read-user', [$this, 'isUserReferencingItself']);
         Gate::define('update-user', [$this, 'isUserReferencingItself']);
@@ -38,8 +60,10 @@ class WorkbenchServiceProvider extends ServiceProvider
         Gate::define('create-to_do', [$this, 'isAuthenticated']);
 
         // Category rules
-        Gate::define('read-category', [$this, 'isAuthenticated']);;
+        Gate::define('read-category', [$this, 'isAuthenticated']);
     }
+
+
 
     public function isUserReferencingItself(?User $currentUser, User $targetUser): bool
     {
