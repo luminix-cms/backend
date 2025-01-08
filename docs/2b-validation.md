@@ -100,7 +100,7 @@ class UserValidator extends Validator
     }
 
     // Each validation context should have a corresponding method
-    // The absence of a method will result in an empty validation array
+    // The absence of a method will remove the validation for that context
 }
 ```
 
@@ -114,7 +114,7 @@ php artisan make:validator UserValidator
 
 ## Handling Validation Errors
 
-Luminix Backend automatically handles validation errors, returning a 422 Unprocessable Entity response with detailed error messages.
+Luminix Backend automatically handles validation errors, returning a `422 Unprocessable Entity` response with detailed error messages.
 
 ## Next Steps
 

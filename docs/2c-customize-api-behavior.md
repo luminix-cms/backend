@@ -156,14 +156,14 @@ class User extends Model
 }
 ```
 
-Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain models routes. Reducers should be added in the `boot` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
+Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain models routes. Reducers should be added in the `register` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function register()
     {
         RouteGenerator::reducer('modelUserRoutes', function ($routes) {
             $routes['profile'] = 'users/profile';
@@ -251,7 +251,7 @@ use Luminix\Backend\Services\RouteGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function register()
     {
         RouteGenerator::reducer('modelRoutes', function ($routes) {
             // Adds the 'logRequest' action to all models, using the GET method
