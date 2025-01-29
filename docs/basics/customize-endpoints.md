@@ -1,4 +1,4 @@
-# Customize API behavior
+# Customize Endpoints
 
 Luminix provides a number of ways to override the default behavior of the REST API. Here are some of the most common ways to customize the behavior of your API controllers.
 
@@ -50,7 +50,7 @@ class UserController extends ResourceController
 }
 ```
 
-Then, you need to assign the new controller to the model in the `config/luminix/backend.php` configuration file. You must have the [configuration published](1a-configuration.md) to do this.
+Then, you need to assign the new controller to the model in the `config/luminix/backend.php` configuration file. You must have the [configuration published](../getting-started/configuration.md) to do this.
 
 ```php
 'api' => [
@@ -265,4 +265,4 @@ class AppServiceProvider extends ServiceProvider
 ## Next Steps
 
 - [Filtering](3-filtering.md)
-- [Back to Documentation Index](0-index.md)
+- [Back to Documentation Index](../0-index.md)

@@ -1,4 +1,4 @@
-# Automatic Endpoint Generation
+# API Reference
 
 ## Overview
 
@@ -73,7 +73,7 @@ axios.post('/luminix-api/to-dos', {
 });
 ```
 
-> **Tip**: Only fillable attributes will be set. Add validation rules for data integrity.
+> **Tip**: Only fillable attributes will be set by default. Consider [adding validation rules](validation.md) for data integrity, or [overriding the controller](customize-endpoints.md#add-model-specific-controllers) to have more control over the creation process.
 
 ### Retrieving a Single Record: `GET /{$prefix}/{$modelSlug}/{{primary_key}}`
 
@@ -167,8 +167,3 @@ axios.post('/luminix-api/users/1/roles/4', {
 ```
 DELETE /luminix-api/users/1/roles/4
 ```
-
-## Next Steps
-
-- [Validation](2b-validation.md)
-- [Back to Documentation Index](0-index.md)

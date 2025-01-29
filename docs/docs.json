@@ -1,0 +1,104 @@
+{
+    "menu": [
+        {
+            "title": "Getting Started",
+            "items": [
+                {
+                    "title": "Installation",
+                    "link": "getting-started/installation.md"
+                },
+                {
+                    "title": "Configuration", 
+                    "link": "getting-started/configuration.md"
+                }
+            ]
+        },
+        {
+            "title": "The Basics",
+            "items": [
+                {
+                    "title": "Adding REST API",
+                    "link": "basics/adding-models.md"
+                },
+                {
+                    "title": "API Reference",
+                    "link": "basics/api-reference.md"
+                },
+                {
+                    "title": "Validation",
+                    "link": "basics/validation.md"
+                },
+                {
+                    "title": "Customize Endpoints",
+                    "link": "basics/customize-endpoints.md"
+                },
+                {
+                    "title": "Filtering Data",
+                    "link": "basics/filtering.md"
+                },
+                {
+                    "title": "Tab Based Filtering",
+                    "link": "basics/tab-filtering.md"
+                }
+            ]
+        },
+        {
+            "title": "Digging Deeper",
+            "items": [
+                {
+                    "title": "Eager loading relationships",
+                    "link": "advanced/eager-loading.md"
+                },
+                {
+                    "title": "Soft Deletes",
+                    "link": "advanced/soft-deletes.md"
+                },
+                {
+                    "title": "Customizing Responses",
+                    "link": "advanced/custom-responses.md"
+                },
+                {
+                    "title": "Custom Search",
+                    "link": "advanced/custom-search.md"
+                },
+                {
+                    "title": "Reducible Elements",
+                    "link": "advanced/reducers.md"
+                }
+            ]
+        },
+        {
+            "title": "Security",
+            "items": [
+                {
+                    "title": "Middleware Configuration",
+                    "link": "security/middleware.md"
+                },
+                {
+                    "title": "Laravel Gate Integration",
+                    "link": "security/laravel-gate.md"
+                },
+                {
+                    "title": "Query-Level Permissions",
+                    "link": "security/query-permissions.md"
+                }
+            ]
+        },
+        {
+            "title": "Troubleshooting",
+            "link": "troubleshooting.md"
+        },
+        {
+            "title": "Changelog",
+            "link": "changelog.md"
+        },
+        {
+            "title": "Package Development",
+            "link": "package-development.md"
+        },
+        {
+            "title": "Contributing",
+            "link": "contributing.md"
+        }
+    ]
+}

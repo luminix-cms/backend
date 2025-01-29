@@ -116,7 +116,3 @@ php artisan make:validator UserValidator
 
 Luminix Backend automatically handles validation errors, returning a `422 Unprocessable Entity` response with detailed error messages.
 
-## Next Steps
-
-- [Customize API Behavior](2c-customize-api-behavior.md)
-- [Back to Documentation Index](0-index.md)

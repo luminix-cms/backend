@@ -54,8 +54,3 @@ php artisan vendor:publish --tag=luminix-config
 | `detach` | `'update'` | Permission required to detach related resources |
 
 These permissions are concatenated with the model name to form the final permission string. For example, the permission for the `index` action on the `User` model would be `'read-user'`.
-
-# Next Steps
-
-- [Adding Models to Luminix](1b-adding-models.md)
-- [Back to Documentation Index](0-index.md)

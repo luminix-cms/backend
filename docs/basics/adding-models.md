@@ -1,4 +1,4 @@
-# Adding Models to Luminix
+# Adding REST API
 
 To enable Luminix Backend to generate API endpoints for your models, you need to add the `LuminixModel` trait to each model class you want to expose.
 
@@ -26,9 +26,4 @@ To ensure proper API generation, your models must meet the following requirement
 
 3. **Fillable Attributes**: Models should define the `$fillable` property to specify which attributes can be mass-assigned. This is important for creating and updating resources via the API.
 
-4. **Primary Key**: Models must have a primary key defined.
-
-## Next Steps
-
- - [Automatic Endpoint Generation](2a-api-endpoints.md)
- - [Back to Documentation Index](0-index.md)
+4. **Primary Key**: Models without primary key are not supported. The [Eloquent primary key](https://laravel.com/docs/11.x/eloquent#primary-keys) will be used to identify resources.
