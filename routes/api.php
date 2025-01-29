@@ -21,9 +21,7 @@ Route::group([
                 $path = $path['path'];
             }
 
-            $overrides = Config::get('luminix.backend.api.controller_overrides', []);
-
-            $controller = $overrides[$class] ?? Config::get('luminix.backend.api.controller', 'Luminix\Backend\Controllers\ResourceController');
+            $controller = $class::getController();
 
             $endpoint = str_contains($action, ':') ? explode(':', $action)[1] : $action;
 

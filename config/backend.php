@@ -37,29 +37,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | This section configures Luminix's routing behavior. It includes settings for route prefixes
-    | and the default controller for handling Luminix routes. You can also override the default
-    | controller for specific models using the 'controller_overrides' setting.
+    | and the maximum number of items per page for paginated responses, as well as API filtering.
     |
     */
     'api' => [
 
         'prefix' => 'luminix-api',
         'max_per_page' => 150,
-
-        /*
-        |--------------------------------------------------------------------------
-        | Controller Assignment
-        |--------------------------------------------------------------------------
-        |
-        | 'controller' specifies the default controller for handling Luminix routes,
-        | applicable to all models unless overridden in the 'controller_overrides'
-        | setting.
-        |
-        */
-        'controller' => 'Luminix\Backend\Controllers\ResourceController',
-        'controller_overrides' => [
-            // 'App\Models\User' => 'App\Http\Controllers\UserController',
-        ],
 
         /*
         |--------------------------------------------------------------------------

@@ -50,14 +50,18 @@ class UserController extends ResourceController
 }
 ```
 
-Then, you need to assign the new controller to the model in the `config/luminix/backend.php` configuration file. You must have the [configuration published](../getting-started/configuration.md) to do this.
+Then, you need to assign the new controller to the model by adding the `WithController` attribute to the model class:
 
 ```php
-'api' => [
-    'controller_overrides' => [
-        \App\Models\User::class => \App\Http\Controllers\UserController::class,
-    ],
-],
+use App\Http\Controllers\UserController;
+use Luminix\Backend\Model\LuminixModel;
+use Luminix\Backend\Controllers\WithController;
+
+#[WithController(UserController::class)]
+class User extends Model
+{
+    use LuminixModel;
+}
 ```
 
 This will tell Luminix to use the `UserController` class for all API endpoints related to the `User` model.

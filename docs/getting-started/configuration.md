@@ -19,8 +19,6 @@ php artisan vendor:publish --tag=luminix-config
 |-----|--------------|-------------|
 | `api.prefix` | `'luminix-api'` | The URL prefix for all Luminix API routes. This allows you to customize the base endpoint for your API. |
 | `api.max_per_page` | `150` | Maximum number of items that can be returned in a single API request. Helps prevent excessive data retrieval and improves performance. |
-| `api.controller` | `'Luminix\Backend\Controllers\ResourceController'` | The default controller used for handling Luminix API routes. Changing this will affect the behavior of all API endpoints. |
-| `api.controller_overrides` | `[]` | A mapping of model classes to custom controller classes. Allows individual model-specific API handling. |
 
 ## API Filtering Configuration
 

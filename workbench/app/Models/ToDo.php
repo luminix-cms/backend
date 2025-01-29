@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Luminix\Backend\Controllers\WithController;
 use Luminix\Backend\Model\LuminixModel;
 use Workbench\App\Contracts\HasTags;
+use Workbench\App\Http\Controllers\ToDoController;
 
+#[WithController(ToDoController::class)]
 class ToDo extends Model
 {
     use HasFactory, LuminixModel, HasTags;

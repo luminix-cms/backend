@@ -35,9 +35,6 @@ class TestCase extends TestbenchTestCase
             'Workbench\App\Models\Category',
             'Workbench\App\Models\Tag',
         ]);
-        $app['config']->set('luminix.backend.api.controller_overrides', [
-            'Workbench\App\Models\ToDo' => 'Workbench\App\Http\Controllers\ToDoController',
-        ]);
         $app['config']->set('auth', require __DIR__.'/../../config/auth.ci.php');
     }
 
