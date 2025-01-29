@@ -2,6 +2,7 @@
 
 namespace Luminix\Backend;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -10,19 +11,32 @@ use Luminix\Backend\Services\ModelFinder;
 
 class BackendServiceProvider extends ServiceProvider
 {
+
+    protected static $preventEnforcingMorphMap = false;
+
+    public static function preventEnforcingMorphMap()
+    {
+        static::$preventEnforcingMorphMap = true;
+    }
+
     public function boot()
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         
-        $this->app->singleton(ModelFinder::class, function () {
-            return new ModelFinder();
-        });
+        $finder = new ModelFinder();
+        $this->app->instance(ModelFinder::class, $finder);
 
         $this->commands([
             Commands\MakeValidatorCommand::class,
         ]);
 
         $this->extendValidator();
+
+        if (!static::$preventEnforcingMorphMap) {
+            Relation::enforceMorphMap(
+                $finder->all()->toArray()
+            );
+        }
         
     }
 

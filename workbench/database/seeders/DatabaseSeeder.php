@@ -54,6 +54,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
+        DB::table('tags')->insert([
+            'name' => 'Important',
+        ]);
+
+        DB::table('tags')->insert([
+            'name' => 'Urgent',
+        ]);
+
+        DB::table('tags')->insert([
+            'name' => 'Personal',
+        ]);
+
+        DB::table('tags')->insert([
+            'name' => 'Work',
+        ]);
 
 
     }

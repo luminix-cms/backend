@@ -23,6 +23,12 @@ class RelationshipTest extends TestCase
                     'foreignKey' => 'user_id',
                     'ownerKey' => null,
                 ],
+                'tags' => [
+                    'type' => 'MorphToMany',
+                    'model' => 'tag',
+                    'foreignKey' => null,
+                    'ownerKey' => null,
+                ]
             ],
             $user->getRelationships()
         );
@@ -41,6 +47,12 @@ class RelationshipTest extends TestCase
                     'foreignKey' => null,
                     'ownerKey' => null,
                 ],
+                'tags' => [
+                    'type' => 'MorphToMany',
+                    'model' => 'tag',
+                    'foreignKey' => null,
+                    'ownerKey' => null,
+                ]
             ],
             $toDo->getRelationships()
         );
@@ -53,6 +65,12 @@ class RelationshipTest extends TestCase
                     'foreignKey' => null,
                     'ownerKey' => null,
                 ],
+                'tags' => [
+                    'type' => 'MorphToMany',
+                    'model' => 'tag',
+                    'foreignKey' => null,
+                    'ownerKey' => null,
+                ]
             ],
             $category->getRelationships()
         );

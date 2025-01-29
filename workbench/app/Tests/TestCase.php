@@ -33,6 +33,7 @@ class TestCase extends TestbenchTestCase
             'Workbench\App\Models\User',
             'Workbench\App\Models\ToDo',
             'Workbench\App\Models\Category',
+            'Workbench\App\Models\Tag',
         ]);
         $app['config']->set('luminix.backend.api.controller_overrides', [
             'Workbench\App\Models\ToDo' => 'Workbench\App\Http\Controllers\ToDoController',

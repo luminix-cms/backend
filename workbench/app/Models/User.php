@@ -10,13 +10,14 @@ use Luminix\Backend\Model\LuminixModel;
 use Luminix\Backend\Resources\DefaultCollection;
 use Luminix\Backend\Resources\WithResource;
 use Luminix\Backend\Validation\WithValidator;
+use Workbench\App\Contracts\HasTags;
 use Workbench\App\Validators\UserValidator;
 
 #[WithResource(collection: DefaultCollection::class)]
 #[WithValidator(UserValidator::class)]
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, LuminixModel;
+    use HasFactory, Notifiable, LuminixModel, HasTags;
 
     protected $fillable = [
         'name',

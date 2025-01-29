@@ -41,6 +41,16 @@ class WorkbenchServiceProvider extends ServiceProvider
 
             return $routes;
         });
+
+        RouteGenerator::reducer('modelTagRoutes', function ($routes) {
+            unset($routes['store']);
+            unset($routes['update']);
+            unset($routes['destroy']);
+            unset($routes['destroyMany']);
+            unset($routes['restoreMany']);
+
+            return $routes;
+        });
     }
 
 
@@ -61,6 +71,9 @@ class WorkbenchServiceProvider extends ServiceProvider
 
         // Category rules
         Gate::define('read-category', [$this, 'isAuthenticated']);
+
+        // Tag rules
+        Gate::define('read-tag', [$this, 'isAuthenticated']);
     }
 
 

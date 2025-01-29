@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Luminix\Backend\Model\LuminixModel;
+use Workbench\App\Contracts\HasTags;
 
 class ToDo extends Model
 {
-    use HasFactory, LuminixModel;
+    use HasFactory, LuminixModel, HasTags;
 
     protected $labeledBy = 'title';
 
@@ -24,6 +25,7 @@ class ToDo extends Model
 
     protected $syncs = [
         'categories',
+        'tags',
     ];
 
     public function user(): BelongsTo

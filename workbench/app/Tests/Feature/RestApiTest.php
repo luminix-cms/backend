@@ -214,6 +214,36 @@ class RestApiTest extends TestCase
             'id' => $todoId,
         ]);
 
+
+        // can assign tags to self to_do
+        $todoId = $user->toDos()->create([
+            'title' => 'Buy milk',
+            'description' => 'Buy milk from the store',
+        ])->id;
+
+        $tags = collect($this->json('GET', '/luminix-api/tags')->json('data'));
+        $selected = $tags->random(3)->pluck('id')->toArray();
+
+        $this->json('POST', "/luminix-api/to-dos/{$todoId}/tags/sync", $selected)->assertStatus(200);
+
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $selected[0],
+            'taggable_id' => $todoId,
+            'taggable_type' => 'to_do',
+        ]);
+
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $selected[1],
+            'taggable_id' => $todoId,
+            'taggable_type' => 'to_do',
+        ]);
+
+        $this->assertDatabaseHas('taggables', [
+            'tag_id' => $selected[2],
+            'taggable_id' => $todoId,
+            'taggable_type' => 'to_do',
+        ]);
+
     }
 
     public function test_validation_rules_are_working()

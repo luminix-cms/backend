@@ -16,6 +16,7 @@ class ModelFinderTest extends TestCase
             'user' => 'Workbench\App\Models\User',
             'to_do' => 'Workbench\App\Models\ToDo',
             'category' => 'Workbench\App\Models\Category',
+            'tag' => 'Workbench\App\Models\Tag',
         ], $models->toArray());
 
     }
