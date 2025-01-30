@@ -14,6 +14,12 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
+use Luminix\Backend\Events\CreatedResource;
+use Luminix\Backend\Events\CreatingResource;
+use Luminix\Backend\Events\SavedResource;
+use Luminix\Backend\Events\SavingResource;
+use Luminix\Backend\Events\UpdatedResource;
+use Luminix\Backend\Events\UpdatingResource;
 use Luminix\Backend\Facades\Finder;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
@@ -195,6 +201,14 @@ class ResourceController extends Controller
     {
     }
 
+    public function beforeTransaction(Request $request, $item)
+    {
+    }
+
+    public function afterTransaction(Request $request, $item)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      * @param Request $request 
@@ -300,13 +314,23 @@ class ResourceController extends Controller
 
         $this->fillRelationships($request, $item);
 
+        $this->beforeTransaction($request, $item);
+
         DB::transaction(function () use ($item, $request) {
+            SavingResource::dispatch($item);
+            CreatingResource::dispatch($item);
+
             $this->beforeSave($request, $item);
 
             $item->save();
-            // $this->syncRelationships($request, $item);
+
             $this->afterSave($request, $item);
+
+            SavedResource::dispatch($item);
+            CreatedResource::dispatch($item);
         });
+
+        $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
             $this->findItem($request, $item->getKey()),
@@ -337,8 +361,14 @@ class ResourceController extends Controller
         $item->fill($request->all());
 
         $this->fillRelationships($request, $item);
+
+        $this->beforeTransaction($request, $item);
         
         DB::transaction(function () use ($item, $request) {
+
+            SavingResource::dispatch($item);
+            UpdatingResource::dispatch($item);
+
             $this->beforeSave($request, $item);
 
             if ($request->query('restore')) {
@@ -346,8 +376,11 @@ class ResourceController extends Controller
             }
 
             $item->save();
-            // $this->syncRelationships($request, $item);
+            
             $this->afterSave($request, $item);
+
+            SavedResource::dispatch($item);
+            UpdatedResource::dispatch($item);
         });
 
         return $this->respondWithItem(

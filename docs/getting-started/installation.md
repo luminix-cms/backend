@@ -2,7 +2,9 @@
 
 ## Requirements
 
-Luminix requires [Laravel 11](https://laravel.com/docs/11.x/upgrade). Before installing Luminix, make sure you have a working Laravel application
+Luminix should be installed in a Laravel 11 application. [Upgrade](https://laravel.com/docs/11.x/upgrade) your application before installing Luminix.
+
+> Luminix should be compatible with all databases supported by Laravel, as it uses Eloquent models for data retrieval and manipulation. Open an issue if you encounter any compatibility problems.
 
 ## Installation
 
