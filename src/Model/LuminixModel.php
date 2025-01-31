@@ -6,6 +6,6 @@ trait LuminixModel
 {
 
     use HasRestApi, HasResourceScopes, HasIdentifiers;
-    use HasRelationHandler, ValidatesRequests;
+    use HasRelationHandler, ValidatesRequests, DispatchesApiEvents;
 
 }
