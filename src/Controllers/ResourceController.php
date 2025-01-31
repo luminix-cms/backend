@@ -193,19 +193,51 @@ class ResourceController extends Controller
         return $this->respondWithItem($this->findItem($request, $id));
     }
 
-    public function beforeSave(Request $request, $item)
+    protected function beforeSave(Request $request, $item)
     {
     }
 
-    public function afterSave(Request $request, $item)
+    protected function afterSave(Request $request, $item)
     {
     }
 
-    public function beforeTransaction(Request $request, $item)
+    protected function beforeTransaction(Request $request, $item)
     {
     }
 
-    public function afterTransaction(Request $request, $item)
+    protected function afterTransaction(Request $request, $item)
+    {
+    }
+
+    protected function beforeCreate(Request $request, $item)
+    {
+    }
+
+    protected function afterCreate(Request $request, $item)
+    {
+    }
+
+    protected function beforeUpdate(Request $request, $item)
+    {
+    }
+
+    protected function afterUpdate(Request $request, $item)
+    {
+    }
+
+    protected function beforeDelete(Request $request, $item)
+    {
+    }
+
+    protected function afterDelete(Request $request, $item)
+    {
+    }
+
+    protected function beforeRestore(Request $request, $item)
+    {
+    }
+
+    protected function afterRestore(Request $request, $item)
     {
     }
 
@@ -317,17 +349,19 @@ class ResourceController extends Controller
         $this->beforeTransaction($request, $item);
 
         DB::transaction(function () use ($item, $request) {
-            SavingResource::dispatch($item);
-            CreatingResource::dispatch($item);
+            $item->fireLuminixEvent('saving');
+            $item->fireLuminixEvent('creating');
 
             $this->beforeSave($request, $item);
+            $this->beforeCreate($request, $item);
 
             $item->save();
 
             $this->afterSave($request, $item);
+            $this->afterCreate($request, $item);
 
-            SavedResource::dispatch($item);
-            CreatedResource::dispatch($item);
+            $item->fireLuminixEvent('saved');
+            $item->fireLuminixEvent('created');
         });
 
         $this->afterTransaction($request, $item);
@@ -365,23 +399,33 @@ class ResourceController extends Controller
         $this->beforeTransaction($request, $item);
         
         DB::transaction(function () use ($item, $request) {
+            if ($request->query('restore')) {
+                $item->fireLuminixEvent('restoring');
+                $this->beforeRestore($request, $item);
 
-            SavingResource::dispatch($item);
-            UpdatingResource::dispatch($item);
+                $item->restore();
+
+                $this->afterRestore($request, $item);
+                $item->fireLuminixEvent('restored');
+            }
+
+            $item->fireLuminixEvent('saving');
+            $item->fireLuminixEvent('updating');
 
             $this->beforeSave($request, $item);
-
-            if ($request->query('restore')) {
-                $item->restore();
-            }
+            $this->beforeUpdate($request, $item);
 
             $item->save();
             
             $this->afterSave($request, $item);
+            $this->afterUpdate($request, $item);
 
-            SavedResource::dispatch($item);
-            UpdatedResource::dispatch($item);
+            $item->fireLuminixEvent('saved');
+            $item->fireLuminixEvent('updated');
+            
         });
+
+        $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
             $this->findItem($request, $id)
@@ -406,13 +450,25 @@ class ResourceController extends Controller
             abort(401);
         }
 
+        $this->beforeTransaction($request, $item);
+
         DB::transaction(function () use ($item, $request) {
+            $item->fireLuminixEvent('deleting');
+
+            $this->beforeDelete($request, $item);
+
             if ($request->force) {
                 $item->forceDelete();
             } else {
                 $item->delete();
             }
+
+            $this->afterDelete($request, $item);
+
+            $item->fireLuminixEvent('deleted');
         });
+
+        $this->afterTransaction($request, $item);
 
         return response()->json(null, 204);
     }
@@ -429,10 +485,6 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
-            abort(401);
-        }
-
         $instance = new $class;
 
         $request->validate([
@@ -442,7 +494,7 @@ class ResourceController extends Controller
         
         $ids = $request->ids;
 
-        $items = $class::beforeLuminix($request)
+        $query = $class::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
                 if ($permission) {
                     $query->allowed($permission);
@@ -452,22 +504,33 @@ class ResourceController extends Controller
             ->afterLuminix($request);
 
         if ($request->force) {
-            $items = $items->withTrashed()->get();
-        } else {
-            $items = $items->get();
+            $query->withTrashed();
         }
+        $items = (clone $query)->get();
 
         if ($items->count() === 0) {
             abort(404);
         }
 
-        DB::transaction(function () use ($items, $request) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true)) {
+            $items->each(function ($item) use ($permission, $alias) {
+                if (!Gate::allows($permission . '-' . $alias, [$item])) {
+                    abort(401);
+                }
+            });
+        }
+
+        $this->beforeTransaction($request, $items);
+
+        DB::transaction(function () use ($query, $request) {
             if ($request->force) {
-                $items->each->forceDelete();
+                $query->forceDelete();
             } else {
-                $items->each->delete();
+                $query->delete();
             }
         });
+
+        $this->afterTransaction($request, $items);
 
         return response()->json(null, 204);
 
@@ -485,10 +548,6 @@ class ResourceController extends Controller
             'permission' => $permission
         ] = $this->inferRequestParameters();
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [null])) {
-            abort(401);
-        }
-
         $instance = new $class;
 
         $request->validate([
@@ -498,7 +557,7 @@ class ResourceController extends Controller
         
         $ids = $request->ids;
 
-        $items = $class::beforeLuminix($request)
+        $query = $class::beforeLuminix($request)
             ->where(function ($query) use ($permission) {
                 if ($permission) {
                     $query->allowed($permission);
@@ -506,16 +565,29 @@ class ResourceController extends Controller
             })
             ->onlyTrashed()
             ->whereIn($instance->getKeyName(), $ids)
-            ->afterLuminix($request)
-            ->get();
+            ->afterLuminix($request);
+
+        $items = (clone $query)->get();
 
         if ($items->count() === 0) {
             abort(404);
         }
 
-        DB::transaction(function () use ($items, $request) {
-            $items->each->restore();
+        if ($permission && config('luminix.backend.security.gates_enabled', true)) {
+            $items->each(function ($item) use ($permission, $alias) {
+                if (!Gate::allows($permission . '-' . $alias, [$item])) {
+                    abort(401);
+                }
+            });
+        }
+
+        $this->beforeTransaction($request, $items);
+
+        DB::transaction(function () use ($query, $request) {
+            $query->restore();
         });
+
+        $this->afterTransaction($request, $items);
 
         return response()->json(null, 204);
     }
