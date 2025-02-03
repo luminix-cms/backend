@@ -2,13 +2,31 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Mockery;
+use PHPUnit\Framework\MockObject\MockObject;
+use Workbench\App\Listeners\ResourceUpdated;
 use Workbench\App\Tests\TestCase;
 use Workbench\App\Models\User;
+use Workbench\App\Observers\UserObserver;
+use Workbench\App\Services\MockedService;
 
 use function Orchestra\Testbench\artisan;
 
 class RestApiTest extends TestCase
 {
+
+    protected function defineEnvironment($app): void
+    {
+        parent::defineEnvironment($app);
+
+        $service = $this->getMockBuilder(MockedService::class)
+            ->onlyMethods(['method1', 'method2'])
+            ->getMock();
+
+        $app->instance(MockedService::class, $service);
+
+    }
+
     public function test_apis_are_protected()
     {
 
@@ -259,6 +277,44 @@ class RestApiTest extends TestCase
         $this->json('POST', '/luminix-api/to-dos', [
             'title' => 'Buy milk',
         ])->assertStatus(422);
+    }
+
+    public function test_events_are_fired()
+    {
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('method1');
+
+        $this->json('POST', '/luminix-api/users', [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        
+    }
+
+    public function test_listeners_are_fired()
+    {
+        $this->json('POST', '/luminix-api/users', [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('method2');
+
+        $this->actingAs($user = User::where('email', 'john@example.com')->first())
+            ->json('POST', "/luminix-api/users/{$user->id}", [
+                'name' => 'Jane Doe',
+            ]);
+
+        
+        
     }
 
 }

@@ -3,9 +3,12 @@
 namespace Workbench\App\Providers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Luminix\Backend\Events\UpdatedResource;
 use Luminix\Backend\Services\RouteGenerator;
+use Workbench\App\Listeners\ResourceUpdated;
 use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
@@ -17,7 +20,6 @@ class WorkbenchServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        
 
     }
 
@@ -28,6 +30,7 @@ class WorkbenchServiceProvider extends ServiceProvider
     {
         $this->bootGates();
         $this->bootRoutes();
+        $this->bootEvents();
     }
 
     public function bootRoutes()
@@ -74,6 +77,14 @@ class WorkbenchServiceProvider extends ServiceProvider
 
         // Tag rules
         Gate::define('read-tag', [$this, 'isAuthenticated']);
+    }
+
+    public function bootEvents()
+    {
+        Event::listen(
+            UpdatedResource::class,
+            ResourceUpdated::class,
+        );
     }
 
 
