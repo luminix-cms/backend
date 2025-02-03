@@ -20,7 +20,7 @@ class RestApiTest extends TestCase
         parent::defineEnvironment($app);
 
         $service = $this->getMockBuilder(MockedService::class)
-            ->onlyMethods(['method1', 'method2'])
+            //->onlyMethods(['creatingUser', 'updatedUser'])
             ->getMock();
 
         $app->instance(MockedService::class, $service);
@@ -281,9 +281,16 @@ class RestApiTest extends TestCase
 
     public function test_events_are_fired()
     {
-        $this->app->make(MockedService::class)
-            ->expects($this->once())
-            ->method('method1');
+        
+        /** @var MockObject */
+        $service = $this->app->make(MockedService::class);
+
+        $service->expects($this->once())
+            ->method('creatingUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User;
+            }));
+            // ->w
 
         $this->json('POST', '/luminix-api/users', [
             'name' => 'John Doe',
@@ -306,15 +313,81 @@ class RestApiTest extends TestCase
 
         $this->app->make(MockedService::class)
             ->expects($this->once())
-            ->method('method2');
+            ->method('updatedUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User && $user->name === 'Jane Doe';
+            }));
 
         $this->actingAs($user = User::where('email', 'john@example.com')->first())
             ->json('POST', "/luminix-api/users/{$user->id}", [
                 'name' => 'Jane Doe',
             ]);
+        
+    }
 
-        
-        
+    public function test_every_event_is_fired()
+    {
+
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('createdUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User 
+                    && $user->name === 'John Doe';
+            }));
+
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('updatingUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User 
+                    && $user->name === 'Jane Doe';
+            }));
+
+        $this->app->make(MockedService::class)
+            ->expects($this->exactly(2))
+            ->method('savingUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User;
+            }));
+
+        $this->app->make(MockedService::class)
+            ->expects($this->exactly(2))
+            ->method('savedUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User ;
+            }));
+
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('deletedUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User ;
+            }));
+
+        $this->app->make(MockedService::class)
+            ->expects($this->once())
+            ->method('deletingUser')
+            ->with($this->callback(function ($user) {
+                return $user instanceof User ;
+            }));
+
+        $this->json('POST', '/luminix-api/users', [
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertStatus(201);
+
+        $this->actingAs($user = User::where('email', 'john@example.com')->first())
+            ->json('POST', "/luminix-api/users/{$user->id}", [
+                'name' => 'Jane Doe',
+            ])
+            ->assertStatus(200);
+
+        $this->json('DELETE', "/luminix-api/users/{$user->id}")
+            ->assertStatus(204);
+
     }
 
 }

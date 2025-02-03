@@ -12,6 +12,6 @@ class ResourceUpdated
     {
         $service = App::make(MockedService::class);
 
-        $service->method2();
+        $service->updatedUser($event->model);
     }
 }
