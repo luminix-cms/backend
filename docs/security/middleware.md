@@ -24,8 +24,3 @@ return [
     ],
 ];
 ```
-
-# Next Steps
-
-- [Laravel Gate Integration](3b-laravel-gate.md)
-- [Back to Documentation Index](0-index.md)

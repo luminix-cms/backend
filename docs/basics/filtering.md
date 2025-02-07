@@ -105,9 +105,3 @@ GET /luminix-api/users?where[email:gmailOrHotmail]=1
 ```
 
 This will filter users whose email address ends with either `@gmail.com` or `@hotmail.com`.
-
-## Next Steps
-
-[Middleware Configuration](../3a-middleware.md)
-[Back to Documentation Index](../0-index.md)
-

@@ -37,6 +37,10 @@ Other important features to consider are [Hidden Attributes](https://laravel.com
 
 Keep in mind that this approach will be applied globally to the model, so it may not be suitable for all use cases.
 
+## Listen to Luminix events
+
+Luminix adds to the Eloquent event system, by registering [API specific events](../digging-deeper/events.md), that are triggered during the processing of a request. This can be useful for adding custom logic to the API endpoints, such as logging, auditing, or sending notifications.
+
 ## Add model-specific controllers
 
 If you need to customize further the behavior of a specific model REST API, you can create a new controller that extends the default Luminix controller. For example, if you have a `User` model, you can create a `UserController` class that extends the `Luminix\Backend\Controllers\ResourceController` class:
