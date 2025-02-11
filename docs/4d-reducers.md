@@ -62,6 +62,3 @@ public function boot()
 }
 ```
 
-## Next Steps
-
-

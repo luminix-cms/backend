@@ -4,7 +4,7 @@ The middleware configuration is a crucial part of the Luminix Backend's security
 
 ## Security Configuration
 
-### Middleware
+### Global Middleware
 
 | Key | Default Value | Description |
 |-----|--------------|-------------|
@@ -16,11 +16,26 @@ You can customize the middleware stack by modifying the `security.middleware` co
 
 ```php
 return [
-    // Other configuration settings...
-
     'security' => [
         'middleware' => ['api', 'auth', 'custom-middleware'],
-        // Other security settings...
     ],
 ];
+```
+
+### Endpoint Middleware
+
+It is possible to set the middleware for a specific route. This is achieved by [customizing the model actions](../basics/customize-endpoints.md#add-custom-actions).
+
+```php
+use Luminix\Backend\Services\RouteGenerator;
+
+public function register()
+{
+    RouteGenerator::reducer('modelUserRoutes', function ($routes) {
+        $routes['index']['middleware'] = ['custom-middleware'];
+
+        return $routes;
+    });
+}
+
 ```

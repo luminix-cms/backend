@@ -30,7 +30,9 @@ class RouteGenerator
 
         // Default Laravel Resource Routes
         $defaultRoutes = [
-            'index' => $prefix,
+            'index' => [
+                'path' => $prefix,
+            ],
             'store' => [
                 'path' => $prefix,
                 'method' => 'post',

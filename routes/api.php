@@ -15,9 +15,11 @@ Route::group([
 
         foreach ($routes as $action => $path) {
             $method = 'get';
+            $middleware = null;
 
             if (is_array($path)) {
-                $method = $path['method'];
+                $method = $path['method'] ?? 'get';
+                $middleware = $path['middleware'] ?? null;
                 $path = $path['path'];
             }
 
@@ -25,7 +27,9 @@ Route::group([
 
             $endpoint = str_contains($action, ':') ? explode(':', $action)[1] : $action;
 
-            Route::$method($path, $controller . '@' . $endpoint)->name('luminix.' . $alias . '.' . $action);
+            Route::$method($path, $controller . '@' . $endpoint)
+                ->middleware($middleware)
+                ->name('luminix.' . $alias . '.' . $action);
         }
     });
 });

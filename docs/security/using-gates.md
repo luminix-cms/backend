@@ -1,4 +1,4 @@
-# Laravel Gate Integration
+# Using Gates
 
 Luminix provides robust security through Laravel's Gate system, ensuring that API access is tightly controlled and secure by default.
 
@@ -36,6 +36,7 @@ Specify the permissions required for each standard API action:
         'store'   => 'create',  // Creating new items
         'update'  => 'update',  // Modifying existing items
         'destroy' => 'delete',  // Removing items
+        // ...
     ]
 ]
 ```
@@ -93,7 +94,3 @@ public function boot()
 - Use the principle of least privilege
 - Regularly audit and update your gate definitions
 - Consider role-based access control for complex permission scenarios
-
-## Next Steps
-- [Explore Query-Level Permissions](3c-query-permissions.md)
-- [Return to Documentation Index](0-index.md)

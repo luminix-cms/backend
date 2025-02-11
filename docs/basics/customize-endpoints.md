@@ -147,10 +147,11 @@ class User extends Model
         // Map the 'profile' method from the controller to 'users/profile' path
         $routes['profile'] = 'users/profile';
 
-        // To use a HTTP method other than GET, you should set the value as an array
+        // To set the http method, or add middleware, you should set the value as an array
         $routes['addAvatar'] = [
-            'method' => 'post',
-            'path' => 'users/{id}/add-avatar',
+            'method' => 'post', // optional
+            'path' => 'users/{id}/add-avatar', // mandatory
+            'middleware' => ['can:update-profile'] // optional
         ];
 
         // Disable the default 'destroy' route
@@ -178,6 +179,7 @@ class AppServiceProvider extends ServiceProvider
             $routes['addAvatar'] = [
                 'method' => 'post',
                 'path' => 'users/{id}/add-avatar',
+                'middleware' => ['can:update-profile']
             ];
             unset($routes['destroy']);
             $routes['index'] = 'custom-users-path';
@@ -269,8 +271,3 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 ```
-
-## Next Steps
-
-- [Filtering](3-filtering.md)
-- [Back to Documentation Index](../0-index.md)

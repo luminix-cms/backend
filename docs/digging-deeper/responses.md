@@ -1,6 +1,6 @@
-# Customize API Responses
+# Responses
 
-In some scenarios, you may want to customize the response format of your API endpoints. In many cases, this could be achieved by [leveraging model behaviors](basics/customize-endpoints.md#add-behaviors-to-the-model-itself), such as hiding attributes or [eager loading relations](4a-eager-loading.md). However, in some cases, you may need more granular control over the response format.
+In some scenarios, you may want to customize the response format of your API endpoints. In many cases, this could be achieved by [leveraging model behaviors](../basics/customize-endpoints.md#add-behaviors-to-the-model-itself), such as hiding attributes or [eager leager-loading.mdr/eager-loading.md). However, in some cases, you may need more granular control over the response format.
 
 Luminix allows you to register a [Laravel Resource](https://laravel.com/docs/11.x/eloquent-resources) class to transform the data before sending it back to the client.
 
@@ -31,12 +31,4 @@ class User extends Model
 ```
 
 In this example, `UserResource` is used for single records, and `UserCollection` is used for paginated responses. 
-
-## Next Steps
-
-- [Reducible Elements](4d-reducers.md)
-- [Back to Documentation Index](0-index.md)
-
-
-
 

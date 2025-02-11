@@ -1,4 +1,4 @@
-# Custom Search
+# Search
 
 The API endpoints for paginated responses accept the `q` query parameter to search for records:
 
@@ -30,7 +30,3 @@ class User extends Model
 
 An integration with Laravel Scout will be considered in a future release. This will allow you to use the full power of Laravel Scout for searching your models.
 
-## Next Steps
-
-- [Customizing Responses](4c-custom-responses.md)
-- [Back to Documentation Index](/0-index.md)

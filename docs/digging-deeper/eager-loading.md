@@ -95,8 +95,3 @@ Load specific relationships dynamically:
 2. **Consider Performance**: Be mindful of loading large or complex relationships. Consider limiting the number of records loaded through eager loading if necessary.
 3. **Use Conditional Loading**: Implement logic to load relationships only when necessary.
 4. **Secure Related Data**: Ensure that no sensitive data is exposed through eager loading.
-
-## Next Steps
-
-- [Custom Search Engine](4b-custom-search.md)
-- [Back to Documentation Index](0-index.md)
