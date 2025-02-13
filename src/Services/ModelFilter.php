@@ -31,6 +31,23 @@ class ModelFilter {
         $this->modelInfo = ModelInfo::forModel($model);
     }
 
+    protected function resolveRelationFunctionName(string $relation): string
+    {
+        $instance = new $this->model;
+
+        if (method_exists($instance, $relation)) {
+            return $relation;
+        }
+
+        $relation = Str::camel($relation);
+
+        if (method_exists($instance, $relation)) {
+            return $relation;
+        }
+
+        throw new Exception('Relation function not found');
+    }
+
     public function relation(Builder $query, string $relation, mixed $value): Builder
     {
         if ($value === '*') {
@@ -40,7 +57,7 @@ class ModelFilter {
         $relatedModel = Finder::toClass($relatedModelAlias);
 
         $instance = new $relatedModel();
-        return $query->whereHas($relation, function ($query) use ($value, $instance) {
+        return $query->whereHas($this->resolveRelationFunctionName($relation), function ($query) use ($value, $instance) {
             if (is_array($value)) {
                 $query->whereIn($instance->getKeyName(), $value);
                 return;
