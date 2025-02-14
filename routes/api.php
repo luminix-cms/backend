@@ -27,8 +27,8 @@ Route::group([
 
             $endpoint = str_contains($action, ':') ? explode(':', $action)[1] : $action;
 
-            Route::$method($path, $controller . '@' . $endpoint)
-                ->middleware($middleware)
+            Route::middleware($middleware)
+                ->$method($path, $controller . '@' . $endpoint)
                 ->name('luminix.' . $alias . '.' . $action);
         }
     });
