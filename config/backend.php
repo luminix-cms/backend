@@ -18,13 +18,13 @@ return [
     | Luminix Model Discovery
     |--------------------------------------------------------------------------
     |
-    | This section configures Luminix's model discovery behavior, including the namespace
+    | This section configures Luminix's model discovery behavior, including the directory
     | for model discovery and the ability to include individual models, typically for 3rd 
-    | party models or models not in the default namespace.
+    | party models or models not in the specified directory.
     |
     */
     'models' => [
-        'namespace' => 'App\Models', 
+        'directory' => 'Models',
         'include' => [
             // 'App\Models\User',
         ],

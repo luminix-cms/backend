@@ -3,11 +3,12 @@
 namespace Luminix\Backend\Services;
 
 use Arandu\Reducible\Reducible;
-use HaydenPierce\ClassFinder\ClassFinder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Luminix\Backend\Model\LuminixModel;
 use Luminix\Backend\Contracts\LuminixModelInterface;
 
@@ -61,15 +62,30 @@ class ModelFinder {
     function all()
     {
         if (!isset($this->classes)) {
-            ClassFinder::disablePSR4Vendors();
 
-            $namespace = config('luminix.backend.models.namespace', 'App\Models');
+            $directory = app_path(config('luminix.backend.models.directory', 'Models'));
+            $namespace = App::getNamespace() . str_replace(
+                '/',
+                '\\',
+                config('luminix.backend.models.directory', 'Models')
+            );
 
-            $models = $namespace
-                ? ClassFinder::getClassesInNamespace($namespace)
-                : [];
+            $models = [];
+            if (is_dir($directory)) {
+                $files = File::allFiles($directory);
+                foreach ($files as $file) {
+                    $class = $namespace . '\\' . str_replace(
+                        ['/', '.php'],
+                        ['\\', ''],
+                        $file->getRelativePathname()
+                    );
+                    if (class_exists($class)) {
+                        $models[] = $class;
+                    }
+                }
+            }
 
-            $models += config('luminix.backend.models.include', []);
+            $models = array_merge($models, config('luminix.backend.models.include', []));
 
             $models = $this->models($models);
 

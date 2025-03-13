@@ -23,7 +23,6 @@
         "php": "^8.2",
         "illuminate/support": "^11.0",
         "illuminate/database": "^11.0",
-        "haydenpierce/class-finder": "^0.5.3",
         "arandu/reducible": "^1.0",
         "spatie/laravel-model-info": "^2.0"
     },
