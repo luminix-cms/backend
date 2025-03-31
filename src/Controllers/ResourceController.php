@@ -8,18 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
-use Luminix\Backend\Events\CreatedResource;
-use Luminix\Backend\Events\CreatingResource;
-use Luminix\Backend\Events\SavedResource;
-use Luminix\Backend\Events\SavingResource;
-use Luminix\Backend\Events\UpdatedResource;
-use Luminix\Backend\Events\UpdatingResource;
 use Luminix\Backend\Facades\Finder;
 use Luminix\Backend\Requests\IndexRequest;
 use Luminix\Backend\Resources\DefaultCollection;
@@ -241,6 +234,11 @@ class ResourceController extends Controller
     {
     }
 
+    protected function onTransactionError($error, Request $request, $item)
+    {
+        throw $error;
+    }
+
     /**
      * Display a listing of the resource.
      * @param Request $request 
@@ -348,21 +346,25 @@ class ResourceController extends Controller
 
         $this->beforeTransaction($request, $item);
 
-        DB::transaction(function () use ($item, $request) {
-            $item->fireLuminixEvent('saving');
-            $item->fireLuminixEvent('creating');
-
-            $this->beforeSave($request, $item);
-            $this->beforeCreate($request, $item);
-
-            $item->save();
-
-            $this->afterSave($request, $item);
-            $this->afterCreate($request, $item);
-
-            $item->fireLuminixEvent('saved');
-            $item->fireLuminixEvent('created');
-        });
+        try {
+            DB::transaction(function () use ($item, $request) {
+                $item->fireLuminixEvent('saving');
+                $item->fireLuminixEvent('creating');
+    
+                $this->beforeSave($request, $item);
+                $this->beforeCreate($request, $item);
+    
+                $item->save();
+    
+                $this->afterSave($request, $item);
+                $this->afterCreate($request, $item);
+    
+                $item->fireLuminixEvent('saved');
+                $item->fireLuminixEvent('created');
+            });
+        } catch (\Throwable $th) {
+            $this->onTransactionError($th, $request, $item);
+        }
 
         $this->afterTransaction($request, $item);
 
@@ -398,32 +400,36 @@ class ResourceController extends Controller
 
         $this->beforeTransaction($request, $item);
         
-        DB::transaction(function () use ($item, $request) {
-            if ($request->query('restore')) {
-                $item->fireLuminixEvent('restoring');
-                $this->beforeRestore($request, $item);
-
-                $item->restore();
-
-                $this->afterRestore($request, $item);
-                $item->fireLuminixEvent('restored');
-            }
-
-            $item->fireLuminixEvent('saving');
-            $item->fireLuminixEvent('updating');
-
-            $this->beforeSave($request, $item);
-            $this->beforeUpdate($request, $item);
-
-            $item->save();
-            
-            $this->afterSave($request, $item);
-            $this->afterUpdate($request, $item);
-
-            $item->fireLuminixEvent('saved');
-            $item->fireLuminixEvent('updated');
-            
-        });
+        try {
+            DB::transaction(function () use ($item, $request) {
+                if ($request->query('restore')) {
+                    $item->fireLuminixEvent('restoring');
+                    $this->beforeRestore($request, $item);
+    
+                    $item->restore();
+    
+                    $this->afterRestore($request, $item);
+                    $item->fireLuminixEvent('restored');
+                }
+    
+                $item->fireLuminixEvent('saving');
+                $item->fireLuminixEvent('updating');
+    
+                $this->beforeSave($request, $item);
+                $this->beforeUpdate($request, $item);
+    
+                $item->save();
+                
+                $this->afterSave($request, $item);
+                $this->afterUpdate($request, $item);
+    
+                $item->fireLuminixEvent('saved');
+                $item->fireLuminixEvent('updated');
+                
+            });
+        } catch (\Throwable $th) {
+            $this->onTransactionError($th, $request, $item);
+        }
 
         $this->afterTransaction($request, $item);
 
@@ -452,21 +458,25 @@ class ResourceController extends Controller
 
         $this->beforeTransaction($request, $item);
 
-        DB::transaction(function () use ($item, $request) {
-            $item->fireLuminixEvent('deleting');
-
-            $this->beforeDelete($request, $item);
-
-            if ($request->force) {
-                $item->forceDelete();
-            } else {
-                $item->delete();
-            }
-
-            $this->afterDelete($request, $item);
-
-            $item->fireLuminixEvent('deleted');
-        });
+        try {
+            DB::transaction(function () use ($item, $request) {
+                $item->fireLuminixEvent('deleting');
+    
+                $this->beforeDelete($request, $item);
+    
+                if ($request->force) {
+                    $item->forceDelete();
+                } else {
+                    $item->delete();
+                }
+    
+                $this->afterDelete($request, $item);
+    
+                $item->fireLuminixEvent('deleted');
+            });
+        } catch (\Throwable $th) {
+            $this->onTransactionError($th, $request, $item);
+        }
 
         $this->afterTransaction($request, $item);
 
@@ -522,13 +532,17 @@ class ResourceController extends Controller
 
         $this->beforeTransaction($request, $items);
 
-        DB::transaction(function () use ($query, $request) {
-            if ($request->force) {
-                $query->forceDelete();
-            } else {
-                $query->delete();
-            }
-        });
+        try {
+            DB::transaction(function () use ($query, $request) {
+                if ($request->force) {
+                    $query->forceDelete();
+                } else {
+                    $query->delete();
+                }
+            });
+        } catch (\Throwable $th) {
+            $this->onTransactionError($th, $request, $items);
+        }
 
         $this->afterTransaction($request, $items);
 
@@ -583,9 +597,13 @@ class ResourceController extends Controller
 
         $this->beforeTransaction($request, $items);
 
-        DB::transaction(function () use ($query, $request) {
-            $query->restore();
-        });
+        try {
+            DB::transaction(function () use ($query, $request) {
+                $query->restore();
+            });
+        } catch (\Throwable $th) {
+            $this->onTransactionError($th, $request, $items);
+        }
 
         $this->afterTransaction($request, $items);
 
