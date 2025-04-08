@@ -1,10 +1,10 @@
-# Customize Endpoints
+# Personalizar Endpoints
 
-Luminix provides a number of ways to override the default behavior of the REST API. Here are some of the most common ways to customize the behavior of your API controllers.
+O Luminix oferece várias maneiras de substituir o comportamento padrão da API REST. Aqui estão algumas das formas mais comuns de personalizar o comportamento dos seus controladores de API.
 
-## Set the fillable fields
+## Definir os campos preenchíveis (fillable)
 
-By default, Luminix will use the `fillable` property of the model to determine which fields can be mass-assigned. You can override this property in the model to specify which fields are allowed to be set using the `store` and `update` methods.
+Por padrão, o Luminix usa a propriedade `fillable` do modelo para determinar quais campos podem ser atribuídos em massa. Você pode substituir essa propriedade no modelo para especificar quais campos são permitidos ao usar os métodos `store` e `update`.
 
 ```php
 class ToDo extends Model
@@ -13,11 +13,11 @@ class ToDo extends Model
 }
 ```
 
-In this example, only the `title`, `description`, and `due_date` fields can be set using the `store` and `update` methods. All other fields will be ignored, unless they are handled manually in a custom controller.
+Neste exemplo, apenas os campos `title`, `description` e `due_date` podem ser definidos usando os métodos `store` e `update`. Todos os outros campos serão ignorados, a menos que sejam tratados manualmente em um controlador personalizado ou em um evento do modelo.
 
-## Add behaviors to the model itself
+## Adicionar comportamentos ao próprio modelo
 
-The easiest way to customize the behavior of a model is to add behaviors directly to the model class. For example, make use of the laravel's built-in [Eloquent Model Events](https://laravel.com/docs/11.x/eloquent#events) to add custom logic to your models.
+A maneira mais fácil de personalizar o comportamento de um modelo é adicionar comportamentos diretamente à classe do modelo. Por exemplo, utilize os [Eventos do Modelo Eloquent](https://laravel.com/docs/11.x/eloquent#events) integrados do Laravel para adicionar lógica personalizada aos seus modelos.
 
 ```php
 class ToDo extends Model
@@ -31,30 +31,30 @@ class ToDo extends Model
 }
 ```
 
-In the example above, the `creating` event is used to automatically set the `user_id` field of a `ToDo` model to the ID of the currently authenticated user. This ensures that the user who created the `ToDo` is always associated with it.
+No exemplo acima, o evento `creating` é usado para definir automaticamente o campo `user_id` do modelo `ToDo` como o ID do usuário autenticado. Isso garante que o usuário que criou o `ToDo` esteja sempre associado a ele.
 
-Other important features to consider are [Hidden Attributes](https://laravel.com/docs/11.x/eloquent-serialization#hiding-attributes-from-json), [Accessors and Mutators](https://laravel.com/docs/11.x/eloquent-mutators) and [Attribute Casting](https://laravel.com/docs/11.x/eloquent-mutators#attribute-casting).
+Outros recursos importantes a considerar são [Atributos Ocultos](https://laravel.com/docs/11.x/eloquent-serialization#hiding-attributes-from-json), [Accessors e Mutators](https://laravel.com/docs/11.x/eloquent-mutators) e [Conversão de Atributos (Attribute Casting)](https://laravel.com/docs/11.x/eloquent-mutators#attribute-casting).
 
-Keep in mind that this approach will be applied globally to the model, so it may not be suitable for all use cases.
+Lembre-se de que essa abordagem será aplicada globalmente ao modelo, portanto pode não ser adequada para todos os casos de uso.
 
-## Listen to Luminix events
+## Ouvir eventos do Luminix
 
-Luminix adds to the Eloquent event system, by registering [API specific events](../digging-deeper/events.md), that are triggered during the processing of a request. This can be useful for adding custom logic to the API endpoints, such as logging, auditing, or sending notifications.
+O Luminix complementa o sistema de eventos do Eloquent ao registrar [eventos específicos da API](../digging-deeper/events.md), que são acionados durante o processamento de uma requisição. Isso pode ser útil para adicionar lógica personalizada aos endpoints da API, como registro de logs, auditoria ou envio de notificações.
 
-## Add model-specific controllers
+## Adicionar controladores específicos do modelo
 
-If you need to customize further the behavior of a specific model REST API, you can create a new controller that extends the default Luminix controller. For example, if you have a `User` model, you can create a `UserController` class that extends the `Luminix\Backend\Controllers\ResourceController` class:
+Se você precisar personalizar ainda mais o comportamento da API REST de um modelo específico, pode criar um novo controlador que estende o controlador padrão do Luminix. Por exemplo, se você tem um modelo `User`, pode criar uma classe `UserController` que estende a classe `Luminix\Backend\Controllers\ResourceController`:
 
 ```php
 use Luminix\Backend\Controllers\ResourceController;
 
 class UserController extends ResourceController
 {
-    // Override default behavior here
+    // Sobrescrever o comportamento padrão aqui
 }
 ```
 
-Then, you need to assign the new controller to the model by adding the `WithController` attribute to the model class:
+Em seguida, você precisa atribuir o novo controlador ao modelo adicionando o atributo `WithController` à classe do modelo:
 
 ```php
 use App\Http\Controllers\UserController;
@@ -68,20 +68,35 @@ class User extends Model
 }
 ```
 
-This will tell Luminix to use the `UserController` class for all API endpoints related to the `User` model.
+Isso informará ao Luminix para usar a classe `UserController` em todos os endpoints da API relacionados ao modelo `User`.
 
-### Controller "hooks"
+### Ganchos (hooks) do controlador
 
-The `ResourceController` has two methods that can be overriden to customize the behavior for most applicable cases:
+O `ResourceController` possui alguns métodos que podem ser sobrescritos para personalizar o comportamento na maioria dos casos aplicáveis:
 
-- `beforeSave`: This method is called before saving a model instance. You can use it to modify the model instance before it is saved to the database.
+- `beforeTransaction`: chamado antes de iniciar uma transação. Você pode usá-lo para executar ações que devem ocorrer antes de qualquer operação de banco de dados.
 
-- `afterSave`: This method is called after saving a model instance. You can use it to perform additional actions after the model has been saved.
+- `afterTransaction`: chamado após a transação ser concluída. Você pode usá-lo para executar ações que devem ocorrer após todas as operações de banco de dados.
 
-Here's an example of how you might use these methods in a custom controller:
+- `beforeSave`: chamado antes de salvar uma instância do modelo. Você pode usá-lo para modificar a instância antes de ser salva no banco de dados.
+
+- `afterSave`: chamado após salvar uma instância do modelo. Você pode usá-lo para executar ações adicionais após o salvamento.
+
+- `beforeCreate`: chamado antes de criar uma nova instância do modelo. Você pode usá-lo para modificar a instância antes de ser criada.
+
+- `afterCreate`: chamado após criar uma nova instância do modelo. Você pode usá-lo para executar ações adicionais após a criação.
+
+- `beforeUpdate`: chamado antes de atualizar uma instância existente do modelo. Você pode usá-lo para modificar a instância antes de ser atualizada.
+
+- `afterUpdate`: chamado após atualizar uma instância existente do modelo. Você pode usá-lo para executar ações adicionais após a atualização.
+
+- `beforeDelete`: chamado antes de excluir uma instância do modelo. Você pode usá-lo para modificar a instância antes de ser excluída.
+
+- `afterDelete`: chamado após excluir uma instância do modelo. Você pode usá-lo para executar ações adicionais após a exclusão.
+
+Aqui está um exemplo de como usar esses métodos em um controlador personalizado:
 
 ```php
-
 use Luminix\Backend\Controllers\ResourceController;
 
 class UserController extends ResourceController
@@ -96,15 +111,14 @@ class UserController extends ResourceController
             $model->avatar = $filename;
         }
     }
-
 }
 ```
 
-In this example, the `beforeSave` method is used to save an avatar image to the `public` disk before saving the `User` model instance. In this particular case it is preferable that the `avatar` field is not fillable in the model, as it is being set manually. Also, you should not `save` the model instance in the `beforeSave` method, as it will be saved later by the controller.
+Neste exemplo, o método `beforeSave` é usado para salvar uma imagem de avatar no disco `public` antes de salvar a instância do modelo `User`. Neste caso específico, é preferível que o campo `avatar` não seja preenchível (fillable) no modelo, pois está sendo definido manualmente. Além disso, você não deve chamar `save` na instância do modelo no método `beforeSave`, pois ela será salva posteriormente pelo controlador.
 
-### Override action methods
+### Sobrescrever métodos de ação
 
-You can also override the default action methods in the controller to customize the behavior of specific actions. For example, you can override the `store` method to make your own logic for creating a new resource. Keep in mind that using this approach, you will need to handle all the logic for the action, including validation and error handling.
+Você também pode sobrescrever os métodos de ação padrão no controlador para personalizar o comportamento de ações específicas. Por exemplo, você pode sobrescrever o método `store` para implementar sua própria lógica de criação de um novo recurso. Lembre-se de que, usando essa abordagem, você precisará tratar toda a lógica da ação, incluindo validação e tratamento de erros.
 
 ```php
 use Luminix\Backend\Controllers\ResourceController;
@@ -127,9 +141,9 @@ class UserController extends ResourceController
 }
 ```
 
-### Add custom actions
+### Adicionar ações personalizadas
 
-If you need to add custom actions to a model API, you can do so by overriding the `getLuminixRoutes` method in the model. This method should return an array of custom routes that you want to add to the routing service.
+Se você precisar adicionar ações personalizadas à API de um modelo, pode fazer isso sobrescrevendo o método `getLuminixRoutes` no modelo. Esse método deve retornar um array de rotas personalizadas que você deseja adicionar ao serviço de roteamento.
 
 ```php
 use Luminix\Backend\Model\LuminixModel;
@@ -141,23 +155,23 @@ class User extends Model
 
     static function getLuminixRoutes(): array
     {
-        // Generate the default routes
+        // Gerar as rotas padrão
         $routes = RouteGenerator::make(static::class);
 
-        // Map the 'profile' method from the controller to 'users/profile' path
+        // Mapear o método 'profile' do controlador para o caminho 'users/profile'
         $routes['profile'] = 'users/profile';
 
-        // To set the http method, or add middleware, you should set the value as an array
+        // Para definir o método HTTP ou adicionar middleware, defina o valor como um array
         $routes['addAvatar'] = [
-            'method' => 'post', // optional
-            'path' => 'users/{id}/add-avatar', // mandatory
-            'middleware' => ['can:update-profile'] // optional
+            'method' => 'post', // opcional
+            'path' => 'users/{id}/add-avatar', // obrigatório
+            'middleware' => ['can:update-profile'] // opcional
         ];
 
-        // Disable the default 'destroy' route
+        // Desabilitar a rota padrão 'destroy'
         unset($routes['destroy']);
 
-        // Customize the path for the index route
+        // Personalizar o caminho da rota index
         $routes['index'] = 'custom-users-path';
 
         return $routes;
@@ -165,7 +179,7 @@ class User extends Model
 }
 ```
 
-Alternatively, you could add a [reducer](https://github.com/AranduTech/php-reducible) to the `RouteGenerator` service to modify certain models routes. Reducers should be added in the `register` method of any service provider loaded by your application. The reducer name should be `'model{$ModelName}Routes'`, where `{$ModelName}` is the name of the model class without the namespace.
+Alternativamente, você pode adicionar um [reducer](https://github.com/AranduTech/php-reducible) ao serviço `RouteGenerator` para modificar as rotas de determinados modelos. Os reducers devem ser adicionados no método `register` de qualquer provedor de serviços carregado pela sua aplicação. O nome do reducer deve ser `'model{$ModelName}Routes'`, onde `{$ModelName}` é o nome da classe do modelo sem o namespace.
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;
@@ -189,7 +203,7 @@ class AppServiceProvider extends ServiceProvider
 }
 ```
 
-Then, the logic for each custom action in the controller should be implemented as a new method:
+Em seguida, a lógica para cada ação personalizada no controlador deve ser implementada como um novo método:
 
 ```php
 use Luminix\Backend\Controllers\ResourceController;
@@ -216,27 +230,15 @@ class UserController extends ResourceController
 }
 ```
 
-The shown method could be accessed by making a `POST` request to `/luminix-api/users/{id}/add-avatar` with the `avatar` file in the request body.
+O método mostrado pode ser acessado enviando uma requisição `POST` para `/luminix-api/users/{id}/add-avatar` com o arquivo `avatar` no corpo da requisição.
 
- > **Note:** Any custom method in the controller should handle all the logic by itself, including validation and error handling.
+> **Nota:** Qualquer método personalizado no controlador deve tratar toda a lógica por conta própria, incluindo validação e tratamento de erros.
 
-## Change the default controller
+### Adicionar métodos ao controlador base
 
-It is possible to change the default controller used by Luminix for all models. This can be done by changing the `api.controller` key in the `config/luminix/backend.php` configuration file.
+Uma maneira menos drástica de personalizar o comportamento de todos os controladores é adicionar métodos à classe do controlador base. Isso é útil para adicionar funcionalidades compartilhadas entre todos os controladores, como tratamento de erros personalizado ou registro de logs.
 
-```php
-'api' => [
-    'controller' => \App\Http\Controllers\CustomResourceController::class,
-],
-```
-
-This approach is useful when you want to add common behavior to all controllers, such as additional operations that should be performed on every model. It is advisable to extend the default `ResourceController` class when creating a custom controller.
-
-### Add methods to the base controller
-
-A less drastic way to customize the behavior of all controllers is to add methods to the base controller class. This is useful for adding functionality that should be shared across all controllers, such as custom error handling or logging.
-
-To do this, you need to add a macro to the `ResourceController` class. You can do this in the `boot` method of your `App\Providers\AppServiceProvider` class:
+Para isso, você precisa adicionar uma macro à classe `ResourceController`. Isso pode ser feito no método `boot` do seu `App\Providers\AppServiceProvider`:
 
 ```php
 use Luminix\Backend\Controllers\ResourceController;
@@ -246,15 +248,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         ResourceController::macro('logRequest', function ($request) {
-            \Log::info('Request received', ['url' => $request->url()]);
+            \Log::info('Requisição recebida', ['url' => $request->url()]);
         });
     }
 }
 ```
 
-This will enable the `logRequest` action on every model route group. You still have to assign the action to a path in the model's `getLuminixRoutes` method.
+Isso habilitará a ação `logRequest` em todos os grupos de rotas dos modelos. Você ainda precisa atribuir a ação a um caminho no método `getLuminixRoutes` do modelo.
 
-It is possible to add a reducer to `'modelRoutes'` to assign the action to all models at once:
+É possível adicionar um reducer a `'modelRoutes'` para atribuir a ação a todos os modelos de uma vez:
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;
@@ -264,7 +266,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         RouteGenerator::reducer('modelRoutes', function ($routes) {
-            // Adds the 'logRequest' action to all models, using the GET method
+            // Adiciona a ação 'logRequest' a todos os modelos usando o método GET
             $routes['logRequest'] = 'log-request';
             return $routes;
         });

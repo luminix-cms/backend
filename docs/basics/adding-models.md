@@ -1,6 +1,6 @@
-# Adding REST API
+# Como adicionar a API REST
 
-To enable Luminix Backend to generate API endpoints for your models, you need to add the `LuminixModel` trait to each model class you want to expose.
+Para habilitar o Luminix Backend a gerar endpoints de API para seus modelos, você precisa adicionar a trait `LuminixModel` a cada classe de modelo que deseja expor.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -10,28 +10,27 @@ class User extends Model
 {
     use LuminixModel;
     
-    // Your model code
+    // Seu código do modelo aqui
 }
 ```
 
-After adding the trait, Luminix will automatically detect and process the model, generating API endpoints for it.
+Após adicionar a trait, o Luminix detectará e processará automaticamente o modelo, gerando endpoints de API para ele.
 
-## Model Requirements
+## Requisitos do Modelo
 
-To ensure proper API generation, your models must meet the following requirements:
+Para garantir a geração correta da API, seus modelos devem atender aos seguintes requisitos:
 
-1. **Model Namespace**: Models must be in the namespace specified in the configuration file. By default, Luminix looks for models in the `App\Models` namespace.
+1. **Namespace do Modelo**: Os modelos devem estar no namespace especificado no arquivo de configuração. Por padrão, o Luminix procura modelos no namespace `App\Models`.
 
-2. **use LuminixModel**: The `LuminixModel` trait must be included in the model class. This trait provides the necessary functionality for API generation.
+2. **Uso da LuminixModel**: A trait `LuminixModel` deve ser incluída na classe do modelo. Essa trait fornece a funcionalidade necessária para a geração da API.
 
-3. **Fillable Attributes**: Models should define the `$fillable` property to specify which attributes can be mass-assigned. This is important for creating and updating resources via the API.
+3. **Atributos Fillable**: Os modelos devem definir a propriedade `$fillable` para especificar quais atributos podem ser atribuídos em massa. Isso é importante para criar e atualizar recursos via API.
 
-4. **Primary Key**: Models without primary key are not supported. The [Eloquent primary key](https://laravel.com/docs/11.x/eloquent#primary-keys) will be used to identify resources.
+4. **Chave Primária**: Modelos sem chave primária não são suportados. A [chave primária do Eloquent](https://laravel.com/docs/11.x/eloquent#primary-keys) será usada para identificar os recursos.
 
+## Apelidos de Modelo
 
-## Model Aliases
-
-Each model will have an alias generated based on the model class name, without the namespace. The alias is used in the route naming and URL generation. By default, the alias is the model class name in snake case. You can customize the alias by defining a `getAlias` static method in your model.
+Cada modelo terá um *apelido* gerado com base no nome da classe do modelo, sem o namespace. O apelido é usado na nomeação das rotas e na geração de URLs. Por padrão, o apelido é o nome da classe do modelo em snake case. Você pode personalizar o apelido definindo um método estático `getAlias` em seu modelo.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -45,11 +44,11 @@ class User extends Model
 }
 ```
 
-The routes will be named using the alias. For example, the index route for the `User` model will be named `luminix.my_user.index`. The alias will then be pluralized and "slugified" to generate the URL. For example, the base URL for the `User` model above will be `/luminix-api/my-users`.
+As rotas serão nomeadas usando o alias. Por exemplo, a rota index para o modelo `User` será nomeada `luminix.my_user.index`. O alias será então pluralizado e "slugificado" para gerar a URL. Por exemplo, a URL base para o modelo `User` acima será `/luminix-api/my-users`.
 
-### Model Aliases in Polymorphic Relationships
+### Apelidos de Modelo em Relações Polimórficas
 
-By default, Luminix Backend will register [Custom Polymorphic Types](https://laravel.com/docs/11.x/eloquent-relationships#custom-polymorphic-types) for all Luminix-enabled models. This means that the model alias will be used as the morph type in polymorphic relationships. If you want to prevent this, call the `preventEnforcingMorphMap` method in the `register` method of your service provider.
+Por padrão, o Luminix Backend registrará [Tipos Polimórficos Personalizados](https://laravel.com/docs/11.x/eloquent-relationships#custom-polymorphic-types) para todos os modelos habilitados no Luminix. Isso significa que o apelido do modelo será usado como o tipo morph em relações polimórficas. Se você deseja evitar isso, chame o método `preventEnforcingMorphMap` no método `register` do seu service provider.
 
 ```php
 // app/Providers/AppServiceProvider.php
@@ -59,6 +58,4 @@ use Luminix\Backend\BackendServiceProvider;
 function register() {
     BackendServiceProvider::preventEnforcingMorphMap();
 }
-
 ```
-

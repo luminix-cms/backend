@@ -1,59 +1,59 @@
-# API Reference
+# Referência da API
 
-## Overview
+## Visão Geral
 
-Luminix Backend simplifies API development by automatically generating RESTful endpoints for your Laravel models. This powerful feature allows developers to:
+O Luminix Backend simplifica o desenvolvimento de APIs ao gerar automaticamente endpoints RESTful para seus modelos Laravel. Este recurso poderoso permite que desenvolvedores:
 
-- Rapidly create standardized API interfaces
-- Reduce boilerplate code
-- Implement consistent security and filtering
-- Easily customize and extend default behaviors
+- Criem rapidamente interfaces de API padronizadas
+- Reduzam código repetitivo
+- Implementem segurança e filtragem consistentes
+- Personalizem e estendam facilmente comportamentos padrão
 
-## Endpoint Naming Conventions
+## Convenções de Nomeação de Endpoints
 
-### URL Structure
+### Estrutura de URLs
 
-All endpoints follow a consistent pattern:
-- Prefix: `/luminix-api` (configurable)
-- Model Representation: Pluralized and *slugified* model alias
+Todos os endpoints seguem um padrão consistente:
+- Prefixo: `/luminix-api` (configurável)
+- Representação do Modelo: Apelido do modelo no plural e *slugificado*
 
-#### Model Slug Transformation Examples
+#### Exemplos de Transformação em Slug
 
-| Model Name | Model Alias | Model Slug |
+| Nome do Modelo | Apelido do Modelo | Slug do Modelo |
 |------------|-------------|------------|
 | `App\Models\User` | `user` | `users` |
 | `App\Models\ToDo` | `to_do` | `to-dos` |
 
-> **Note**: *Slugification* converts underscores to hyphens and ensures URL-friendly naming.
+> **Nota**: A *slugificação* converte underscores em hífens e garante nomes amigáveis para URLs.
 
-## CRUD Operations
+## Operações CRUD
 
-### Listing Records: `GET /{$prefix}/{$modelSlug}`
+### Listagem de Registros: `GET /{$prefix}/{$modelSlug}`
 
-Retrieve a paginated list of model records with powerful filtering options.
+Recupera uma lista paginada de registros com opções avançadas de filtragem.
 
-#### Query Parameters
+#### Parâmetros de Consulta
 
-| Parameter | Type | Description | Example |
+| Parâmetro | Tipo | Descrição | Exemplo |
 |-----------|------|-------------|---------|
-| `page` | Integer | Pagination page number | `?page=2` |
-| `per_page` | Integer | Records per page | `?per_page=10` |
-| `q` | String | Searches for the given term | `?q=John` |
-| `order_by` | String | Sort results (`column:direction`) | `?order_by=email:desc` |
-| `where` | Array | Advanced filtering | `?where[age:greaterThan]=18` |
-| `tab` | String | Custom tab-based filtering | `?tab=active` |
+| `page` | Inteiro | Número da página na paginação | `?page=2` |
+| `per_page` | Inteiro | Registros por página | `?per_page=10` |
+| `q` | String | Busca pelo termo especificado | `?q=João` |
+| `order_by` | String | Ordena resultados (`coluna:direção`) | `?order_by=email:desc` |
+| `where` | Array | Filtragem avançada | `?where[idade:greaterThan]=18` |
+| `tab` | String | Filtragem personalizada por aba | `?tab=ativos` |
 
-#### Example Requests
+#### Exemplos de Requisições
 
 ```javascript
-// Comprehensive filtering example
+// Exemplo de filtro abrangente
 axios.get('/luminix-api/users', {
     params: {
         page: 2,
         per_page: 10,
         order_by: 'email:desc',
         where: {
-            'name:contains': 'John',
+            'name:contains': 'João',
             'age:between': [18, 30],
             'email_verified_at:notNull': 1
         }
@@ -61,52 +61,52 @@ axios.get('/luminix-api/users', {
 });
 ```
 
-### Creating Records: `POST /{$prefix}/{$modelSlug}`
+### Criação de Registros: `POST /{$prefix}/{$modelSlug}`
 
-Create new model records with built-in attribute protection.
+Cria novos registros com proteção interna de atributos.
 
 ```javascript
 axios.post('/luminix-api/to-dos', {
-    title: 'Buy groceries',
-    description: 'Milk, eggs, bread, and butter',
+    title: 'Comprar mantimentos',
+    description: 'Leite, ovos, pão e manteiga',
     due_date: '2024-12-31'
 });
 ```
 
-> **Tip**: Only fillable attributes will be set by default. Consider [adding validation rules](validation.md) for data integrity, or [overriding the controller](customize-endpoints.md#add-model-specific-controllers) to have more control over the creation process.
+> **Dica**: Apenas atributos preenchíveis (fillable) serão definidos por padrão. Considere [adicionar regras de validação](validation.md) para integridade dos dados, ou [sobrescrever o controlador](customize-endpoints.md#add-model-specific-controllers) para maior controle no processo de criação.
 
-### Retrieving a Single Record: `GET /{$prefix}/{$modelSlug}/{{primary_key}}`
+### Busca de Registro Único: `GET /{$prefix}/{$modelSlug}/{{primary_key}}`
 
-Fetch a specific record by its primary key.
+Busca um registro específico pela sua chave primária.
 
 ```
 GET /luminix-api/users/1
 GET /luminix-api/to-dos/14
 ```
 
-### Updating Records: `POST /{$prefix}/{$modelSlug}/{{primary_key}}`
+### Atualização de Registros: `POST /{$prefix}/{$modelSlug}/{{primary_key}}`
 
-Update existing records with optional restoration.
+Atualiza registros existentes com opção de restauração.
 
 ```javascript
 axios.post('/luminix-api/to-dos/14', {
-    title: 'Updated Grocery List'
+    title: 'Lista de Compras Atualizada'
 });
 
-// restore soft-deleted record
+// Restaurar registro excluído via soft-delete
 axios.post('/luminix-api/to-dos/14?restore=1');
 ```
 
-### Deleting Records
+### Exclusão de Registros
 
-#### Single Record: `DELETE /{$prefix}/{$modelSlug}/{{primary_key}}`
+#### Registro Único: `DELETE /{$prefix}/{$modelSlug}/{{primary_key}}`
 
 ```
 DELETE /luminix-api/users/1
-DELETE /luminix-api/to-dos/14?force=1  // Permanent deletion
+DELETE /luminix-api/to-dos/14?force=1  // Exclusão permanente
 ```
 
-#### Multiple Records: `DELETE /{$prefix}/{$modelSlug}`
+#### Múltiplos Registros: `DELETE /{$prefix}/{$modelSlug}`
 
 ```javascript
 axios.delete('/luminix-api/to-dos', {
@@ -114,13 +114,13 @@ axios.delete('/luminix-api/to-dos', {
 });
 ```
 
-## Relationship Management
+## Gerenciamento de Relacionamentos
 
-Luminix supports advanced relationship operations for many-to-many relationships.
+O Luminix suporta operações avançadas para relacionamentos muitos-para-muitos.
 
-### Prerequisites
+### Pré-requisitos
 
-Define syncable relationships in your model:
+Defina relacionamentos sincronizáveis no seu modelo:
 
 ```php
 class User extends Model
@@ -136,33 +136,33 @@ class User extends Model
 }
 ```
 
-### Relationship Operations
+### Operações de Relacionamento
 
-#### Sync Relationship: `POST /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/sync`
+#### Sincronização: `POST /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/sync`
 
 ```javascript
-// Simple sync
+// Sincronização simples
 axios.post('/luminix-api/users/1/roles/sync', [1, 2, 3]);
 
-// Sync with pivot data
+// Sincronização com dados do pivot
 axios.post('/luminix-api/users/1/roles/sync', [
     { id: 1, expires_at: '2024-12-31' }
 ]);
 ```
 
-#### Attach Relationship: `POST /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/{{related_primary_key}}`
+#### Vincular: `POST /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/{{related_primary_key}}`
 
 ```javascript
-// Simple attach
+// Vinculação simples
 axios.post('/luminix-api/users/1/roles/4');
 
-// Attach with pivot data
+// Vinculação com dados do pivot
 axios.post('/luminix-api/users/1/roles/4', {
     expires_at: '2024-12-31'
 });
 ```
 
-#### Detach Relationship: `DELETE /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/{{related_primary_key}}`
+#### Desvincular: `DELETE /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/{{related_primary_key}}`
 
 ```
 DELETE /luminix-api/users/1/roles/4

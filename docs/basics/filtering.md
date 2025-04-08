@@ -1,13 +1,13 @@
-# Filtering Data
+# Filtragem de Dados
 
-Luminix API provides a powerful filtering system that allows clients to retrieve only the data they need. This helps creating a more generic and flexible API, reducing the amount of data transferred and improving performance.
+A API Luminix oferece um sistema de filtragem poderoso que permite aos clientes recuperar apenas os dados necessários. Isso ajuda a criar uma API mais genérica e flexível, reduzindo o volume de dados transferidos e melhorando o desempenho.
 
-## Enabling/Disabling Filtering
+## Ativando/Desativando a Filtragem
 
-By default, filtering is enabled for all models. You can disable this feature by setting the `api.filter.enable` configuration key to `false`.
+Por padrão, a filtragem está ativada para todos os modelos. Você pode desativar esse recurso definindo a chave de configuração `api.filter.enable` como `false`.
 
 ```php
-// config/luminix/backend.php
+// Arquivo de configuração do backend do Luminix
 'api' => [
     'filter' => [
         'enable' => false,
@@ -15,58 +15,58 @@ By default, filtering is enabled for all models. You can disable this feature by
 ],
 ```
 
-## Filter Syntax
+## Sintaxe de Filtro
 
-The filtering system will use the query parameter `where` to apply filters to the data. The value of this parameter should be an array of key-value pairs, where the key could be the column name or the column name followed by a colon and an operator. The value should be the desired value to filter by.
+O sistema de filtragem utiliza o parâmetro de query `where` para aplicar filtros aos dados. O valor deste parâmetro deve ser um array de pares chave-valor, onde a chave pode ser o nome da coluna ou o nome da coluna seguido por dois pontos e um operador. O valor deve ser o critério desejado para a filtragem.
 
-Here are some examples of how you can use the `where` parameter:
+Aqui estão alguns exemplos de uso do parâmetro `where`:
 
 ```http
-// Get users with the exact name "John Doe"
-GET /luminix-api/users?where[name]=John%20Doe
+// Busca usuários com o nome exato "João Silva"
+GET /luminix-api/users?where[name]=Jo%C3%A3o%20Silva
 
-// Get users with the name containing "John"
-GET /luminix-api/users?where[name:contains]=John
+// Busca usuários cujo nome contém "João"
+GET /luminix-api/users?where[name:contains]=Jo%C3%A3o
 
-// Get users with the age greater than 18
-GET /luminix-api/users?where[age:greaterThan]=18
+// Busca produtos com preço menor que 50
+GET /luminix-api/products?where[price:lessThan]=50
 
-// Get users created in the year 2024
+// Busca usuários criados no ano de 2024
 GET /luminix-api/users?where[created_at:between][]=2024-01-01&where[created_at:between][]=2024-12-31
 ```
 
-The available operators are:
+Os operadores disponíveis são:
 
-- `equals`: Filters records where the column value is equal to the provided value.
-- `notEquals`: Filters records where the column value is not equal to the provided value.
-- `greaterThan`: Filters records where the column value is greater than the provided value.
-- `greaterThanOrEquals`: Filters records where the column value is greater than or equal to the provided value.
-- `lessThan`: Filters records where the column value is less than the provided value.
-- `lessThanOrEquals`: Filters records where the column value is less than or equal to the provided value.
-- `like`: Filters records where the column value is like the provided value. This operator supports the `%` wildcard.
-- `contains`: Filters records where the column value contains the provided value. It is the like operator with the `%` wildcard automatically added to the beginning and end of the value.
-- `startsWith`: Filters records where the column value starts with the provided value. It is the like operator with the `%` wildcard automatically added to the end of the value.
-- `endsWith`: Filters records where the column value ends with the provided value. It is the like operator with the `%` wildcard automatically added to the beginning of the value.
-- `null`: Filters records where the column value is `null`.
-- `notNull`: Filters records where the column value is not `null`.
-- `relation`: Filters records by a related model. The value should be the related model's ID.
+- `equals`: Filtra registros onde o valor da coluna é igual ao valor fornecido.
+- `notEquals`: Filtra registros onde o valor da coluna é diferente do valor fornecido.
+- `greaterThan`: Filtra registros onde o valor da coluna é maior que o valor fornecido.
+- `greaterThanOrEquals`: Filtra registros onde o valor da coluna é maior ou igual ao valor fornecido.
+- `lessThan`: Filtra registros onde o valor da coluna é menor que o valor fornecido.
+- `lessThanOrEquals`: Filtra registros onde o valor da coluna é menor ou igual ao valor fornecido.
+- `like`: Filtra registros onde o valor da coluna corresponde ao padrão fornecido. Este operador suporta o curinga `%`.
+- `contains`: Filtra registros onde o valor da coluna contém o valor fornecido (equivalente a `%valor%`).
+- `startsWith`: Filtra registros onde o valor da coluna começa com o valor fornecido (equivalente a `valor%`).
+- `endsWith`: Filtra registros onde o valor da coluna termina com o valor fornecido (equivalente a `%valor`).
+- `null`: Filtra registros onde o valor da coluna é `null`.
+- `notNull`: Filtra registros onde o valor da coluna não é `null`.
+- `relation`: Filtra registros por um modelo relacionado. O valor deve ser o ID do modelo relacionado.
 
-If the operator is either `equals` or `relation`, you can omit it from the key. For example, `where[age]=18` is equivalent to `where[age:equals]=18`.
+Caso o operador seja `equals` ou `relation`, você pode omiti-lo da chave. Por exemplo, `where[age]=18` é equivalente a `where[age:equals]=18`.
 
-Multiple conditions can be combined by adding more key-value pairs to the `where` parameter. For example, to filter users by age and email verification status, you can use the following query:
+É possível combinar múltiplas condições adicionando mais pares chave-valor ao parâmetro `where`. Por exemplo, para filtrar usuários por idade e status de verificação de e-mail:
 
 ```http
 GET /luminix-api/users?where[age:greaterThan]=18&where[email_verified_at:notNull]=1
 ```
 
-It is not possible, however, to apply an "OR" condition in the same query. A custom endpoint or a custom filter would be necessary to achieve this.
+Entretanto, não é possível aplicar condições "OR" na mesma consulta. Seria necessário criar um endpoint personalizado ou um filtro customizado para esse cenário.
 
-## Excluding Sensitive Columns
+## Excluindo Colunas Sensíveis
 
-You can exclude specific columns from being filtered by setting the `api.filter.exclude` configuration key. This is useful for preventing clients from filtering on sensitive or internal columns.
+Você pode excluir colunas específicas da filtragem definindo a chave de configuração `api.filter.exclude`. Isso é útil para evitar que clientes filtrem colunas sensíveis ou internas.
 
 ```php
-// config/luminix/backend.php
+// Arquivo de configuração do backend do Luminix
 'api' => [
     'filter' => [
         'exclude' => [
@@ -76,32 +76,81 @@ You can exclude specific columns from being filtered by setting the `api.filter.
 ],
 ```
 
-This will prevent clients from filtering on the `password` and `email_verified_at` columns of the `User` model.
+Isso impedirá que clientes filtrem pelas colunas `password` e `email_verified_at` do modelo `User`.
 
- > **Note:** By default, the model's `$hidden` columns are excluded from filtering, so this example would almost always be unnecessary. However, if adding columns to a model's `$hidden` array is not an option, this configuration can be used as a fallback.
+> **Nota:** Por padrão, as colunas definidas no array `$hidden` do modelo são excluídas da filtragem. Portanto, este exemplo seria quase sempre redundante. Porém, se não for possível adicionar colunas ao array `$hidden` do modelo, esta configuração pode ser usada como alternativa.
 
-## Registering Custom Operators
+## Alterando o comportamento do filtro
 
-It is possible to add custom operators to the filtering system by registering macros to the `Luminix\Backend\Services\ModelFilter` class. This allows you to define custom filtering methods that can be used in the `where` parameter.
-
-Here's an example of how you might register a custom operator:
+Você pode alterar o comportamento padrão do sistema de filtragem sobrescrevendo o método `scopeWhereMatchesFilter` no seu modelo. Isso permite que você personalize como os filtros são aplicados, adicionando lógica adicional ou alterando a forma como os dados são recuperados.
 
 ```php
-
+use Illuminate\Database\Eloquent\Builder;
+use Luminix\Backend\Model\LuminixModel;
 use Luminix\Backend\Services\ModelFilter;
 
-ModelFilter::macro('gmailOrHotmail', function (Builder $query, string $column, mixed $value) {
-    return $query->where(function ($query) use ($column, $value) {
-        $query->where($column, 'like', '%@gmail.com')
-            ->orWhere($column, 'like', '%@hotmail.com');
-    });
+class Match extends Model
+{
+    use LuminixModel;
+
+    public function scopeWhereMatchesFilter(Builder $query, array $filters): Builder
+    {
+        if (isset($filters['team_id'])) {
+            // Filtra partidas onde o time está envolvido
+            $query->where(function ($subQuery) use ($filters) {
+                $subQuery->where('home_team_id', $filters['team_id'])
+                    ->orWhere('away_team_id', $filters['team_id']);
+            });
+
+            // Remove a chave `team_id` dos filtros para evitar conflitos
+            // com outros filtros do Luminix
+            unset($filters['team_id']);
+        }
+
+        // Aplica os outros filtros do Luminix
+        // A omissão da linha abaixo fará com que o Luminix ignore outros parâmetros enviados no `where`
+        (new ModelFilter(static::class, $query))->apply($filters);
+    }
+}
+```
+
+Desta forma é possível adicionar lógica de filtragem customizada ao seu modelo, permitindo que você crie filtros mais complexos e específicos para suas necessidades.
+
+## Filtrando Relacionamentos
+
+Para filtrar registros com base em relacionamentos, você pode usar o nome de um relacionamento como a coluna. O valor deve ser pode ser um ID ou um array de IDs do modelo relacionado. O Luminix irá aplicar a filtragem automaticamente.
+
+```http
+// Busca produtos relacionados a uma categoria específica
+GET /luminix-api/products?where[category]=1
+// Busca produtos relacionados a várias categorias
+GET /luminix-api/products?where[category][]=1&where[category][]=2
+```
+
+## Registrando Operadores Personalizados
+
+É possível adicionar operadores personalizados ao sistema de filtragem registrando macros na classe `Luminix\Backend\Services\ModelFilter`. Isso permite definir métodos de filtragem customizados que podem ser usados no parâmetro `where`.
+
+Exemplo de registro de um operador personalizado:
+
+```php
+use Luminix\Backend\Services\ModelFilter;
+
+// Registra um operador para busca geográfica aproximada
+// considerando banco de dados MySQL com suporte a geolocalização
+ModelFilter::macro('nearLocation', function (Builder $query, string $column, array $coordinates) {
+    [$latitude, $longitude, $radius] = $coordinates;
+    
+    return $query->whereRaw(
+        "ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?",
+        [$longitude, $latitude, $radius * 1000]
+    );
 });
 ```
 
-With this macro registered, you can now use the `gmailOrHotmail` operator in the `where` parameter:
+Com esta macro registrada, você pode usar o operador `nearLocation` no parâmetro `where` para filtrar modelos que tenham uma coluna de geolocalização (latitude e longitude). O exemplo abaixo busca lojas em um raio de 5 km de São Paulo:
 
 ```http
-GET /luminix-api/users?where[email:gmailOrHotmail]=1
+# Busca lojas em um raio de 5km de São Paulo (lat, long, raio_km)
+GET /luminix-api/shops?where[location:nearLocation][]=-23.550520&where[location:nearLocation][]=-46.633308&where[location:nearLocation][]=5
 ```
-
-This will filter users whose email address ends with either `@gmail.com` or `@hotmail.com`.

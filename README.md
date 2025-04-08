@@ -1,26 +1,26 @@
 # Luminix Backend
 
-Luminix Backend is a powerful Laravel package that automatically generates RESTful API endpoints for your models with built-in security, filtering, and permission management.
+Luminix Backend é um pacote poderoso para Laravel que gera automaticamente endpoints RESTful API para seus modelos, com segurança integrada, filtragem e gerenciamento de permissões.
 
-## Features
+## Funcionalidades
 
-- 🚀 Automatic API Endpoint Generation
-- 🔒 Robust Security Controls
-- 🔍 Advanced API Filtering
-- 🛡️ Laravel Gate Integration
-- 🔧 Highly Configurable
+- 🚀 Geração Automática de Endpoints API
+- 🔒 Controles de Segurança Robustos
+- 🔍 Filtragem Avançada em APIs
+- 🛡️ Integração com Gates do Laravel
+- 🔧 Altamente Configurável
 
-## Installation
+## Instalação
 
-Install the package via Composer:
+Instale o pacote via Composer:
 
 ```bash
 composer require luminix/backend
 ```
 
-## Quick Start
+## Começo Rápido
 
-1. Add the `Luminix\Backend\Model\LuminixModel` trait to your models:
+1. Adicione a trait `Luminix\Backend\Model\LuminixModel` aos seus modelos:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -30,30 +30,30 @@ class User extends Model
 {
     use LuminixModel;
     
-    // Your model code
+    // Seu código do modelo aqui
 }
 ```
 
-2. Publish the configuration file:
+2. Publique o arquivo de configuração:
 
 ```bash
 php artisan vendor:publish --tag=luminix-config
 ```
 
-3. Configure the package in `config/luminix/backend.php`
+3. Configure o pacote em `config/luminix/backend.php`
 
-## Documentation
+## Documentação
 
-Proceed to the [documentation](docs/0-index.md) for detailed instructions on using Luminix Backend.
+Acesse a [documentação](docs/getting-started/installation.md) para instruções detalhadas de uso do Luminix Backend.
 
-## Contributing
+## Contribuindo
 
-Contributions are welcome! Please submit pull requests or open issues on our GitHub repository.
+Contribuições são bem-vindas! Envie pull requests ou abra issues em nosso repositório no GitHub.
 
-## License
+## Licença
 
 [MIT](https://opensource.org/licenses/MIT).
 
-## Support
+## Suporte
 
-For support, please open an issue on the GitHub repository.
+Para suporte, abra uma issue no repositório do GitHub.

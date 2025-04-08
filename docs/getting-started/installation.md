@@ -1,17 +1,17 @@
-# Installation
+# Instalação
 
-## Requirements
+## Requisitos
 
-Luminix should be installed in a Laravel 11 application. [Upgrade](https://laravel.com/docs/11.x/upgrade) your application before installing Luminix.
+O Luminix deve ser instalado em uma aplicação Laravel 11. [Atualize](https://laravel.com/docs/11.x/upgrade) sua aplicação antes de instalar o Luminix.
 
-> Luminix should be compatible with all databases supported by Laravel, as it uses Eloquent models for data retrieval and manipulation. Open an issue if you encounter any compatibility problems.
+> O Luminix deve ser compatível com todos os bancos de dados suportados pelo Laravel, pois utiliza modelos Eloquent para recuperação e manipulação de dados. Abra um Issue no GitHub se encontrar quaisquer problemas de compatibilidade.
 
-## Installation
+## Instalação
 
-To install Luminix Backend, use Composer:
+Para instalar o Luminix Backend, utilize o Composer:
 
 ```bash
 composer require luminix/backend
 ```
 
-Then, [configure the package](configuration.md) to suit your application's needs.
+Em seguida, [configure o pacote](configuration.md) de acordo com as necessidades da sua aplicação.

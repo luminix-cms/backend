@@ -1,54 +1,55 @@
-# Luminix Backend Configuration Reference
+# Referência de Configuração do Luminix Backend
 
-To publish the configuration file, use the command below:
+Para publicar o arquivo de configuração, utilize o comando abaixo:
 
 ```bash
+# Publica o arquivo de configuração do Luminix
 php artisan vendor:publish --tag=luminix-config
 ```
 
-## Model Discovery Configuration
+## Configuração de Descoberta de Modelos
 
-| Key | Default Value | Description |
+| Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `models.namespace` | `'App\Models'` | The default namespace where Luminix will discover and scan for models. All models in this namespace that use the `LuminixModel` trait will be processed. |
-| `models.include` | `[]` | An array of additional model classes that can be manually included for Luminix processing. Useful for adding models from different namespaces or third-party packages. |
+| `models.namespace` | `'App\Models'` | Namespace padrão onde o Luminix irá descobrir e escanear modelos. Todos os modelos neste namespace que utilizam a trait `LuminixModel` serão processados. |
+| `models.include` | `[]` | Array de classes de modelos adicionais para inclusão manual no processamento. Útil para adicionar modelos de outros namespaces ou pacotes de terceiros. |
 
-## API Configuration
+## Configuração da API
 
-| Key | Default Value | Description |
+| Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `api.prefix` | `'luminix-api'` | The URL prefix for all Luminix API routes. This allows you to customize the base endpoint for your API. |
-| `api.max_per_page` | `150` | Maximum number of items that can be returned in a single API request. Helps prevent excessive data retrieval and improves performance. |
+| `api.prefix` | `'luminix-api'` | Prefixo da URL para todas as rotas da API do Luminix. Permite personalizar o endpoint base da API. |
+| `api.max_per_page` | `150` | Número máximo de itens retornados em uma única requisição da API. Previne uso excessivo de dados e melhora desempenho. |
 
-## API Filtering Configuration
+## Configuração de Filtragem da API
 
-| Key | Default Value | Description |
+| Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `api.filter.enable` | `true` | Enables or disables API filtering functionality. When enabled, clients can filter API results using the 'where' parameter. |
-| `api.filter.exclude` | `[]` | A list of columns to exclude from filtering for specific models. Prevents filtering on sensitive or internal columns. Format is `'ModelClassName:column1,column2'`. By default the model's `hidden` columns are excluded. |
-| `api.filter.throw` | `true` | Determines whether Luminix should throw exceptions when filtering fails (e.g., invalid column or operator). Helps identify and debug filtering issues. |
+| `api.filter.enable` | `true` | Habilita ou desabilita a funcionalidade de filtragem na API. Quando ativo, clientes podem filtrar resultados usando o parâmetro 'where'. |
+| `api.filter.exclude` | `[]` | Lista de colunas excluídas da filtragem para modelos específicos. Previne filtragem em colunas sensíveis ou internas. Formato: `'NomeDaClasseModelo:coluna1,coluna2'`. Por padrão, as colunas `hidden` do modelo são excluídas. |
+| `api.filter.throw` | `true` | Define se o Luminix deve lançar exceções em falhas de filtragem (ex.: coluna ou operador inválido). Auxilia na identificação e depuração de problemas. |
 
-## Security Configuration
+## Configuração de Segurança
 
-| Key | Default Value | Description |
+| Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `security.gates_enabled` | `true` | Enables Laravel Gate checks for route-level permissions. When active, Luminix enforces permissions defined in the `permissions` section. |
-| `security.middleware` | `['api', 'auth']` | Middleware applied to all Luminix API routes. Provides an additional layer of security and authentication. |
-| `security.permissions` | See below | Maps controller actions to specific permission types. Enables fine-grained access control. |
+| `security.gates_enabled` | `true` | Habilita verificações do Laravel Gate para permissões em nível de rota. Quando ativo, o Luminix aplica as permissões definidas na seção `permissions`. |
+| `security.middleware` | `['api', 'auth']` | Middleware aplicado a todas as rotas da API do Luminix. Oferece uma camada adicional de segurança e autenticação. |
+| `security.permissions` | Veja abaixo | Mapeia ações do controlador para tipos específicos de permissões. Permite controle de acesso granular. |
 
-### Detailed Permissions Mapping
+### Mapeamento Detalhado de Permissões
 
-| Action | Permission | Description |
+| Ação | Permissão | Descrição |
 |--------|------------|-------------|
-| `index` | `'read'` | Permission required to list/retrieve multiple resources |
-| `show` | `'read'` | Permission required to retrieve a single resource |
-| `store` | `'create'` | Permission required to create a new resource |
-| `update` | `'update'` | Permission required to modify an existing resource |
-| `destroy` | `'delete'` | Permission required to delete a single resource |
-| `destroyMany` | `'delete'` | Permission required to delete multiple resources |
-| `restoreMany` | `'update'` | Permission required to restore multiple resources |
-| `sync` | `'update'` | Permission required to synchronize resources |
-| `attach` | `'update'` | Permission required to attach related resources |
-| `detach` | `'update'` | Permission required to detach related resources |
+| `index` | `'read'` | Permissão necessária para listar/recuperar múltiplos recursos |
+| `show` | `'read'` | Permissão necessária para recuperar um único recurso |
+| `store` | `'create'` | Permissão necessária para criar um novo recurso |
+| `update` | `'update'` | Permissão necessária para modificar um recurso existente |
+| `destroy` | `'delete'` | Permissão necessária para excluir um único recurso |
+| `destroyMany` | `'delete'` | Permissão necessária para excluir múltiplos recursos |
+| `restoreMany` | `'update'` | Permissão necessária para restaurar múltiplos recursos |
+| `sync` | `'update'` | Permissão necessária para sincronizar recursos |
+| `attach` | `'update'` | Permissão necessária para vincular recursos relacionados |
+| `detach` | `'update'` | Permissão necessária para desvincular recursos relacionados |
 
-These permissions are concatenated with the model name to form the final permission string. For example, the permission for the `index` action on the `User` model would be `'read-user'`.
+Essas permissões são concatenadas com o nome do modelo para formar a string de permissão final. Por exemplo, a permissão para a ação `index` no modelo `User` seria `'read-user'`.
