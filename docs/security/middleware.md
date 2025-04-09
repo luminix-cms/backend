@@ -1,41 +1,50 @@
-# Middleware Configuration
+# Configuração de Middleware
 
-The middleware configuration is a crucial part of the Luminix Backend's security setup. Middleware provides an additional layer of security and authentication for your API routes, ensuring that only authorized requests are processed.
+A configuração de middleware é uma parte crucial da segurança do Luminix Backend. O middleware fornece uma camada adicional de segurança e autenticação para suas rotas de API, garantindo que apenas requisições autorizadas sejam processadas.
 
-## Security Configuration
+## Configuração de Segurança
 
-### Global Middleware
+### Middleware Global
 
-| Key | Default Value | Description |
+| Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `security.middleware` | `['api', 'auth']` | Middleware applied to all Luminix API routes. This ensures that all API requests pass through the specified middleware stack, providing essential security and authentication checks. |
+| `security.middleware` | `['api', 'auth']` | Middleware aplicado a todas as rotas da API do Luminix. Isso garante que todas as requisições passem pela pilha de middleware especificada, fornecendo verificações essenciais de segurança e autenticação. |
 
-By default, Luminix applies the `api` and `auth` middleware to all API routes. The `api` middleware group typically includes rate limiting and other API-specific middleware, while the `auth` middleware ensures that only authenticated users can access the API.
+Por padrão, o Luminix aplica os middlewares `api` e `auth` a todas as rotas da API. O grupo `api` geralmente inclui middlewares específicos para APIs, como limitação de taxa (*rate limiting*), enquanto o `auth` garante que apenas usuários autenticados possam acessar a API.
 
-You can customize the middleware stack by modifying the `security.middleware` configuration in the `config/luminix/backend.php` file. For example, you might want to add additional middleware for logging, throttling, or custom authentication mechanisms.
+Você pode personalizar a pilha de middleware modificando a configuração `security.middleware` no arquivo `config/luminix/backend.php`. Por exemplo, você pode adicionar middlewares para logs, limitação de requisições (*throttling*) ou mecanismos de autenticação personalizados:
 
 ```php
 return [
     'security' => [
-        'middleware' => ['api', 'auth', 'custom-middleware'],
+        'middleware' => ['api', 'auth', App\Http\Middlewares\MinhaMiddleware::class], // Exemplo: middleware personalizado adicionado
     ],
 ];
 ```
 
-### Endpoint Middleware
+### Middleware Específico por Endpoint
 
-It is possible to set the middleware for a specific route. This is achieved by [customizing the model actions](../basics/customize-endpoints.md#add-custom-actions).
+É possível definir middlewares para rotas específicas. Isso é alcançado [personalizando as ações do modelo](../basics/customize-endpoints.md#adicionar-ações-personalizadas).
+
+O exemplo abaixo demonstra como alterar o middleware para a ação `index` do modelo `User`:
 
 ```php
 use Luminix\Backend\Services\RouteGenerator;
 
 public function register()
 {
-    RouteGenerator::reducer('modelUserRoutes', function ($routes) {
-        $routes['index']['middleware'] = ['custom-middleware'];
-
-        return $routes;
+    RouteGenerator::reducer('modelUserRoutes', function ($rotas) {
+        // Define um middleware personalizado apenas para a ação 'index'
+        $rotas['index']['middleware'] = ['meu-middleware'];
+        
+        return $rotas;
     });
 }
-
 ```
+
+> A aplicação de middleware no nível da rota é feita dentro do grupo geral de middleware definido na configuração. Portanto, se você adicionar um middleware específico para uma rota, ele será aplicado juntamente com os middlewares globais.
+
+#### Casos de Uso Comuns:
+- **Autenticação diferenciada**: Use middlewares distintos para endpoints públicos e privados.
+- **Controle de acesso granular**: Restrinja ações específicas (ex: `destroy`) a usuários com permissões elevadas.
+- **Logs customizados**: Adicione um middleware para rastrear atividades em endpoints críticos.

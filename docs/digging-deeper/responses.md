@@ -1,20 +1,20 @@
-# Responses
+# Respostas
 
-In some scenarios, you may want to customize the response format of your API endpoints. In many cases, this could be achieved by [leveraging model behaviors](../basics/customize-endpoints.md#add-behaviors-to-the-model-itself), such as hiding attributes or [eager leager-loading.mdr/eager-loading.md). However, in some cases, you may need more granular control over the response format.
+Em alguns cenários, você pode querer personalizar o formato das respostas dos seus endpoints API. Em muitos casos, isso pode ser alcançado [utilizando comportamentos do modelo](../basics/customize-endpoints.md#adicionar-comportamentos-ao-próprio-modelo), como ocultar atributos ou [carregamento antecipado de relacionamentos](../eager-loading.md). Porém, em situações específicas, você pode precisar de um controle mais granular sobre o formato da resposta.
 
-Luminix allows you to register a [Laravel Resource](https://laravel.com/docs/11.x/eloquent-resources) class to transform the data before sending it back to the client.
+O Luminix permite que você registre uma [Laravel Resource](https://laravel.com/docs/11.x/eloquent-resources) para transformar os dados antes de enviá-los ao cliente.
 
-## Registering a Resource
+## Registrando um Resource
 
-To customize the response format, create a new Resource class using the `artisan` command:
+Para personalizar o formato da resposta, crie uma nova classe Resource usando o comando `artisan`:
 
 ```bash
 php artisan make:resource UserResource
 ```
 
-Follow [Laravel documentation](https://laravel.com/docs/11.x/eloquent-resources) to define the structure of your Resource class. You can customize the data, include additional metadata, and format the response as needed.
+Siga a [documentação do Laravel](https://laravel.com/docs/11.x/eloquent-resources) para definir a estrutura da sua Resource. Você pode personalizar os dados, incluir metadados adicionais e formatar a resposta conforme necessário.
 
-To apply the Resource to your API endpoints, add the `Luminix\Backend\Resources\WithResource` attribute to your model, specifying the Resource class as the argument:
+Para aplicar a Resource aos endpoints da API, adicione o atributo `Luminix\Backend\Resources\WithResource` ao seu modelo, especificando a classe Resource como argumento:
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -30,5 +30,36 @@ class User extends Model
 }
 ```
 
-In this example, `UserResource` is used for single records, and `UserCollection` is used for paginated responses. 
+Neste exemplo:
+- `UserResource` é usado para respostas de registros individuais
+- `UserCollection` é usado para respostas paginadas
 
+**Funcionalidades avançadas:**
+1. Transformação condicional de dados usando métodos `when` e `whenLoaded`
+2. Inclusão de relacionamentos via `->load()` no controller
+3. Formatação consistente de datas e valores numéricos
+4. Adição de metadados personalizados na resposta
+
+**Exemplo de Resource personalizada:**
+```php
+// UserResource.php
+class UserResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'nome_completo' => $this->first_name . ' ' . $this->last_name,
+            'email' => $this->when($request->user()->isAdmin(), $this->email),
+            'ultimo_acesso' => $this->last_login?->format('d/m/Y H:i'),
+            'perfis' => ProfileResource::collection($this->whenLoaded('profiles'))
+        ];
+    }
+}
+```
+
+> **Dica:** Utilize Resources para:
+> - Garantir consistência nas respostas da API
+> - Implementar controle de acesso granular a campos sensíveis
+> - Reduzir payloads desnecessários
+> - Formatarcampos complexos (datas, valores monetários, etc.)

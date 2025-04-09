@@ -1,21 +1,25 @@
-# Eager Loading Relationships in Luminix
+# Carregamento Ansioso (Eager Loading) de Relacionamentos no Luminix
 
-Eager loading is a crucial technique in Laravel for optimizing database queries by loading related models efficiently. In Luminix, developers have flexible control over how relationships are loaded, preventing the need for multiple API requests.
+O carregamento ansioso é uma técnica crucial no Laravel para otimizar consultas ao banco de dados, carregando modelos relacionados de forma eficiente. No Luminix, os desenvolvedores têm controle flexível sobre como os relacionamentos são carregados, evitando a necessidade de múltiplas requisições à API.
 
-## Understanding Eager Loading
+---
 
-Eager loading allows you to load related models alongside the primary model, reducing the number of database queries and preventing the N+1 query problem. Luminix provides multiple approaches to add eager loaded relationships to your API responses.
+## Entendendo o Carregamento Ansioso
 
-## 1. Global Relationship Loading with `$with` Property
+O carregamento ansioso permite que você carregue modelos relacionados junto com o modelo principal, reduzindo o número de consultas ao banco de dados e prevenindo o problema de consultas N+1. O Luminix oferece múltiplas abordagens para adicionar relacionamentos carregados ansiosamente às respostas da sua API.
 
-The `$with` property provides a simple way to always eager load specific relationships for a model. This is ideal for relationships that are consistently needed.
+---
+
+## 1. Carregamento Global de Relacionamentos com a Propriedade `$with`
+
+A propriedade `$with` oferece uma maneira simples de **sempre** carregar ansiosamente relacionamentos específicos para um modelo. É ideal para relacionamentos que são necessários consistentemente.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
-    // Always load roles whenever a User is queried
+    // Carrega sempre os papéis (roles) quando um User é consultado
     protected $with = ['roles'];
 
     public function roles()
@@ -25,13 +29,16 @@ class User extends Model
 }
 ```
 
-### Considerations
-- ⚠️ Use with caution: This approach **always** loads the specified relationships, unless specified otherwise in the query.
-- Risk of creating recursive loading if relationships are interdependent
+### Considerações Importantes
+- ⚠️ Use com cautela: Esta abordagem **sempre** carrega os relacionamentos especificados, a menos que seja indicado o contrário na consulta.
+- Risco de criar carregamento recursivo se os relacionamentos forem interdependentes.
+- Pode impactar o desempenho se os relacionamentos envolverem muitos dados ou lógica complexa.
 
-## 2. Dynamic Relationship Loading with Query Scopes
+---
 
-For more granular control, override the `scopeBeforeLuminix` or `scopeAfterLuminix` methods to dynamically load relationships based on request parameters.
+## 2. Carregamento Dinâmico de Relacionamentos com Escopos de Consulta
+
+Para um controle mais granular, sobrescreva os métodos `scopeBeforeLuminix` ou `scopeAfterLuminix` para carregar relacionamentos dinamicamente com base em parâmetros da requisição.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
@@ -45,53 +52,83 @@ class User extends Model
 
     public function scopeBeforeLuminix(Builder $query, Request $request)
     {
-        // List of allowed relationships
+        // Lista de relacionamentos permitidos
         $allowedRelationships = ['roles', 'permissions'];
 
-        // Check if 'with' parameter is present in the request
+        // Verifica se o parâmetro 'with' está presente na requisição
         if ($request->has('with')) {
             $requested = $request->input('with', []);
             $with = collect(is_string($requested) ? [$requested] : $requested);
 
+            // Valida se os relacionamentos solicitados são permitidos
             if (!$with->every(fn ($relation) => in_array($relation, $allowedRelationships))) {
-                // Load only allowed relationships
-                abort(422, 'Invalid "with" parameter');
+                abort(422, 'Parâmetro "with" inválido');
             }
 
-            // Load 'roles' relationship if requested
+            // Carrega o relacionamento 'roles' se solicitado
             if ($with->contains('roles')) {
-                // You can add a closure to modify the sub-query
                 $query->with([
-                    // In this example, we will use the 'allowed'
-                    // scope to load only roles that the user is 
-                    // allowed to read, considering the Role model
-                    // is also using LuminixModel and has query-level
-                    // permissions implemented
                     'roles' => fn ($query) => $query->allowed('read')
+                    // Usa o escopo 'allowed' para carregar apenas roles
+                    // que o usuário tem permissão de leitura (considerando
+                    // que o modelo Role também usa LuminixModel)
                 ]);
             }
 
-            // ... Load other relationships as needed
-
+            // ... Adicione outros relacionamentos conforme necessário
         }
     }
-
 }
 ```
 
-### API Request Examples
+### Exemplos de Requisições na API
 
-Load specific relationships dynamically:
-- `/luminix-api/users?with=roles`
-- `/luminix-api/users/1?with[]=roles&with[]=permissions`
+Carregar relacionamentos específicos dinamicamente:
+```http
+GET /luminix-api/users?with=roles
+GET /luminix-api/users/1?with[]=roles&with[]=permissions
+```
 
-### Benefits of This Approach
-- Fine-grained control over relationship loading
-- Flexibility for API consumers
+### Vantagens desta Abordagem
+- **Controle refinado**: Permite definir exatamente quais relacionamentos podem ser carregados.
+- **Flexibilidade**: Os consumidores da API podem solicitar apenas os dados necessários.
+- **Segurança**: Relacionamentos sensíveis não são expostos inadvertidamente.
 
-## Best Practices
+---
 
-1. **List Allowed Relationships**: Always define an explicit list of relationships that can be eager loaded.
-2. **Consider Performance**: Be mindful of loading large or complex relationships. Consider limiting the number of records loaded through eager loading if necessary.
-3. **Use Conditional Loading**: Implement logic to load relationships only when necessary.
-4. **Secure Related Data**: Ensure that no sensitive data is exposed through eager loading.
+## Melhores Práticas
+
+1. **Liste Relacionamentos Permitidos**: Defina explicitamente quais relacionamentos podem ser carregados ansiosamente para evitar acesso não autorizado.
+2. **Monitore o Desempenho**: Relacionamentos complexos ou grandes volumes de dados podem impactar o tempo de resposta. Considere paginação ou limites.
+3. **Use Carregamento Condicional**: Carregue relacionamentos apenas quando necessário (ex: parâmetros de requisição específicos).
+4. **Valide Entradas do Usuário**: Sempre valide os parâmetros `with` para evitar injeção de consultas não intencionais.
+5. **Evite Exposição de Dados Sensíveis**: Certifique-se de que relacionamentos carregados não exponham informações confidenciais inadvertidamente.
+
+---
+
+## Exemplo Avançado: Combinando Escopos e Filtros
+
+Você pode combinar carregamento ansioso com filtros para otimizar ainda mais as consultas:
+
+```php
+public function scopeBeforeLuminix(Builder $query, Request $request)
+{
+    if ($request->has('with')) {
+        $query->with([
+            'posts' => function ($query) use ($request) {
+                $query->where('status', 'published')
+                      ->when($request->has('category'), function ($q) use ($request) {
+                          $q->where('category_id', $request->category);
+                      });
+            }
+        ]);
+    }
+}
+```
+
+**Requisição:**
+```http
+GET /luminix-api/users?with=posts&category=5
+```
+
+Neste exemplo, apenas posts publicados da categoria 5 serão carregados com os usuários.

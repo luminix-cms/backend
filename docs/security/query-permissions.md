@@ -1,21 +1,21 @@
-# Query-Level Permissions
+# Permissões em Nível de Consulta
 
-## Overview
+## Visão Geral
 
-Query-level permissions allow you to dynamically filter records based on user permissions directly at database level. This powerful feature enables fine-grained access control by eliminating unauthorized records before they are returned to the client.
+As permissões em nível de consulta permitem filtrar registros dinamicamente com base nas permissões do usuário diretamente no banco de dados. Este recurso poderoso oferece controle de acesso refinado, eliminando registros não autorizados antes que sejam retornados ao cliente.
 
-## Purpose
+## Propósito
 
-The `scopeAllowed` method provides a mechanism to:
-- Restrict access to records based on user-specific conditions
-- Implement row-level security
-- Prevent unauthorized users from accessing or modifying specific records
+O método `scopeAllowed` fornece um mecanismo para:
+- Restringir acesso a registros com base em condições específicas do usuário
+- Implementar segurança em nível de linha (*row-level security*)
+- Impedir que usuários não autorizados acessem ou modifiquem registros específicos
 
-## Implementation
+## Implementação
 
-To implement query-level permissions, override the `scopeAllowed` method in your model with custom logic that filters records based on the user's permissions.
+Para implementar permissões em nível de consulta, sobrescreva o método `scopeAllowed` em seu modelo com lógica personalizada que filtra registros com base nas permissões do usuário.
 
-### Basic Example
+### Exemplo Básico
 
 ```php
 use Illuminate\Database\Eloquent\Builder;
@@ -23,22 +23,22 @@ use Illuminate\Database\Eloquent\Builder;
 class Post extends Model
 {
     /**
-     * Scope queries to only include records the user is allowed to access.
+     * Filtra as consultas para incluir apenas registros que o usuário pode acessar.
      *
-     * @param Builder $query The Eloquent query builder
-     * @param string $permission The type of permission being checked (e.g., 'read', 'update', 'delete')
+     * @param Builder $query Construtor de consultas do Eloquent
+     * @param string $permission Tipo de permissão verificada (ex: 'read', 'update', 'delete')
      * @return void
      */
     public function scopeAllowed(Builder $query, string $permission)
     {
-        // Only allow authors to update or delete their own posts
+        // Apenas autores podem atualizar ou excluir seus próprios posts
         if (in_array($permission, ['update', 'delete'])) {
             $query->where('author_id', auth()->id());
         }
         
-        // Optionally add different logic for different permissions
+        // Lógica opcional para diferentes tipos de permissão
         if ($permission === 'read') {
-            // Example: Allow viewing of published posts or user's own drafts
+            // Permite visualizar posts publicados ou rascunhos do próprio usuário
             $query->where(function ($q) {
                 $q->where('status', 'published')
                    ->orWhere('author_id', auth()->id());
@@ -48,22 +48,22 @@ class Post extends Model
 }
 ```
 
-## Key Concepts
+## Conceitos-Chave
 
-### Permission Types
-The `scopeAllowed` method will handle all permissions mapped in the `security.permissions` configuration. The default possible values are `read`, `create`, `update`, and `delete`.
+### Tipos de Permissão
+O método `scopeAllowed` lida com todas as permissões mapeadas na configuração `security.permissions`. Os valores padrão possíveis são `read`, `create`, `update` e `delete`.
 
-### Authentication
-To utilize `auth()->id()` to get the current user's ID, ensure you have proper authentication middleware in place.
+### Autenticação
+Para utilizar `auth()->id()` e obter o ID do usuário atual, certifique-se de ter um middleware de autenticação configurado corretamente.
 
-### Behavior
-- If no records match the allowed conditions, an empty result set is returned
-- Follows the `404 Not Found` pattern for unauthorized access attempts
+### Comportamento
+- Se nenhum registro corresponder às condições permitidas, um conjunto vazio é retornado
+- Segue o padrão `404 Not Found` para tentativas de acesso não autorizadas
 
-## Advanced Use Cases
+## Casos de Uso Avançados
 
-### Multiple Conditions
-You can implement complex permission logic with multiple conditions:
+### Condições Múltiplas
+Implemente lógicas complexas de permissão com múltiplas condições:
 
 ```php
 public function scopeAllowed(Builder $query, string $permission)
@@ -73,43 +73,39 @@ public function scopeAllowed(Builder $query, string $permission)
             $q->where('author_id', auth()->id())
               ->orWhere('team_id', auth()->user()->team_id)
               ->orWhereHas('collaborators', function ($subQuery) {
-                  $subQuery->where('user_id', auth()->id());
+                  $subQuery->where('user_id', auth()->id()); // Filtra colaboradores associados
               });
         });
     }
 }
 ```
 
-### Role-Based Permissions
-Integrate with role-based access control systems:
+### Permissões Baseadas em Funções
+Integre com sistemas de controle de acesso baseado em funções (*RBAC*):
 
 ```php
 public function scopeAllowed(Builder $query, string $permission)
 {
     if (auth()->user()->hasRole('admin')) {
-        // Admins can access everything
+        // Admins podem acessar todos os registros
         return;
     }
     
-    // Apply specific permissions for non-admin users
+    // Aplica restrições para usuários não-administradores
     $query->where('organization_id', auth()->user()->organization_id);
 }
 ```
 
-## Best Practices
+## Boas Práticas
 
-- Keep permission logic clear and concise
-- Use existing authentication and authorization mechanisms
-- Test permission scenarios thoroughly
-- Consider performance implications of complex query scopes
+- Mantenha a lógica de permissão clara e concisa
+- Utilize mecanismos existentes de autenticação e autorização
+- Teste exaustivamente diferentes cenários de permissão
+- Considere implicações de desempenho em escopos de consulta complexos
 
-## Potential Pitfalls
+## Armadilhas Comuns
 
-- Ensure consistent application of permission logic across different query methods
-- Be cautious of N+1 query problems when using complex relationship-based permissions
-- Always validate permissions at both the query and application logic levels
+- Garanta aplicação consistente da lógica de permissão em diferentes métodos de consulta
+- Cuidado com problemas de consultas N+1 ao usar permissões baseadas em relacionamentos
+- Sempre valide permissões tanto no nível da consulta quanto na lógica da aplicação
 
-## Next Steps
-
-[Eager Loading Relationships](3d-eager-loading.md)
-[Back to Documentation Index](0-index.md)

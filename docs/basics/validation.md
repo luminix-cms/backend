@@ -1,16 +1,18 @@
-# Data Validation in Luminix Backend
+# Validação de Dados no Luminix Backend
 
-## Introduction
+## Introdução
 
-Robust data validation is crucial for maintaining data integrity and security in your API. Luminix Backend provides a flexible and powerful validation system that leverages Laravel's built-in validation capabilities, allowing you to easily define and enforce data validation rules across different contexts.
+A validação robusta de dados é essencial para manter a integridade e segurança das informações em sua API. O Luminix Backend oferece um sistema de validação flexível e poderoso que aproveita os recursos nativos de validação do Laravel, permitindo que você defina e aplique regras de validação de forma consistente em diferentes contextos.
 
-## Validation Approaches
+---
 
-Luminix Backend supports two primary methods of defining validation rules:
+## Abordagens de Validação
 
-### 1. Inline Model Validation
+O Luminix Backend suporta dois métodos principais para definir regras de validação:
 
-You can define validation rules directly within your model by overriding the `getValidationRules` method. This approach is straightforward and works well for simpler validation scenarios.
+### 1. Validação Direta no Modelo
+
+Você pode definir regras de validação diretamente no modelo sobrescrevendo o método `getValidationRules`. Essa abordagem é ideal para cenários mais simples.
 
 ```php
 class User extends Model
@@ -20,19 +22,19 @@ class User extends Model
     protected function getValidationRules(string $for): array
     {
         return match ($for) {
-            // Rules specifically for creating a new user
+            // Regras específicas para criação de usuários
             'store' => [
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users',
                 'password' => 'required|string|min:8|confirmed',
             ],
-            // Different rules for updating an existing user
+            // Regras diferentes para atualização de usuários
             'update' => [
                 'name' => 'sometimes|string|max:255',
                 'email' => 'sometimes|email|unique:users,email,' . $this->id,
                 'password' => 'sometimes|string|min:8|confirmed',
             ],
-            // Separate rules for custom contexts
+            // Regras personalizadas para contextos específicos
             'profile_update' => [
                 'bio' => 'nullable|string|max:500',
                 'avatar' => 'sometimes|image|max:2048',
@@ -43,41 +45,46 @@ class User extends Model
 }
 ```
 
-### Validation Contexts
+### Contextos de Validação
 
-The `$for` parameter allows you to define different validation rules for various scenarios:
-- `store`: Used in the default `store` implementation of the controller
-- `update`: Used in the default `update` implementation of the controller
-- Custom contexts: It is possible to create custom contexts. To do so, the user will need to validate the request by calling the `validateRequest` method from the model, passing the context as second argument.
+O parâmetro `$for` permite definir regras para diferentes cenários:
+- `store`: Usado na operação padrão de criação (`store`) do controlador
+- `update`: Usado na operação padrão de atualização (`update`) do controlador
+- Contextos personalizados: Permite criar validações específicas. Para isso, chame o método `validateRequest` do modelo passando o contexto desejado.
 
+**Exemplo de Uso:**
 ```php
 $user->validateRequest($request, 'profile_update');
 ```
 
-### 2. Dedicated Validator Classes
+---
 
-For more complex validation logic or better separation of concerns, you can use a dedicated validator class.
+### 2. Classes de Validação Dedicadas
+
+Para lógicas complexas ou melhor organização, utilize classes de validação dedicadas.
 
 ```php
 use Luminix\Backend\Validation\WithValidator;
 use App\Validators\UserValidator;
 
-#[WithValidator(UserValidator::class)]
+#[WithValidator(UserValidator::class)] // Atributo que vincula o validador ao modelo
 class User extends Model
 {
     use LuminixModel;
 }
 ```
 
-#### Creating a Validator Class
+#### Criando uma Classe de Validação
 
 ```php
 use Luminix\Backend\Validation\Validator;
 use App\Models\User;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UserValidator extends Validator
 {
-    // Validation method updating a user
+    // Validação para atualização de usuário
     public function update(User $user)
     {
         return [
@@ -85,7 +92,7 @@ class UserValidator extends Validator
             'email' => [
                 'sometimes', 
                 'email', 
-                Rule::unique('users')->ignore($user->id)
+                Rule::unique('users')->ignore($user->id) // Ignora o e-mail atual do usuário
             ],
             'password' => [
                 'sometimes', 
@@ -94,25 +101,51 @@ class UserValidator extends Validator
                     ->letters()
                     ->mixedCase()
                     ->numbers()
-                    ->symbols()
+                    ->symbols() // Exige senha complexa
             ],
         ];
     }
 
-    // Each validation context should have a corresponding method
-    // The absence of a method will remove the validation for that context
+    // Cada contexto de validação deve ter um método correspondente
+    // A ausência do método remove a validação para aquele contexto
 }
 ```
 
-## Generating Validator Classes
+---
 
-Use the Artisan command to quickly generate a validator:
+## Gerando Classes de Validação
+
+Use o comando Artisan para criar rapidamente um validador:
 
 ```bash
 php artisan make:validator UserValidator
 ```
 
-## Handling Validation Errors
+> **Dica:** O comando gera a classe no diretório `app/Validators` com um *stub* básico.
 
-Luminix Backend automatically handles validation errors, returning a `422 Unprocessable Entity` response with detailed error messages.
+---
 
+## Tratamento de Erros de Validação
+
+O Luminix Backend trata automaticamente os erros de validação, retornando uma resposta HTTP `422 Unprocessable Entity` com detalhes dos erros. Isso segue o padrão de APIs RESTful e é compatível com clientes frontend modernos.
+
+**Exemplo de Resposta de Erro:**
+```json
+{
+    "message": "O campo email é obrigatório.",
+    "errors": {
+        "email": ["O campo email é obrigatório."]
+    }
+}
+```
+
+---
+
+## Boas Práticas e Dicas
+
+1. **Separação de Responsabilidades**: Use classes dedicadas para validações complexas ou reutilizáveis.
+2. **Teste de Contextos**: Valide diferentes cenários (criação, atualização, ações personalizadas) para garantir consistência.
+3. **Regras Condicionais**: Aproveite regras como `sometimes` e `nullable` para flexibilidade.
+4. **Segurança**: Sempre valide campos sensíveis (como senhas) com regras rigorosas (ex: `Password::min(8)->uncompromised()`).
+
+Para personalizações avançadas, consulte a [documentação oficial do Laravel sobre validação](https://laravel.com/docs/validation).
