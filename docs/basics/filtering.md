@@ -118,7 +118,7 @@ Desta forma é possível adicionar lógica de filtragem customizada ao seu model
 
 ## Filtrando Relacionamentos
 
-Para filtrar registros com base em relacionamentos, você pode usar o nome de um relacionamento como a coluna. O valor deve ser pode ser um ID ou um array de IDs do modelo relacionado. O Luminix irá aplicar a filtragem automaticamente.
+Para filtrar registros com base em relacionamentos, você pode usar o nome de um relacionamento como a coluna. O valor pode ser um ID ou um array de IDs do modelo relacionado. O Luminix irá aplicar a filtragem automaticamente.
 
 ```http
 // Busca produtos relacionados a uma categoria específica
@@ -138,19 +138,19 @@ use Luminix\Backend\Services\ModelFilter;
 
 // Registra um operador para busca geográfica aproximada
 // considerando banco de dados MySQL com suporte a geolocalização
-ModelFilter::macro('nearLocation', function (Builder $query, string $column, array $coordinates) {
+ModelFilter::macro('inRadius', function (Builder $query, string $column, array $coordinates) {
     [$latitude, $longitude, $radius] = $coordinates;
     
     return $query->whereRaw(
-        "ST_Distance_Sphere(point(longitude, latitude), point(?, ?)) <= ?",
+        "ST_Distance_Sphere({$column}, point(?, ?)) <= ?",
         [$longitude, $latitude, $radius * 1000]
     );
 });
 ```
 
-Com esta macro registrada, você pode usar o operador `nearLocation` no parâmetro `where` para filtrar modelos que tenham uma coluna de geolocalização (latitude e longitude). O exemplo abaixo busca lojas em um raio de 5 km de São Paulo:
+Com esta macro registrada, você pode usar o operador `inRadius` no parâmetro `where` para filtrar modelos que tenham uma coluna do tipo `POINT` (ou similar) e que suportem geolocalização:
 
 ```http
 # Busca lojas em um raio de 5km de São Paulo (lat, long, raio_km)
-GET /luminix-api/shops?where[location:nearLocation][]=-23.550520&where[location:nearLocation][]=-46.633308&where[location:nearLocation][]=5
+GET /luminix-api/shops?where[location:inRadius][]=-23.550520&where[location:inRadius][]=-46.633308&where[location:inRadius][]=5
 ```

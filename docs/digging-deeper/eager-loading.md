@@ -71,7 +71,8 @@ class User extends Model
                     'roles' => fn ($query) => $query->allowed('read')
                     // Usa o escopo 'allowed' para carregar apenas roles
                     // que o usuário tem permissão de leitura (considerando
-                    // que o modelo Role também usa LuminixModel)
+                    // que o modelo Role também usa LuminixModel e possui
+                    // uma implementação de scopeAllowed)
                 ]);
             }
 
