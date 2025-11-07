@@ -152,7 +152,7 @@ class ResourceController extends Controller
 
         $relation->sync(
             collect($request->all())->mapWithKeys(function ($relationItem) use (&$key, $relation) {
-                if (is_int($relationItem)) {
+                if (is_int($relationItem) || is_string($relationItem)) {
                     $key++;
                     return [$key => $relationItem];
                 }
