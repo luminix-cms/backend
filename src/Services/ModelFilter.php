@@ -146,12 +146,12 @@ class ModelFilter {
     public static function operators(): array
     {
         return [
-            'equals',
-            'notEquals',
-            'like',
             'contains', 
             'startsWith', 
             'endsWith',
+            'like',
+            'equals',
+            'notEquals',
             'greaterThan',
             'greaterThanOrEquals',
             'lessThan',

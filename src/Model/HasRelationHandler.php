@@ -3,6 +3,7 @@
 namespace Luminix\Backend\Model;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use Luminix\Backend\Facades\Finder;
@@ -59,6 +60,10 @@ trait HasRelationHandler
                 'foreignKey' => $foreignKey,
                 'ownerKey' => $ownerKey,
             ];
+
+            if ($relation instanceof MorphToMany) {
+                $relations[Str::snake($methodName)]['morphType'] = $relation->getMorphType();
+            }
         }
 
         return empty($relations)
