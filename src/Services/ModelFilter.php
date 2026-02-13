@@ -146,10 +146,10 @@ class ModelFilter {
     public static function operators(): array
     {
         return [
-            'contains', 
+            'relation',
+            'contains',
             'startsWith', 
             'endsWith',
-            'like',
             'equals',
             'notEquals',
             'greaterThan',
@@ -160,7 +160,7 @@ class ModelFilter {
             'notBetween',
             'null',
             'notNull',
-            'relation',
+            'like',
         ] + array_keys(static::$macros);
     }
 
