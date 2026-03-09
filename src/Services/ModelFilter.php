@@ -248,7 +248,7 @@ class ModelFilter {
                 '[Luminix] Invalid filter provided for model "' . $this->model . '"\n'
                 . 'Column: ' . $column . '\n'
                 . 'Operator: ' . $operator . '\n'
-                . 'Value: ' . $value
+                . 'Value: ' . (string) $value
             );
         } else {
             Log::warning('[Luminix] Invalid filter provided', [
