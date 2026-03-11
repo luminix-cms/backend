@@ -106,7 +106,7 @@ class ResourceController extends Controller
         }
     }
 
-    private function getRequestedRelation(Request $request, $id)
+    protected function getRequestedRelation(Request $request, $id)
     {
         
         [
