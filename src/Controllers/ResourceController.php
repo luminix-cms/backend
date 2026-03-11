@@ -23,7 +23,7 @@ class ResourceController extends Controller
 
     use Macroable;
 
-    private function inferRequestParameters()
+    protected function inferRequestParameters()
     {
 
         /** @var Request */
