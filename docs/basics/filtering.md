@@ -43,6 +43,8 @@ Os operadores disponíveis são:
 - `greaterThanOrEquals`: Filtra registros onde o valor da coluna é maior ou igual ao valor fornecido.
 - `lessThan`: Filtra registros onde o valor da coluna é menor que o valor fornecido.
 - `lessThanOrEquals`: Filtra registros onde o valor da coluna é menor ou igual ao valor fornecido.
+- `between`: Filtra registros onde o valor da coluna está entre dois valores fornecidos (array com dois elementos).
+- `notBetween`: Filtra registros onde o valor da coluna **não** está entre dois valores fornecidos (array com dois elementos).
 - `like`: Filtra registros onde o valor da coluna corresponde ao padrão fornecido. Este operador suporta o curinga `%`.
 - `contains`: Filtra registros onde o valor da coluna contém o valor fornecido (equivalente a `%valor%`).
 - `startsWith`: Filtra registros onde o valor da coluna começa com o valor fornecido (equivalente a `valor%`).
@@ -52,6 +54,8 @@ Os operadores disponíveis são:
 - `relation`: Filtra registros por um modelo relacionado. O valor deve ser o ID do modelo relacionado.
 
 Caso o operador seja `equals` ou `relation`, você pode omiti-lo da chave. Por exemplo, `where[age]=18` é equivalente a `where[age:equals]=18`.
+
+> **Nota:** O parâmetro `where` é o nome canônico. O alias `filters` é aceito por compatibilidade legada, mas prefira sempre `where` em novos projetos.
 
 É possível combinar múltiplas condições adicionando mais pares chave-valor ao parâmetro `where`. Por exemplo, para filtrar usuários por idade e status de verificação de e-mail:
 
@@ -109,7 +113,7 @@ class Match extends Model
 
         // Aplica os outros filtros do Luminix
         // A omissão da linha abaixo fará com que o Luminix ignore outros parâmetros enviados no `where`
-        (new ModelFilter(static::class, $query))->apply($filters);
+        (new ModelFilter(static::class, $filters))->apply($query);
     }
 }
 ```

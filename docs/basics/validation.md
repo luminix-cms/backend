@@ -141,6 +141,28 @@ O Luminix Backend trata automaticamente os erros de validação, retornando uma 
 
 ---
 
+## Regra de Validação `luminix_sync`
+
+O Luminix registra automaticamente a regra de validação `luminix_sync`, usada internamente para validar dados de sincronização de relacionamentos via a operação `sync`. A regra aceita dois argumentos: a classe do modelo pai e o nome do relacionamento.
+
+```php
+'luminix_sync:App\Models\User,roles'
+```
+
+Ela verifica se:
+1. O relacionamento existe no modelo e está listado em `$syncs`
+2. Cada item enviado corresponde a um registro válido do modelo relacionado
+
+Normalmente você não precisa usá-la manualmente, mas ela pode ser útil em validações personalizadas de formulários que replicam o comportamento de sync:
+
+```php
+$request->validate([
+    '*' => 'luminix_sync:' . User::class . ',roles',
+]);
+```
+
+---
+
 ## Boas Práticas e Dicas
 
 1. **Separação de Responsabilidades**: Use classes dedicadas para validações complexas ou reutilizáveis.

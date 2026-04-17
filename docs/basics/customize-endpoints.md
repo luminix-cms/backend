@@ -94,21 +94,30 @@ O `ResourceController` possui alguns métodos que podem ser sobrescritos para pe
 
 - `afterDelete`: chamado após excluir uma instância do modelo. Você pode usá-lo para executar ações adicionais após a exclusão.
 
+- `beforeRestore`: chamado antes de restaurar uma instância excluída via soft-delete. Disponível apenas para modelos que utilizam `SoftDeletes`.
+
+- `afterRestore`: chamado após restaurar uma instância excluída via soft-delete.
+
+- `onTransactionError`: chamado quando ocorre um erro dentro da transação de banco de dados. Recebe o erro, a requisição e o item. Por padrão, relança o erro. Pode ser sobrescrito para tratamento personalizado.
+
+Todos os hooks recebem o objeto `Request` e a instância do modelo como parâmetros, exceto `onTransactionError` que recebe também o `Throwable` como primeiro argumento.
+
 Aqui está um exemplo de como usar esses métodos em um controlador personalizado:
 
 ```php
+use Illuminate\Http\Request;
 use Luminix\Backend\Controllers\ResourceController;
 
 class UserController extends ResourceController
 {
-    protected function beforeSave($model, $data)
+    protected function beforeSave(Request $request, $item)
     {
-        $avatar = $data['avatar'] ?? null;
+        $avatar = $request->file('avatar');
 
         if ($avatar) {
             $filename = \Str::random(10) . '.' . $avatar->getClientOriginalExtension();
             \Storage::disk('public')->put('avatars/' . $filename, $avatar);
-            $model->avatar = $filename;
+            $item->avatar = $filename;
         }
     }
 }

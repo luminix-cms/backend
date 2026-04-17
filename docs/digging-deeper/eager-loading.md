@@ -36,9 +36,14 @@ class User extends Model
 
 ---
 
-## 2. Carregamento Dinâmico de Relacionamentos com Escopos de Consulta
+## 2. Carregamento Dinâmico com `scopeBeforeLuminix` e `scopeAfterLuminix`
 
-Para um controle mais granular, sobrescreva os métodos `scopeBeforeLuminix` ou `scopeAfterLuminix` para carregar relacionamentos dinamicamente com base em parâmetros da requisição.
+Para um controle mais granular, sobrescreva `scopeBeforeLuminix` ou `scopeAfterLuminix` no modelo. Ambos são chamados automaticamente em cada consulta Luminix e recebem o `Builder` e o `Request` como parâmetros:
+
+- **`scopeBeforeLuminix`**: executado **antes** de filtros, busca e ordenação serem aplicados — ideal para eager loading e restrições base.
+- **`scopeAfterLuminix`**: executado **depois** de todos os escopos — útil para modificações finais na query.
+
+Exemplo de uso para carregar relacionamentos dinamicamente com base em parâmetros da requisição:
 
 ```php
 use Illuminate\Database\Eloquent\Model;

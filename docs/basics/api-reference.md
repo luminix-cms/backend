@@ -42,6 +42,7 @@ Recupera uma lista paginada de registros com opções avançadas de filtragem.
 | `order_by` | String | Ordena resultados (`coluna:direção`) | `?order_by=email:desc` |
 | `where` | Array | Filtragem avançada | `?where[idade:greaterThan]=18` |
 | `tab` | String | Filtragem personalizada por aba | `?tab=ativos` |
+| `minified` | Booleano | Retorna apenas `id` + campo de label (útil para selects/dropdowns) | `?minified=1` |
 
 #### Exemplos de Requisições
 
@@ -113,6 +114,21 @@ axios.delete('/luminix-api/to-dos', {
     data: { ids: [14, 15, 16] }
 });
 ```
+
+### Restauração de Múltiplos Registros: `POST /{$prefix}/{$modelSlug}/restore`
+
+Disponível apenas para modelos que utilizam `SoftDeletes`. Restaura registros previamente excluídos via soft-delete.
+
+```javascript
+axios.post('/luminix-api/to-dos/restore', {
+    ids: [14, 15, 16]
+});
+```
+
+> **Nota:** Para restaurar um único registro, utilize o endpoint de atualização com o parâmetro `?restore=1`:
+> ```
+> POST /luminix-api/to-dos/14?restore=1
+> ```
 
 ## Gerenciamento de Relacionamentos
 

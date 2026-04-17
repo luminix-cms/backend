@@ -11,8 +11,8 @@ php artisan vendor:publish --tag=luminix-config
 
 | Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
-| `models.namespace` | `'App\Models'` | Namespace padrão onde o Luminix irá descobrir e escanear modelos. Todos os modelos neste namespace que utilizam a trait `LuminixModel` serão processados. |
-| `models.include` | `[]` | Array de classes de modelos adicionais para inclusão manual no processamento. Útil para adicionar modelos de outros namespaces ou pacotes de terceiros. |
+| `models.directory` | `'Models'` | Caminho relativo ao diretório `app/` onde o Luminix irá descobrir e escanear modelos. Todos os modelos neste caminho que utilizam a trait `LuminixModel` serão processados. |
+| `models.include` | `[]` | Array de classes de modelos adicionais para inclusão manual no processamento. Útil para adicionar modelos de outros diretórios ou pacotes de terceiros. |
 
 ## Configuração da API
 

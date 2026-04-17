@@ -46,6 +46,33 @@ class User extends Model
 
 As rotas serão nomeadas usando o alias. Por exemplo, a rota index para o modelo `User` será nomeada `luminix.my_user.index`. O alias será então pluralizado e "slugificado" para gerar a URL. Por exemplo, a URL base para o modelo `User` acima será `/luminix-api/my-users`.
 
+### Nome de Exibição
+
+Além do apelido, cada modelo expõe um nome de exibição legível via o método estático `getDisplayName()`, que retorna um array com as formas singular e plural do nome da classe:
+
+```php
+User::getDisplayName();
+// ['singular' => 'User', 'plural' => 'Users']
+
+ToDo::getDisplayName();
+// ['singular' => 'To Do', 'plural' => 'To Dos']
+```
+
+Você pode sobrescrever esse método para retornar nomes localizados.
+
+### Campo de Label
+
+O método `getLabel()` retorna o nome do campo usado como rótulo do registro (útil no parâmetro `minified` e em selects). Por padrão, retorna o primeiro campo em `$fillable`. Para personalizar, defina a propriedade `$labeledBy` no modelo:
+
+```php
+class User extends Model
+{
+    use LuminixModel;
+
+    protected string $labeledBy = 'name';
+}
+```
+
 ### Apelidos de Modelo em Relações Polimórficas
 
 Por padrão, o Luminix Backend registrará [Tipos Polimórficos Personalizados](https://laravel.com/docs/11.x/eloquent-relationships#custom-polymorphic-types) para todos os modelos habilitados no Luminix. Isso significa que o apelido do modelo será usado como o tipo morph em relações polimórficas. Se você deseja evitar isso, chame o método `preventEnforcingMorphMap` no método `register` do seu service provider.

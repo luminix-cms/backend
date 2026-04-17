@@ -56,6 +56,10 @@ O método `scopeAllowed` lida com todas as permissões mapeadas na configuraçã
 ### Autenticação
 Para utilizar `auth()->id()` e obter o ID do usuário atual, certifique-se de ter um middleware de autenticação configurado corretamente.
 
+### Invocação Automática
+
+O `scopeAllowed` é chamado **automaticamente** em toda consulta ao banco de dados gerada pelo Luminix, desde que a ação possua uma permissão mapeada em `security.permissions` e `security.gates_enabled` esteja ativo. Você não precisa chamá-lo manualmente; basta definir a implementação no modelo.
+
 ### Comportamento
 - Se nenhum registro corresponder às condições permitidas, um conjunto vazio é retornado
 - Segue o padrão `404 Not Found` para tentativas de acesso não autorizadas
