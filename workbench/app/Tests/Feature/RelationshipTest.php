@@ -28,6 +28,7 @@ class RelationshipTest extends TestCase
                     'model' => 'tag',
                     'foreignKey' => null,
                     'ownerKey' => null,
+                    'morphType' => 'taggable_type',
                 ]
             ],
             $user->getRelationships()
@@ -52,6 +53,7 @@ class RelationshipTest extends TestCase
                     'model' => 'tag',
                     'foreignKey' => null,
                     'ownerKey' => null,
+                    'morphType' => 'taggable_type',
                 ]
             ],
             $toDo->getRelationships()
@@ -70,6 +72,7 @@ class RelationshipTest extends TestCase
                     'model' => 'tag',
                     'foreignKey' => null,
                     'ownerKey' => null,
+                    'morphType' => 'taggable_type',
                 ]
             ],
             $category->getRelationships()
