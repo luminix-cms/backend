@@ -43,6 +43,8 @@ jobs:
       - name: Determine version
         uses: paulhatch/semantic-version@v5.4.0
         id: semver
+        with:
+          tag_prefix: ''
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
