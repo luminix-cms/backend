@@ -119,6 +119,56 @@ Gate::define('update-department', function (User $user, Department $department) 
 });
 ```
 
+## Tradução da Mensagem de Erro
+
+Quando um Gate nega o acesso a um recurso, o pacote retorna uma resposta HTTP 401 com a mensagem padrão em inglês:
+
+```json
+{
+    "message": "You are not authorized to perform this action."
+}
+```
+
+### Publicando os arquivos de idioma
+
+Para traduzir ou personalizar essa mensagem, publique os arquivos de idioma do pacote com o comando:
+
+```bash
+php artisan vendor:publish --tag=luminix-lang
+```
+
+Isso criará o arquivo `lang/vendor/luminix-backend/en/backend.php` na sua aplicação com o seguinte conteúdo:
+
+```php
+<?php
+
+return [
+    'unauthorized' => 'You are not authorized to perform this action.',
+];
+```
+
+### Adicionando um novo idioma
+
+Para adicionar o português brasileiro, por exemplo, crie o arquivo `lang/vendor/luminix-backend/pt-BR/backend.php`:
+
+```php
+<?php
+
+return [
+    'unauthorized' => 'Você não tem permissão para realizar esta ação.',
+];
+```
+
+O Laravel utilizará automaticamente o arquivo do idioma configurado em `config/app.php`:
+
+```php
+'locale' => 'pt-BR',
+```
+
+### Alterando apenas a mensagem em inglês
+
+Se quiser apenas ajustar o texto sem trocar o idioma, edite o arquivo `lang/vendor/luminix-backend/en/backend.php` publicado anteriormente.
+
 ## Integração com Policies
 
 Para modelos complexos, considere usar [Policies do Laravel](https://laravel.com/docs/11.x/authorization#creating-policies) para organizar melhor as regras:

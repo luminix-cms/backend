@@ -121,7 +121,7 @@ class ResourceController extends Controller
         $item = $class::findOrFail($id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401);
+            abort(401, __('luminix-backend::backend.unauthorized'));
         }
 
 
@@ -281,7 +281,7 @@ class ResourceController extends Controller
 
             $items->each(function ($item) use ($permission, $alias) {
                 if (!Gate::allows($permission . '-' . $alias, [$item])) {
-                    abort(401);
+                    abort(401, __('luminix-backend::backend.unauthorized'));
                 }
             });
         }
@@ -308,7 +308,7 @@ class ResourceController extends Controller
         $supposedItem = $class::findOrFail($id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
-            abort(401);
+            abort(401, __('luminix-backend::backend.unauthorized'));
         }
 
         $item = $this->findItem($request, $id);
@@ -333,7 +333,7 @@ class ResourceController extends Controller
                 && config('luminix.backend.security.gates_enabled', true) 
                 && !Gate::allows($permission . '-' . $alias, [null])
         ) {
-            abort(401);
+            abort(401, __('luminix-backend::backend.unauthorized'));
         }
 
         $item = new $class;
@@ -389,7 +389,7 @@ class ResourceController extends Controller
         $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401);
+            abort(401, __('luminix-backend::backend.unauthorized'));
         }
 
         $item->validateRequest($request, 'update');
@@ -453,7 +453,7 @@ class ResourceController extends Controller
         $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401);
+            abort(401, __('luminix-backend::backend.unauthorized'));
         }
 
         $this->beforeTransaction($request, $item);
@@ -525,7 +525,7 @@ class ResourceController extends Controller
         if ($permission && config('luminix.backend.security.gates_enabled', true)) {
             $items->each(function ($item) use ($permission, $alias) {
                 if (!Gate::allows($permission . '-' . $alias, [$item])) {
-                    abort(401);
+                    abort(401, __('luminix-backend::backend.unauthorized'));
                 }
             });
         }
@@ -590,7 +590,7 @@ class ResourceController extends Controller
         if ($permission && config('luminix.backend.security.gates_enabled', true)) {
             $items->each(function ($item) use ($permission, $alias) {
                 if (!Gate::allows($permission . '-' . $alias, [$item])) {
-                    abort(401);
+                    abort(401, __('luminix-backend::backend.unauthorized'));
                 }
             });
         }

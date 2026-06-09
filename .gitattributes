@@ -1,2 +1,5 @@
+/.github export-ignore
 /workbench export-ignore
 /docs export-ignore
+/phpunit.xml export-ignore
+/testbench.yaml export-ignore

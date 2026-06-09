@@ -22,6 +22,11 @@ class BackendServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'luminix-backend');
+
+        $this->publishes([
+            __DIR__ . '/../lang' => $this->app->langPath('vendor/luminix-backend'),
+        ], 'luminix-lang');
         
         $finder = new ModelFinder();
         $this->app->instance(ModelFinder::class, $finder);
