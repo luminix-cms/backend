@@ -5,7 +5,7 @@ Pacote Laravel para geração automática de endpoints RESTful a partir de model
 ## Requisitos
 
 - PHP 8.2+
-- Laravel 11+
+- Laravel 11, 12 ou 13
 
 ## Instalação
 
