@@ -58,7 +58,7 @@ jobs:
       - name: Pin Laravel and Testbench versions
         run: |
           composer install --prefer-dist --no-interaction --no-progress
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-progress
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-progress --with-all-dependencies
 
       - name: Run tests
         run: composer test
