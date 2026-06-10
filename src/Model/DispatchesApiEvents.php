@@ -2,16 +2,13 @@
 
 namespace Luminix\Backend\Model;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 trait DispatchesApiEvents {
 
-    public static function bootDispatchesApiEvents()
+    public function getObservableEvents()
     {
-        $observers = Arr::wrap(static::resolveObserveAttributes());
-
-        $events = [
+        return array_unique(array_merge(parent::getObservableEvents(), [
             'luminixCreating',
             'luminixCreated',
             'luminixUpdating',
@@ -22,37 +19,11 @@ trait DispatchesApiEvents {
             'luminixDeleted',
             'luminixRestoring',
             'luminixRestored',
-        ];
-
-        foreach ($observers as $observer) {
-            foreach ($events as $event) {
-                if (method_exists($observer, $event)) {
-
-                    $class = is_object($observer) ? get_class($observer) : $observer;
-
-                    static::registerModelEvent($event, $class . '@' . $event);
-                }
-            }
-        }
+        ]));
     }
 
     public function initializeDispatchesApiEvents()
     {
-        $events = [
-            'luminixCreating',
-            'luminixCreated',
-            'luminixUpdating',
-            'luminixUpdated',
-            'luminixSaving',
-            'luminixSaved',
-            'luminixDeleting',
-            'luminixDeleted',
-            'luminixRestoring',
-            'luminixRestored',
-        ];
-
-        $this->observables = array_merge($this->observables, $events);
-
         $this->dispatchesEvents = array_merge([
             'luminixCreating' => \Luminix\Backend\Events\CreatingResource::class,
             'luminixCreated' => \Luminix\Backend\Events\CreatedResource::class,
