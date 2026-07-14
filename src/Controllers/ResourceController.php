@@ -369,7 +369,7 @@ class ResourceController extends Controller
         $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
-            $this->findItem($request, $item->getKey()),
+            $this->refetchItem($request, $item->getKey()),
             201
         );
     }
@@ -434,13 +434,13 @@ class ResourceController extends Controller
         $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
-            $this->findItem($request, $id)
+            $this->refetchItem($request, $id)
         );
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param Request $request 
+     * @param Request $request
      */
     public function destroy(Request $request, $id)
     {
@@ -664,9 +664,27 @@ class ResourceController extends Controller
 
     public function findItem(Request $request, $id)
     {
+        ['permission' => $permission] = $this->inferRequestParameters();
+
+        return $this->itemQuery($request, $id, $permission)->firstOrFail();
+    }
+
+    /**
+     * Re-fetch an item to build the response after a committed write.
+     *
+     * Applies `beforeLuminix`/`afterLuminix` but not `scopeAllowed`: the write
+     * was already authorized and committed, so the response must never be a
+     * 404, even when `scopeAllowed` hides the row from its own author.
+     */
+    public function refetchItem(Request $request, $id)
+    {
+        return $this->itemQuery($request, $id, null)->firstOrFail();
+    }
+
+    protected function itemQuery(Request $request, $id, ?string $permission): Builder
+    {
         [
             'class' => $class,
-            'permission' => $permission,
             'method' => $method
         ] = $this->inferRequestParameters();
 
@@ -686,8 +704,6 @@ class ResourceController extends Controller
             $query = $query->withTrashed();
         }
 
-        $item = $query->firstOrFail();
-
-        return $item;
+        return $query;
     }
 }
