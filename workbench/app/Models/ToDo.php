@@ -56,8 +56,13 @@ class ToDo extends Model
         };
     }
 
+    /** Permission strings received by scopeAllowed, recorded for contract tests. */
+    public static array $receivedPermissions = [];
+
     public function scopeAllowed(Builder $query, string $permission)
     {
+        static::$receivedPermissions[] = $permission;
+
         $query->where('user_id', auth()->id());
     }
 }
