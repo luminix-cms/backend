@@ -154,6 +154,8 @@ class User extends Model
 
 ### Operações de Relacionamento
 
+> **Autorização:** as operações de relacionamento são tratadas como uma **atualização do modelo pai** — aplicam o [`scopeAllowed('update')`](../security/query-permissions.md) na busca do registro pai e verificam o Gate `update-{apelido_modelo}`. Em caso de sucesso, respondem `200` com o registro pai atualizado.
+
 #### Sincronização: `POST /{$prefix}/{$modelSlug}/{{primary_key}}/{{relation}}/sync`
 
 ```javascript

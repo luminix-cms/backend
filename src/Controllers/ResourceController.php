@@ -40,7 +40,11 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        $permission = config('luminix.backend.security.permissions.' . $method, null);
+        // Relation routes are named "{relation}:{action}"; their permission is
+        // configured under the action alone ('sync', 'attach', 'detach').
+        $permissionKey = str_contains($method, ':') ? explode(':', $method)[1] : $method;
+
+        $permission = config('luminix.backend.security.permissions.' . $permissionKey, null);
 
         return [
             'class' => $class,
@@ -118,7 +122,7 @@ class ResourceController extends Controller
 
         [$relationName, $action] = explode(':', $method);
 
-        $item = $class::findOrFail($id);
+        $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
             abort(401, __('luminix-backend::backend.unauthorized'));
@@ -163,7 +167,7 @@ class ResourceController extends Controller
             })
         );
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     public function attach(Request $request, $id, $itemId)
@@ -174,7 +178,7 @@ class ResourceController extends Controller
 
         $relation->attach($itemId, $request->all());
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     public function detach(Request $request, $id, $itemId)
@@ -183,7 +187,7 @@ class ResourceController extends Controller
 
         $relation->detach($itemId);
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     protected function beforeSave(Request $request, $item)
@@ -369,7 +373,7 @@ class ResourceController extends Controller
         $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
-            $this->findItem($request, $item->getKey()),
+            $this->refetchItem($request, $item->getKey()),
             201
         );
     }
@@ -434,13 +438,13 @@ class ResourceController extends Controller
         $this->afterTransaction($request, $item);
 
         return $this->respondWithItem(
-            $this->findItem($request, $id)
+            $this->refetchItem($request, $id)
         );
     }
 
     /**
      * Remove the specified resource from storage.
-     * @param Request $request 
+     * @param Request $request
      */
     public function destroy(Request $request, $id)
     {
@@ -664,9 +668,27 @@ class ResourceController extends Controller
 
     public function findItem(Request $request, $id)
     {
+        ['permission' => $permission] = $this->inferRequestParameters();
+
+        return $this->itemQuery($request, $id, $permission)->firstOrFail();
+    }
+
+    /**
+     * Re-fetch an item to build the response after a committed write.
+     *
+     * Applies `beforeLuminix`/`afterLuminix` but not `scopeAllowed`: the write
+     * was already authorized and committed, so the response must never be a
+     * 404, even when `scopeAllowed` hides the row from its own author.
+     */
+    public function refetchItem(Request $request, $id)
+    {
+        return $this->itemQuery($request, $id, null)->firstOrFail();
+    }
+
+    protected function itemQuery(Request $request, $id, ?string $permission): Builder
+    {
         [
             'class' => $class,
-            'permission' => $permission,
             'method' => $method
         ] = $this->inferRequestParameters();
 
@@ -686,8 +708,6 @@ class ResourceController extends Controller
             $query = $query->withTrashed();
         }
 
-        $item = $query->firstOrFail();
-
-        return $item;
+        return $query;
     }
 }

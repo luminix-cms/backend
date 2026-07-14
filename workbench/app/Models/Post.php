@@ -19,8 +19,13 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Permission strings received by scopeAllowed, recorded for contract tests. */
+    public static array $receivedPermissions = [];
+
     public function scopeAllowed(Builder $query, string $permission): void
     {
+        static::$receivedPermissions[] = $permission;
+
         if (in_array($permission, ['update', 'delete'])) {
             $query->where('user_id', auth()->id());
         }

@@ -31,15 +31,21 @@ Especifique as permissões necessárias para cada ação padrão da API:
 // config/luminix/backend.php
 'security' => [
     'permissions' => [
-        'index'   => 'read',    // Listar itens
-        'show'    => 'read',    // Visualizar um item
-        'store'   => 'create',  // Criar novos itens
-        'update'  => 'update',  // Modificar itens existentes
-        'destroy' => 'delete',  // Remover itens
-        // ...
+        'index'       => 'read',    // Listar itens
+        'show'        => 'read',    // Visualizar um item
+        'store'       => 'create',  // Criar novos itens
+        'update'      => 'update',  // Modificar itens existentes
+        'destroy'     => 'delete',  // Remover itens
+        'destroyMany' => 'delete',  // Remover itens em lote
+        'restoreMany' => 'update',  // Restaurar itens em lote (soft delete)
+        'sync'        => 'update',  // Sincronizar uma relação
+        'attach'      => 'update',  // Anexar um item a uma relação
+        'detach'      => 'update',  // Desanexar um item de uma relação
     ]
 ]
 ```
+
+> **Nota:** `sync`, `attach` e `detach` são autorizados como uma **atualização do modelo pai**: o Gate `update-{apelido_modelo}` é verificado com o registro pai da relação. Quem não pode atualizar o registro não pode alterar suas relações.
 
 ## Entendendo a Nomenclatura de Permissões
 
@@ -86,7 +92,22 @@ public function boot()
 ### Comportamento em Endpoints de Listagem
 - Ao recuperar uma lista de itens, a permissão é verificada **para cada item individualmente**
 - O usuário deve ter permissão para todos os itens da lista
-- Se qualquer item negar a permissão, a requisição é abortada com uma resposta Forbidden (403)
+- Se qualquer item negar a permissão, a requisição é abortada com uma resposta `401`
+
+### Comportamento no `store`
+- No momento da criação ainda não existe registro, então o Gate `create-{apelido_modelo}` é verificado **sem instância do modelo** — a definição recebe apenas o usuário autenticado:
+
+```php
+Gate::define('create-to_do', function (?User $user) {
+    return !!$user;
+});
+```
+
+- Toda a autorização de criação acontece nos Gates e nas regras de validação; o [`scopeAllowed`](./query-permissions.md) não participa do `store`
+
+### Códigos de resposta
+- Gate negado: `401` com a mensagem `unauthorized`
+- Registro oculto pelo [`scopeAllowed`](./query-permissions.md): `404` — para o usuário, o registro não existe
 
 ### Depuração de Permissões
 - Use métodos do facade `Gate` como `allows()` e `denies()` para testar permissões:
