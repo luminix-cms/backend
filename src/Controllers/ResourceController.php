@@ -40,7 +40,11 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        $permission = config('luminix.backend.security.permissions.' . $method, null);
+        // Relation routes are named "{relation}:{action}"; their permission is
+        // configured under the action alone ('sync', 'attach', 'detach').
+        $permissionKey = str_contains($method, ':') ? explode(':', $method)[1] : $method;
+
+        $permission = config('luminix.backend.security.permissions.' . $permissionKey, null);
 
         return [
             'class' => $class,
@@ -118,7 +122,7 @@ class ResourceController extends Controller
 
         [$relationName, $action] = explode(':', $method);
 
-        $item = $class::findOrFail($id);
+        $item = $this->findItem($request, $id);
 
         if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
             abort(401, __('luminix-backend::backend.unauthorized'));
@@ -163,7 +167,7 @@ class ResourceController extends Controller
             })
         );
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     public function attach(Request $request, $id, $itemId)
@@ -174,7 +178,7 @@ class ResourceController extends Controller
 
         $relation->attach($itemId, $request->all());
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     public function detach(Request $request, $id, $itemId)
@@ -183,7 +187,7 @@ class ResourceController extends Controller
 
         $relation->detach($itemId);
 
-        return $this->respondWithItem($this->findItem($request, $id));
+        return $this->respondWithItem($this->refetchItem($request, $id));
     }
 
     protected function beforeSave(Request $request, $item)
