@@ -145,10 +145,10 @@ class ModelFilter {
 
     public static function operators(): array
     {
-        return [
+        return array_merge([
             'relation',
             'contains',
-            'startsWith', 
+            'startsWith',
             'endsWith',
             'equals',
             'notEquals',
@@ -161,7 +161,7 @@ class ModelFilter {
             'null',
             'notNull',
             'like',
-        ] + array_keys(static::$macros);
+        ], array_keys(static::$macros));
     }
 
     private function methodExists(string $method): bool
