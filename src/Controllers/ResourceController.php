@@ -29,14 +29,15 @@ class ResourceController extends Controller
         /** @var Request */
         $request = request();
 
-        $name = $request->route()->getName();
+        $routeName = $request->route()->getName();
 
-        [, $name, $method] = explode('.', $name);
+        $name = Finder::aliasFromRouteName($routeName);
+        $method = Finder::actionFromRouteName($routeName);
 
         $models = Finder::all();
-        $class = $models[$name];
+        $class = $models[$name] ?? null;
 
-        if (!class_exists($class)) {
+        if (!is_string($class) || !class_exists($class)) {
             abort(404);
         }
 

@@ -100,6 +100,54 @@ class ModelFinder {
         return $this->classes;
     }
 
+    /**
+     * The alias encoded in a Luminix route name, or null when the name does not
+     * belong to this package.
+     *
+     * Route names follow `luminix.{alias}.{action}`, and that shape is load
+     * bearing: this package splits it in `ResourceController`, and consuming
+     * applications split it again whenever they need to know which model an
+     * automatic endpoint belongs to — to gate it behind a feature flag, for
+     * instance.
+     *
+     * Every one of those consumers is a copy of a convention we never exposed.
+     * The day the shape changes, they stop matching in silence: no exception,
+     * no failing test, just endpoints answering when they should not. Reading
+     * the alias from here keeps the convention in one place.
+     */
+    function aliasFromRouteName(?string $name): ?string
+    {
+        return $this->splitRouteName($name)[0] ?? null;
+    }
+
+    /**
+     * The action encoded in a Luminix route name, or null when the name does
+     * not belong to this package. Relation actions keep their `{relation}:{action}`
+     * shape, as the routes declare them.
+     */
+    function actionFromRouteName(?string $name): ?string
+    {
+        return $this->splitRouteName($name)[1] ?? null;
+    }
+
+    /**
+     * @return array{0: string, 1: string}|array{}
+     */
+    private function splitRouteName(?string $name): array
+    {
+        if (!is_string($name)) {
+            return [];
+        }
+
+        $parts = explode('.', $name);
+
+        if (count($parts) !== 3 || $parts[0] !== 'luminix') {
+            return [];
+        }
+
+        return [$parts[1], $parts[2]];
+    }
+
     function toAlias(string $model): string
     {
         return $this->all()->search($model);
