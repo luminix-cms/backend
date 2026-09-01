@@ -2,8 +2,12 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Luminix\Backend\Exceptions\InvalidFilterException;
 use Luminix\Backend\Services\ModelFilter;
+use ReflectionMethod;
+use ReflectionProperty;
 use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
@@ -16,6 +20,17 @@ use Workbench\App\Tests\TestCase;
  */
 class ModelFilterUnitTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        // Model::resolveRelationUsing() stores resolvers in a static property
+        // shared across the whole run; reset it so tests don't bleed into each other.
+        $property = new ReflectionProperty(Model::class, 'relationResolvers');
+        $property->setAccessible(true);
+        $property->setValue(null, []);
+
+        parent::tearDown();
+    }
+
     // ── Equality ────────────────────────────────────────────────────────────
 
     public function test_equals_operator_matches_single_value()
@@ -261,6 +276,37 @@ class ModelFilterUnitTest extends TestCase
         // Attach one category
         $todo->categories()->sync([1]);
         $this->assertCount(1, $this->filter(ToDo::class, ['categories' => '*']));
+    }
+
+    // ── Dynamic relations (Model::resolveRelationUsing) ──────────────────────
+
+    public function test_resolve_relation_function_name_recognizes_relations_registered_via_resolve_relation_using()
+    {
+        // No `dynamicToDos` method exists on Category — only a resolver registered
+        // the way a package would declare an inverse relation for a model it doesn't own.
+        Category::resolveRelationUsing('dynamicToDos', function (Category $category) {
+            return $category->belongsToMany(ToDo::class);
+        });
+
+        $filter = new ModelFilter(Category::class, []);
+
+        $resolve = new ReflectionMethod($filter, 'resolveRelationFunctionName');
+        $resolve->setAccessible(true);
+
+        $this->assertEquals('dynamicToDos', $resolve->invoke($filter, 'dynamicToDos'));
+    }
+
+    public function test_resolve_relation_function_name_still_throws_for_unknown_relation()
+    {
+        $filter = new ModelFilter(Category::class, []);
+
+        $resolve = new ReflectionMethod($filter, 'resolveRelationFunctionName');
+        $resolve->setAccessible(true);
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Relation function not found');
+
+        $resolve->invoke($filter, 'nonexistentRelation');
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
