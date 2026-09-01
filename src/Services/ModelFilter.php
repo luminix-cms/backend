@@ -35,14 +35,10 @@ class ModelFilter {
     {
         $instance = new $this->model;
 
-        if (method_exists($instance, $relation)) {
-            return $relation;
-        }
-
-        $relation = Str::camel($relation);
-
-        if (method_exists($instance, $relation)) {
-            return $relation;
+        foreach ([$relation, Str::camel($relation)] as $candidate) {
+            if ($instance->isRelation($candidate)) {
+                return $candidate;
+            }
         }
 
         throw new Exception('Relation function not found');
