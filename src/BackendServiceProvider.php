@@ -27,6 +27,14 @@ class BackendServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../lang' => $this->app->langPath('vendor/luminix-backend'),
         ], 'luminix-lang');
+
+        // Installs the consumer skill into the app so it triggers without /luminix. The whole
+        // tree is copied, so refreshing it after a package upgrade takes `--force`. Shared tag
+        // across every luminix/* package -> one `vendor:publish --tag=luminix-skill` covers all
+        // of them.
+        $this->publishes([
+            __DIR__ . '/../skill' => base_path('.claude/skills/luminix-backend'),
+        ], 'luminix-skill');
         
         $finder = new ModelFinder();
         $this->app->instance(ModelFinder::class, $finder);
