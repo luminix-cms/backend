@@ -24,6 +24,30 @@ class ModelFinderTest extends TestCase
         ], $models->toArray());
     }
 
+    public function test_it_reads_the_alias_and_action_from_a_route_name()
+    {
+        $this->assertEquals('to_do', Finder::aliasFromRouteName('luminix.to_do.index'));
+        $this->assertEquals('index', Finder::actionFromRouteName('luminix.to_do.index'));
+    }
+
+    public function test_it_keeps_the_relation_action_whole()
+    {
+        // Relation routes are named `{relation}:{action}`; splitting on the dot
+        // must not cut them in half.
+        $this->assertEquals('category', Finder::aliasFromRouteName('luminix.category.tags:sync'));
+        $this->assertEquals('tags:sync', Finder::actionFromRouteName('luminix.category.tags:sync'));
+    }
+
+    public function test_a_foreign_route_name_reads_as_nothing()
+    {
+        // Applications ask about every route they see, not only ours. Returning
+        // null is what lets them tell "not a Luminix endpoint" from "an endpoint
+        // whose alias I could not resolve".
+        $this->assertNull(Finder::aliasFromRouteName('admin.dashboard.index'));
+        $this->assertNull(Finder::aliasFromRouteName('luminix.to_do'));
+        $this->assertNull(Finder::aliasFromRouteName(null));
+    }
+
     public function test_to_alias_converts_class_to_alias()
     {
         $this->assertEquals('user',     Finder::toAlias(User::class));
