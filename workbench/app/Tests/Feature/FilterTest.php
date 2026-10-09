@@ -2,6 +2,7 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Luminix\Backend\Exceptions\InvalidFilterException;
 use Workbench\App\Models\User;
 use Workbench\App\Tests\TestCase;
 
@@ -172,6 +173,27 @@ class FilterTest extends TestCase
         $sorted = $names;
         rsort($sorted);
         $this->assertEquals($sorted, $names);
+    }
+
+    public function test_order_by_allows_non_fillable_visible_columns()
+    {
+        // 'id' isn't in Category::$fillable, but it's a visible column.
+        $response = $this->json('GET', '/luminix-api/categories?order_by=id:desc');
+
+        $response->assertStatus(200);
+        $ids = array_column($response->json('data'), 'id');
+        $sorted = $ids;
+        rsort($sorted);
+        $this->assertEquals($sorted, $ids);
+    }
+
+    public function test_order_by_rejects_hidden_columns()
+    {
+        // User::$hidden includes 'password' — ordering by it would let its
+        // value be inferred from the position of records in the response.
+        $this->expectException(InvalidFilterException::class);
+
+        User::query()->applyOrderBy('password', 'asc');
     }
 
     // ── Pagination ───────────────────────────────────────────────────────────

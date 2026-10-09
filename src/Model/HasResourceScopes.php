@@ -4,8 +4,10 @@ namespace Luminix\Backend\Model;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Luminix\Backend\Exceptions\InvalidFilterException;
 use Luminix\Backend\Services\ModelFilter;
 use Illuminate\Support\Str;
+use Spatie\ModelInfo\ModelInfo;
 
 trait HasResourceScopes
 {
@@ -47,7 +49,21 @@ trait HasResourceScopes
 
     public function scopeApplyOrderBy(Builder $query, string $column, string $direction)
     {
-        $query->orderBy(Str::snake($column), $direction)->orderBy($this->getKeyName(), 'asc');
+        $column = Str::snake($column);
+
+        $orderable = ModelInfo::forModel(static::class)->attributes
+            ->where('hidden', false)
+            ->where('appended', false)
+            ->pluck('name');
+
+        if (!$orderable->contains($column)) {
+            throw new InvalidFilterException(
+                '[Luminix] Invalid order_by column provided for model "' . static::class . '"' . "\n"
+                . 'Column: ' . $column
+            );
+        }
+
+        $query->orderBy($column, $direction)->orderBy($this->getKeyName(), 'asc');
     }
 
     public function scopeLuminixQuery(Builder $query, Request $request, ?string $permission)

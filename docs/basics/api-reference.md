@@ -62,6 +62,8 @@ axios.get('/luminix-api/users', {
 });
 ```
 
+> **Nota:** `order_by` rejeita colunas listadas no `$hidden` do modelo (ou fora da lista de colunas do modelo) lançando `InvalidFilterException` — isso evita que o valor de uma coluna oculta seja inferido pela posição dos registros na resposta.
+
 ### Criação de Registros: `POST /{$prefix}/{$modelSlug}`
 
 Cria novos registros com proteção interna de atributos.
