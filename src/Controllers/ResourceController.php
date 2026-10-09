@@ -306,16 +306,13 @@ class ResourceController extends Controller
         [
             'alias' => $alias,
             'permission' => $permission,
-            'class' => $class,
         ] = $this->inferRequestParameters();
 
-        $supposedItem = $class::findOrFail($id);
+        $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$supposedItem])) {
+        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
             abort(401, __('luminix-backend::backend.unauthorized'));
         }
-
-        $item = $this->findItem($request, $id);
 
         return $this->respondWithItem($item);
     }

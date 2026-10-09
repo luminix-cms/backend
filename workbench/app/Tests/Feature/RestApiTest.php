@@ -49,12 +49,13 @@ class RestApiTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath("data", []);
 
+        // ToDo::scopeAllowed excludes the row before the Gate ever runs, same as update/destroy below.
         $this->json('GET', '/luminix-api/to-dos/1')
-            ->assertStatus(401);
-        
+            ->assertStatus(404);
+
         $this->json('POST', '/luminix-api/to-dos')
             ->assertStatus(401);
-        
+
         $this->json('POST', '/luminix-api/to-dos/1')
             ->assertStatus(404);
 
@@ -122,9 +123,9 @@ class RestApiTest extends TestCase
             'name' => 'Jane Doe',
         ]);
 
-        // cant read other users to_dos
+        // cant read other users to_dos — scopeAllowed excludes the row before the Gate runs
         $this->json('GET', '/luminix-api/to-dos/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         // can create to_do
         $this->json('POST', '/luminix-api/to-dos', [
