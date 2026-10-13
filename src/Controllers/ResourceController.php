@@ -535,7 +535,7 @@ class ResourceController extends Controller
         if ($request->force) {
             $query->withTrashed();
         }
-        $items = $this->authorizeItems($permission, $alias, (clone $query)->get());
+        $items = $this->authorizeItems($permission, $alias, $this->withKeySelected(clone $query)->get());
 
         if ($items->count() === 0) {
             abort(404);
@@ -591,7 +591,7 @@ class ResourceController extends Controller
             ->whereIn($instance->getKeyName(), $ids)
             ->afterLuminix($request);
 
-        $items = $this->authorizeItems($permission, $alias, (clone $query)->get());
+        $items = $this->authorizeItems($permission, $alias, $this->withKeySelected(clone $query)->get());
 
         if ($items->count() === 0) {
             abort(404);
@@ -684,6 +684,20 @@ class ResourceController extends Controller
         }
 
         throw (new ModelNotFoundException)->setModel(get_class($item));
+    }
+
+    /**
+     * Load the key alongside the columns a scope narrowed with `select()`, so
+     * the authorized items can pick the rows a bulk write reaches. Registered
+     * as the last global scope, it runs after the model's own.
+     */
+    protected function withKeySelected(Builder $query): Builder
+    {
+        return $query->withGlobalScope('luminix.key', function ($query) {
+            if ($query->getQuery()->columns !== null) {
+                $query->addSelect($query->getModel()->getQualifiedKeyName());
+            }
+        });
     }
 
     /**
