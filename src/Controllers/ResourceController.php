@@ -169,21 +169,17 @@ class ResourceController extends Controller
     {
         $relation = $this->getRequestedRelation($request, $id);
 
-        $key = -1;
+        $keyName = $relation->getRelated()->getKeyName();
 
         $relation->sync(
-            collect($request->all())->mapWithKeys(function ($relationItem) use (&$key, $relation) {
+            collect($request->all())->mapWithKeys(function ($relationItem) use ($keyName, $relation) {
                 if (is_int($relationItem) || is_string($relationItem)) {
-                    $key++;
-                    return [$key => $relationItem];
+                    return [$relationItem => []];
                 }
-                $key = $relationItem[$relation->getRelated()->getKeyName()];
-                $pivot = $this->pivotAttributes(
-                    $relation,
-                    Arr::except($relationItem, $relation->getRelated()->getKeyName())
-                );
-                return [$relationItem[$relation->getRelated()->getKeyName()] => $pivot];
-                
+
+                return [
+                    $relationItem[$keyName] => $this->pivotAttributes($relation, Arr::except($relationItem, $keyName)),
+                ];
             })
         );
 
