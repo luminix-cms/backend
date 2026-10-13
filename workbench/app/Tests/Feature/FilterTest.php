@@ -2,6 +2,11 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Illuminate\Database\Eloquent\Model;
+use Luminix\Backend\Exceptions\InvalidFilterException;
+use Luminix\Backend\Model\LuminixModel;
+use Workbench\App\Models\Category;
+use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
 use Workbench\App\Tests\TestCase;
 
@@ -201,6 +206,79 @@ class FilterTest extends TestCase
         // value be inferred from the position of records in the response.
         $this->json('GET', '/luminix-api/users?order_by=password:asc')
             ->assertStatus(422);
+    }
+
+    public function test_order_by_rejects_columns_excluded_by_config()
+    {
+        // The `filter.exclude` entry replaces `$hidden` for `where`; order_by follows it.
+        config(['luminix.backend.api.filter.exclude' => [
+            'Workbench\App\Models\Category:name',
+        ]]);
+
+        $this->json('GET', '/luminix-api/categories?order_by=name:asc')
+            ->assertStatus(422);
+    }
+
+    public function test_order_by_rejects_accessors_that_are_not_columns()
+    {
+        $model = new class extends Model {
+            use LuminixModel;
+
+            protected $table = 'categories';
+
+            public function getShoutedNameAttribute(): string
+            {
+                return strtoupper($this->name);
+            }
+        };
+
+        $this->expectException(InvalidFilterException::class);
+
+        $model->newQuery()->applyOrderBy('shouted_name', 'asc');
+    }
+
+    public function test_order_by_accepts_keys_declared_in_orderable()
+    {
+        // Category::$orderable declares the `withCount('toDos')` alias.
+        $work = Category::where('name', 'Work')->first();
+        $work->toDos()->attach(ToDo::first()->id);
+
+        $first = Category::query()
+            ->withCount('toDos')
+            ->applyOrderBy('to_dos_count', 'desc')
+            ->first();
+
+        $this->assertEquals($work->id, $first->id);
+    }
+
+    public function test_order_by_is_ignored_when_throw_is_disabled()
+    {
+        config(['luminix.backend.api.filter.throw' => false]);
+
+        $response = $this->json('GET', '/luminix-api/categories?order_by=nonexistent_column:desc');
+
+        $response->assertStatus(200);
+        $ids = array_column($response->json('data'), 'id');
+        $sorted = $ids;
+        sort($sorted);
+        $this->assertEquals($sorted, $ids);
+    }
+
+    public function test_order_by_rejects_an_unknown_direction()
+    {
+        $this->json('GET', '/luminix-api/categories?order_by=name:sideways')
+            ->assertStatus(422);
+    }
+
+    public function test_order_by_without_direction_sorts_ascending()
+    {
+        $response = $this->json('GET', '/luminix-api/categories?order_by=name');
+
+        $response->assertStatus(200);
+        $names = array_column($response->json('data'), 'name');
+        $sorted = $names;
+        sort($sorted);
+        $this->assertEquals($sorted, $names);
     }
 
     // ── Pagination ───────────────────────────────────────────────────────────

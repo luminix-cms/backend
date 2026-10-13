@@ -4,10 +4,10 @@ namespace Luminix\Backend\Model;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Luminix\Backend\Exceptions\InvalidFilterException;
 use Luminix\Backend\Services\ModelFilter;
 use Illuminate\Support\Str;
-use Spatie\ModelInfo\ModelInfo;
 
 trait HasResourceScopes
 {
@@ -47,23 +47,57 @@ trait HasResourceScopes
         }
     }
 
+    /**
+     * Keys `order_by` accepts besides the model's columns, such as a
+     * `withCount` alias added in scopeBeforeLuminix.
+     */
+    public function getOrderable(): array
+    {
+        if (!isset($this->orderable)) {
+            return [];
+        }
+
+        return $this->orderable;
+    }
+
+    /**
+     * Whether `order_by` may sort by `$column`: a key in `$orderable`, or a
+     * table column that ModelFilter::excludes() doesn't keep out of client
+     * queries. Sorting by an excluded column would let its value be inferred
+     * from the order of the records in the response.
+     */
+    public function isOrderable(string $column): bool
+    {
+        if (in_array($column, $this->getOrderable(), true)) {
+            return true;
+        }
+
+        return !ModelFilter::excludes($this, $column)
+            && in_array($column, $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable()), true);
+    }
+
     public function scopeApplyOrderBy(Builder $query, string $column, string $direction)
     {
         $column = Str::snake($column);
+        $direction = strtolower($direction);
 
-        $orderable = ModelInfo::forModel(static::class)->attributes
-            ->where('hidden', false)
-            ->where('appended', false)
-            ->pluck('name');
-
-        if (!$orderable->contains($column)) {
+        if (in_array($direction, ['asc', 'desc'], true) && $this->isOrderable($column)) {
+            $query->orderBy($column, $direction);
+        } elseif (config('luminix.backend.api.filter.throw', true)) {
             throw new InvalidFilterException(
-                '[Luminix] Invalid order_by column provided for model "' . static::class . '"' . "\n"
-                . 'Column: ' . $column
+                '[Luminix] Invalid order_by provided for model "' . static::class . '"' . "\n"
+                . 'Column: ' . $column . "\n"
+                . 'Direction: ' . $direction
             );
+        } else {
+            Log::warning('[Luminix] Invalid order_by provided', [
+                'model' => static::class,
+                'column' => $column,
+                'direction' => $direction,
+            ]);
         }
 
-        $query->orderBy($column, $direction)->orderBy($this->getKeyName(), 'asc');
+        $query->orderBy($this->getKeyName(), 'asc');
     }
 
     public function scopeLuminixQuery(Builder $query, Request $request, ?string $permission)
@@ -93,7 +127,7 @@ trait HasResourceScopes
         }
 
         if ($request->has('order_by')) {
-            [$field, $direction] = explode(':', $request->order_by);
+            [$field, $direction] = array_pad(explode(':', $request->order_by, 2), 2, 'asc');
             $query->applyOrderBy($field, $direction);
         }
 

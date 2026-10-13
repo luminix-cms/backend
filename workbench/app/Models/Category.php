@@ -20,6 +20,10 @@ class Category extends Model
         'toDos',
     ];
 
+    protected $orderable = [
+        'to_dos_count',
+    ];
+
     public function toDos(): BelongsToMany
     {
         return $this->belongsToMany(ToDo::class);
