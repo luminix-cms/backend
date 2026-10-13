@@ -113,4 +113,6 @@ class UserController extends ResourceController {
 }
 ```
 
+It runs on `attach` and on every `sync` item; a plain key in `sync` arrives with `$attributes = []`.
+
 > Required for `BelongsToMany.sync()` from `@luminix/core`.

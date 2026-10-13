@@ -56,6 +56,8 @@ class UserController extends ResourceController
 }
 ```
 
+O método roda no `attach` e em cada item do `sync`. Um id simples enviado ao `sync` chega com `$attributes` vazio.
+
 ## Adicionar comportamentos ao próprio modelo
 
 A maneira mais fácil de personalizar o comportamento de um modelo é adicionar comportamentos diretamente à classe do modelo. Por exemplo, utilize os [Eventos do Modelo Eloquent](https://laravel.com/docs/11.x/eloquent#events) integrados do Laravel para adicionar lógica personalizada aos seus modelos.
