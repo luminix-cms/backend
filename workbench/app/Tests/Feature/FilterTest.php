@@ -2,7 +2,6 @@
 
 namespace Workbench\App\Tests\Feature;
 
-use Luminix\Backend\Exceptions\InvalidFilterException;
 use Workbench\App\Models\User;
 use Workbench\App\Tests\TestCase;
 
@@ -151,6 +150,15 @@ class FilterTest extends TestCase
         $this->assertCount(0, $response->json('data'));
     }
 
+    public function test_invalid_where_answers_422()
+    {
+        config(['app.debug' => false]);
+
+        $this->json('GET', '/luminix-api/categories', ['where' => ['nonexistent_column' => 'x']])
+            ->assertStatus(422)
+            ->assertExactJson(['message' => 'The given filter or ordering is invalid.']);
+    }
+
     // ── `order_by` ───────────────────────────────────────────────────────────
 
     public function test_order_by_ascending_sorts_correctly()
@@ -191,9 +199,8 @@ class FilterTest extends TestCase
     {
         // User::$hidden includes 'password' — ordering by it would let its
         // value be inferred from the position of records in the response.
-        $this->expectException(InvalidFilterException::class);
-
-        User::query()->applyOrderBy('password', 'asc');
+        $this->json('GET', '/luminix-api/users?order_by=password:asc')
+            ->assertStatus(422);
     }
 
     // ── Pagination ───────────────────────────────────────────────────────────
