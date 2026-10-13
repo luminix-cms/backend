@@ -163,10 +163,12 @@ class User extends Model
 
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class)->withPivot('expires_at');
     }
 }
 ```
+
+Os dados de pivô enviados ao `sync` e ao `attach` ficam restritos às colunas declaradas em `withPivot()`: as demais chaves são descartadas sem erro, como um atributo fora do `$fillable`. Veja [Definir as colunas de pivô graváveis](customize-endpoints.md#definir-as-colunas-de-pivô-graváveis).
 
 ### Operações de Relacionamento
 

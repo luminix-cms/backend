@@ -15,6 +15,47 @@ class ToDo extends Model
 
 Neste exemplo, apenas os campos `title`, `description` e `due_date` podem ser definidos usando os métodos `store` e `update`. Todos os outros campos serão ignorados, a menos que sejam tratados manualmente em um controlador personalizado ou em um evento do modelo.
 
+## Definir as colunas de pivô graváveis
+
+Nas rotas `sync` e `attach` de relações muitos-para-muitos, o `withPivot()` da relação faz o papel do `$fillable`: apenas as colunas declaradas nele são gravadas a partir do corpo da requisição.
+
+```php
+class User extends Model
+{
+    protected $syncs = ['roles'];
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class)
+            ->withPivot('expires_at')
+            ->withTimestamps();
+    }
+}
+```
+
+Neste exemplo, o cliente pode enviar `expires_at`; qualquer outra chave é descartada sem erro. As chaves do pivô (`user_id`, `role_id`), o tipo do morph em relações `MorphToMany` e as colunas de `withTimestamps()` são sempre definidos pelo Eloquent.
+
+Como o `withPivot()` também define as colunas carregadas em `$model->pivot`, uma coluna declarada para leitura fica gravável pelo cliente. Para manter uma coluna sob controle do servidor, ou preenchê-la a partir da requisição, sobrescreva `pivotAttributes()` num [controlador do modelo](#adicionar-controladores-específicos-do-modelo):
+
+```php
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Luminix\Backend\Controllers\ResourceController;
+
+class UserController extends ResourceController
+{
+    protected function pivotAttributes(BelongsToMany $relation, array $attributes): array
+    {
+        $attributes = parent::pivotAttributes($relation, $attributes);
+
+        if ($relation->getTable() === 'role_user') {
+            $attributes['granted_by'] = auth()->id(); // substitui qualquer valor do cliente
+        }
+
+        return $attributes;
+    }
+}
+```
+
 ## Adicionar comportamentos ao próprio modelo
 
 A maneira mais fácil de personalizar o comportamento de um modelo é adicionar comportamentos diretamente à classe do modelo. Por exemplo, utilize os [Eventos do Modelo Eloquent](https://laravel.com/docs/11.x/eloquent#events) integrados do Laravel para adicionar lógica personalizada aos seus modelos.

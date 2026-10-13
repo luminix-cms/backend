@@ -91,6 +91,9 @@ class UserObserver
 }
 ```
 
+Pivot data sent to `sync`/`attach` is held to the relation's `withPivot()` columns -> *Relationship
+sync* in `customization.md`.
+
 ## Attribute searching protection
 
 `where[]` and `order_by` share one exclusion: they never reach `$hidden` columns, nor columns left
