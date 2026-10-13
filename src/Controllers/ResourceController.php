@@ -148,6 +148,23 @@ class ResourceController extends Controller
         return $relation;
     }
 
+    /**
+     * Pivot attributes `sync` and `attach` accept from the client: the columns
+     * the relation declares with `withPivot()`. The rest is dropped, like
+     * non-fillable attributes on `store`/`update`, so the pivot keys, the morph
+     * type and the `withTimestamps()` columns stay with Eloquent.
+     */
+    protected function pivotAttributes(BelongsToMany $relation, array $attributes): array
+    {
+        $columns = $relation->getPivotColumns();
+
+        if ($relation->withTimestamps) {
+            $columns = array_diff($columns, [$relation->createdAt(), $relation->updatedAt()]);
+        }
+
+        return Arr::only($attributes, $columns);
+    }
+
     public function sync(Request $request, $id)
     {
         $relation = $this->getRequestedRelation($request, $id);
@@ -161,7 +178,10 @@ class ResourceController extends Controller
                     return [$key => $relationItem];
                 }
                 $key = $relationItem[$relation->getRelated()->getKeyName()];
-                $pivot = Arr::except($relationItem, $relation->getRelated()->getKeyName());
+                $pivot = $this->pivotAttributes(
+                    $relation,
+                    Arr::except($relationItem, $relation->getRelated()->getKeyName())
+                );
                 return [$relationItem[$relation->getRelated()->getKeyName()] => $pivot];
                 
             })
@@ -187,7 +207,7 @@ class ResourceController extends Controller
             ->whereKey($itemId)
             ->firstOrFail();
 
-        $relation->attach($itemId, $request->all());
+        $relation->attach($itemId, $this->pivotAttributes($relation, $request->all()));
 
         return $this->respondWithItem($this->refetchItem($request, $id));
     }

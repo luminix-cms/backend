@@ -26,6 +26,8 @@ class Category extends Model
 
     public function toDos(): BelongsToMany
     {
-        return $this->belongsToMany(ToDo::class);
+        return $this->belongsToMany(ToDo::class)
+            ->withPivot('note')
+            ->withTimestamps();
     }
 }
