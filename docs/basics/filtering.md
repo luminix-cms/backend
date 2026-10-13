@@ -82,9 +82,11 @@ Você pode excluir colunas específicas da filtragem definindo a chave de config
 
 Isso impedirá que clientes filtrem pelas colunas `password` e `email_verified_at` do modelo `User`.
 
-> **Nota:** Por padrão, as colunas definidas no array `$hidden` do modelo são excluídas da filtragem. Portanto, este exemplo seria quase sempre redundante. Porém, se não for possível adicionar colunas ao array `$hidden` do modelo, esta configuração pode ser usada como alternativa.
+> **Nota:** Por padrão, são excluídas da filtragem as colunas do array `$hidden` do modelo e, quando o modelo define `$visible`, as colunas fora dele. Portanto, este exemplo seria quase sempre redundante. Porém, se não for possível ajustar `$hidden`/`$visible` no modelo, esta configuração pode ser usada como alternativa. A entrada **substitui** a exclusão padrão do modelo: repita nela toda coluna oculta que deve continuar inalcançável.
 >
-> O parâmetro `order_by` (veja [Referência da API](api-reference.md)) aplica a mesma restrição: colunas em `$hidden` não podem ser usadas para ordenar resultados.
+> O parâmetro `order_by` (veja [Referência da API](api-reference.md)) aplica a mesma exclusão.
+>
+> Um filtro ou ordenação inválido responde `422`. Com `api.filter.throw` desligado, ele é ignorado e registrado como aviso no log.
 
 ## Alterando o comportamento do filtro
 

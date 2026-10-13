@@ -9,7 +9,7 @@ codes -> `routes-and-contract.md` · `api.max_per_page` and filter switches -> `
 |-------------------------|---------------------------------------------------|
 | `?page=2&per_page=25`   | Pagination (`per_page` cap: `api.max_per_page`, default 150) |
 | `?q=laravel`            | Search across all `$fillable` fields              |
-| `?order_by=created_at:desc` | Sort                                          |
+| `?order_by=created_at:desc` | Sort -> *Ordering* below                      |
 | `?where[title:contains]=api` | Filter with operator                        |
 | `?where[status]=active` | Exact match                                       |
 | `?tab=trashed`          | Show only soft-deleted records                     |
@@ -20,6 +20,28 @@ codes -> `routes-and-contract.md` · `api.max_per_page` and filter switches -> `
 
 Which columns `where[]` may reach is a security question -> *Attribute Searching Protection* in
 `authorization.md`.
+
+## Ordering — `order_by`
+
+`?order_by={column}:{asc|desc}`; the column is snake_cased, an omitted direction is `asc`, and the
+primary key ascending is always appended as tiebreaker. Accepted columns: table columns `where[]`
+may reach (same exclusion -> *Attribute searching protection* in `authorization.md`) plus the keys
+the model lists in `$orderable`. Anything else -> `422`, or ignored with a log warning when
+`api.filter.throw` is off.
+
+`$orderable` admits keys that are not table columns, such as aggregates added by
+`scopeBeforeLuminix`. Its keys skip the exclusion, so list only what the caller may see:
+
+```php
+protected $orderable = ['comments_count'];
+
+public function scopeBeforeLuminix(Builder $query, Request $request) {
+    $query->withCount('comments');
+}
+// GET /luminix-api/posts?order_by=comments_count:desc
+```
+
+Overriding `scopeApplyOrderBy` replaces the column check: the override decides what is sortable.
 
 ## Custom selection — `scopeBeforeLuminix` / `scopeAfterLuminix`
 

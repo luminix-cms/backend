@@ -151,7 +151,7 @@ O Luminix registra automaticamente a regra de validação `luminix_sync`, usada 
 
 Ela verifica se:
 1. O relacionamento existe no modelo e está listado em `$syncs`
-2. Cada item enviado corresponde a um registro válido do modelo relacionado
+2. Cada item enviado corresponde a um registro do modelo relacionado alcançável pelo `scopeAllowed('read')` desse modelo (o `attach` aplica a mesma verificação ao id associado e responde `404` se ela falhar)
 
 Normalmente você não precisa usá-la manualmente, mas ela pode ser útil em validações personalizadas de formulários que replicam o comportamento de sync:
 

@@ -29,7 +29,8 @@ Four requirements, all silent failures when missed:
 
 ## Gates are mandatory
 
-Deny-first: with no Gate defined, every endpoint answers `401`. The minimum to get a readable API:
+Deny-first: with no Gate defined, `index` and `store` answer `401` and every id route answers
+`404`, as if the id did not exist. The minimum to get a readable API:
 
 ```php
 // AppServiceProvider::boot()

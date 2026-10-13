@@ -62,7 +62,21 @@ axios.get('/luminix-api/users', {
 });
 ```
 
-> **Nota:** `order_by` rejeita colunas listadas no `$hidden` do modelo (ou fora da lista de colunas do modelo) lançando `InvalidFilterException` — isso evita que o valor de uma coluna oculta seja inferido pela posição dos registros na resposta.
+> **Nota:** `order_by` aceita as colunas da tabela que o `where` alcança (veja [Excluindo Colunas Sensíveis](filtering.md)) e as chaves listadas em `$orderable` no modelo. Qualquer outra coluna, ou uma direção diferente de `asc`/`desc`, responde `422` — isso evita que o valor de uma coluna oculta seja inferido pela posição dos registros na resposta. Sem direção (`?order_by=email`), a ordenação é ascendente.
+
+Use `$orderable` para ordenar por chaves que não são colunas da tabela, como contagens adicionadas no `scopeBeforeLuminix`:
+
+```php
+protected $orderable = ['comments_count'];
+
+public function scopeBeforeLuminix(Builder $query, Request $request)
+{
+    $query->withCount('comments');
+}
+// GET /luminix-api/posts?order_by=comments_count:desc
+```
+
+As chaves de `$orderable` não passam pela exclusão de colunas: liste apenas o que o cliente pode ver. Um modelo que sobrescreve `scopeApplyOrderBy` substitui essa verificação e passa a decidir sozinho quais colunas são seguras.
 
 ### Criação de Registros: `POST /{$prefix}/{$modelSlug}`
 

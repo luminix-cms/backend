@@ -79,6 +79,8 @@ Um filtro de linhas não tem como expressar "pode criar": no momento do `store`,
 
 `sync`, `attach` e `detach` são tratados como uma **atualização do modelo pai**: a busca do registro pai aplica `scopeAllowed('update')` e o Gate `update-{apelido_modelo}` é verificado com o registro pai. Se o usuário não pode atualizar o registro, ele não pode alterar suas relações.
 
+Os registros relacionados enviados ao `sync` e ao `attach` precisam passar pelo `scopeAllowed('read')` **do modelo relacionado**: o `sync` responde `422` a um id fora do escopo e o `attach` responde `404`, como para um id inexistente. Assim, um usuário não associa ao seu registro um item de outro dono. O `detach` aceita qualquer id já presente na tabela pivô.
+
 ## Conceitos-Chave
 
 ### Tipos de Permissão
@@ -92,9 +94,10 @@ Para utilizar `auth()->id()` e obter o ID do usuário atual, certifique-se de te
 ### Códigos de resposta
 
 - Registro oculto pelo `scopeAllowed`: `404 Not Found` (em listagens, o registro simplesmente não aparece)
-- Acesso negado por um Gate: `401` com a mensagem `unauthorized`
+- Acesso negado por um Gate em um registro que o usuário pode ler: `401` com a mensagem `unauthorized`
+- Acesso negado por um Gate em um registro que o usuário não pode ler: `404`, idêntico ao do escopo
 
-Essa distinção é intencional: o escopo faz o registro *não existir* para o usuário; o Gate nega uma ação sobre um registro que o usuário consegue alcançar.
+Essa distinção é intencional: o escopo faz o registro *não existir* para o usuário; o Gate nega uma ação sobre um registro que o usuário consegue alcançar. Nas listagens só o escopo oculta registros — um Gate `read` negado responde `401` à página inteira (veja [Utilizando Gates](./using-gates.md)).
 
 ## O que o scopeAllowed não deve fazer
 

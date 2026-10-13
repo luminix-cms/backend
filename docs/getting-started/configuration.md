@@ -26,8 +26,8 @@ php artisan vendor:publish --tag=luminix-config
 | Chave | Valor Padrão | Descrição |
 |-----|--------------|-------------|
 | `api.filter.enable` | `true` | Habilita ou desabilita a funcionalidade de filtragem na API. Quando ativo, clientes podem filtrar resultados usando o parâmetro 'where'. |
-| `api.filter.exclude` | `[]` | Lista de colunas excluídas da filtragem para modelos específicos. Previne filtragem em colunas sensíveis ou internas. Formato: `'NomeDaClasseModelo:coluna1,coluna2'`. Por padrão, as colunas `hidden` do modelo são excluídas. |
-| `api.filter.throw` | `true` | Define se o Luminix deve lançar exceções em falhas de filtragem (ex.: coluna ou operador inválido). Auxilia na identificação e depuração de problemas. |
+| `api.filter.exclude` | `[]` | Lista de colunas excluídas da filtragem e da ordenação (`order_by`) para modelos específicos. Previne filtragem em colunas sensíveis ou internas. Formato: `'NomeDaClasseModelo:coluna1,coluna2'`. Por padrão, são excluídas as colunas `hidden` do modelo e as que ficam fora de um `visible` não vazio; a entrada substitui esse padrão. |
+| `api.filter.throw` | `true` | Define se um `where` ou `order_by` inválido (ex.: coluna ou operador inválido) responde `422`. Desligado, o parâmetro inválido é ignorado e registrado como aviso no log. |
 
 ## Configuração de Segurança
 
