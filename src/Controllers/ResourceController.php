@@ -3,11 +3,13 @@
 namespace Luminix\Backend\Controllers;
 
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -124,9 +126,7 @@ class ResourceController extends Controller
 
         $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401, __('luminix-backend::backend.unauthorized'));
-        }
+        $this->authorizeItem($permission, $alias, $item);
 
 
         if (!in_array($relationName, $item->getSyncs())) {
@@ -321,9 +321,7 @@ class ResourceController extends Controller
 
         $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401, __('luminix-backend::backend.unauthorized'));
-        }
+        $this->authorizeItem($permission, $alias, $item);
 
         return $this->respondWithItem($item);
     }
@@ -400,9 +398,7 @@ class ResourceController extends Controller
 
         $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401, __('luminix-backend::backend.unauthorized'));
-        }
+        $this->authorizeItem($permission, $alias, $item);
 
         $item->validateRequest($request, 'update');
         
@@ -464,9 +460,7 @@ class ResourceController extends Controller
 
         $item = $this->findItem($request, $id);
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true) && !Gate::allows($permission . '-' . $alias, [$item])) {
-            abort(401, __('luminix-backend::backend.unauthorized'));
-        }
+        $this->authorizeItem($permission, $alias, $item);
 
         $this->beforeTransaction($request, $item);
 
@@ -509,10 +503,7 @@ class ResourceController extends Controller
 
         $instance = new $class;
 
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
-        ]);
+        $request->validate($this->idsRules($instance));
         
         $ids = $request->ids;
 
@@ -528,19 +519,13 @@ class ResourceController extends Controller
         if ($request->force) {
             $query->withTrashed();
         }
-        $items = (clone $query)->get();
+        $items = $this->authorizeItems($permission, $alias, (clone $query)->get());
 
         if ($items->count() === 0) {
             abort(404);
         }
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true)) {
-            $items->each(function ($item) use ($permission, $alias) {
-                if (!Gate::allows($permission . '-' . $alias, [$item])) {
-                    abort(401, __('luminix-backend::backend.unauthorized'));
-                }
-            });
-        }
+        $query->whereIn($instance->getKeyName(), $items->modelKeys());
 
         $this->beforeTransaction($request, $items);
 
@@ -576,10 +561,7 @@ class ResourceController extends Controller
 
         $instance = new $class;
 
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:' . $instance->getTable() . ',' . $instance->getKeyName(),
-        ]);
+        $request->validate($this->idsRules($instance));
         
         $ids = $request->ids;
 
@@ -593,19 +575,13 @@ class ResourceController extends Controller
             ->whereIn($instance->getKeyName(), $ids)
             ->afterLuminix($request);
 
-        $items = (clone $query)->get();
+        $items = $this->authorizeItems($permission, $alias, (clone $query)->get());
 
         if ($items->count() === 0) {
             abort(404);
         }
 
-        if ($permission && config('luminix.backend.security.gates_enabled', true)) {
-            $items->each(function ($item) use ($permission, $alias) {
-                if (!Gate::allows($permission . '-' . $alias, [$item])) {
-                    abort(401, __('luminix-backend::backend.unauthorized'));
-                }
-            });
-        }
+        $query->whereIn($instance->getKeyName(), $items->modelKeys());
 
         $this->beforeTransaction($request, $items);
 
@@ -672,6 +648,73 @@ class ResourceController extends Controller
         }
         
         return new DefaultCollection($items);
+    }
+
+    /**
+     * Abort unless the Gate lets the caller perform `$permission` on `$item`.
+     *
+     * A caller who can't read the item gets the same 404 a missing id gets, so
+     * a denied id can't be told apart from an absent one. A caller who can read
+     * it but not perform the action gets 401.
+     */
+    protected function authorizeItem(?string $permission, string $alias, $item): void
+    {
+        if ($this->allowsItem($permission, $alias, $item)) {
+            return;
+        }
+
+        if ($this->canReadItem($permission, $alias, $item)) {
+            abort(401, __('luminix-backend::backend.unauthorized'));
+        }
+
+        throw (new ModelNotFoundException)->setModel(get_class($item));
+    }
+
+    /**
+     * Keep the items the caller may act on. Items it can't read are dropped,
+     * the same as ids that don't exist; a readable item the Gate denies aborts
+     * the request with 401.
+     */
+    protected function authorizeItems(?string $permission, string $alias, Collection $items): Collection
+    {
+        return $items->filter(function ($item) use ($permission, $alias) {
+            if ($this->allowsItem($permission, $alias, $item)) {
+                return true;
+            }
+
+            if ($this->canReadItem($permission, $alias, $item)) {
+                abort(401, __('luminix-backend::backend.unauthorized'));
+            }
+
+            return false;
+        });
+    }
+
+    protected function allowsItem(?string $permission, string $alias, $item): bool
+    {
+        return !$permission
+            || !config('luminix.backend.security.gates_enabled', true)
+            || Gate::allows($permission . '-' . $alias, [$item]);
+    }
+
+    protected function canReadItem(string $permission, string $alias, $item): bool
+    {
+        $read = config('luminix.backend.security.permissions.show');
+
+        return $permission !== $read && $this->allowsItem($read, $alias, $item);
+    }
+
+    /**
+     * Rules for the `ids` of destroyMany/restoreMany. Existence is left to the
+     * scoped query: an unscoped `exists` rule would answer 422 for a missing id
+     * and 404 for a hidden one.
+     */
+    protected function idsRules($instance): array
+    {
+        return [
+            'ids' => 'required|array',
+            'ids.*' => $instance->getKeyType() === 'int' ? 'integer' : 'string',
+        ];
     }
 
     public function findItem(Request $request, $id)

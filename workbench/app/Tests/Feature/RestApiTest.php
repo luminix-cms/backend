@@ -33,14 +33,15 @@ class RestApiTest extends TestCase
         $this->json('GET', '/luminix-api/users')
             ->assertStatus(401);
 
+        // a record the caller can't read answers like a missing one
         $this->json('GET', '/luminix-api/users/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         $this->json('POST', '/luminix-api/users/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         $this->json('DELETE', '/luminix-api/users/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         // since ToDos have Query-Level permission,
         // no results will be tested against
@@ -66,7 +67,7 @@ class RestApiTest extends TestCase
             ->assertStatus(401);
 
         $this->json('GET', '/luminix-api/categories/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         $this->json('POST', '/luminix-api/categories')
             ->assertStatus(405);
@@ -102,7 +103,7 @@ class RestApiTest extends TestCase
             ->assertStatus(401);
 
         $this->json('GET', '/luminix-api/users/1')
-            ->assertStatus(401);
+            ->assertStatus(404);
 
         // can read self
         $this->json('GET', "/luminix-api/users/{$user->id}")
