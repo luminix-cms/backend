@@ -16,6 +16,10 @@ class Category extends Model
         'name',
     ];
 
+    protected $syncs = [
+        'toDos',
+    ];
+
     public function toDos(): BelongsToMany
     {
         return $this->belongsToMany(ToDo::class);

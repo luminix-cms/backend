@@ -2,6 +2,7 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Illuminate\Support\Facades\Gate;
 use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
 use Workbench\App\Models\User;
@@ -11,7 +12,8 @@ use Workbench\App\Tests\TestCase;
  * sync/attach/detach are authorized as an *update of the parent model*:
  * the parent lookup applies `scopeAllowed('update')` (hidden row → 404,
  * before any write) and the `update-{alias}` gate (denial → 401), exactly
- * like the update endpoint.
+ * like the update endpoint. The related row is looked up through the
+ * related model's `scopeAllowed`, the same check `luminix_sync` applies.
  */
 class RelationAuthorizationTest extends TestCase
 {
@@ -116,5 +118,44 @@ class RelationAuthorizationTest extends TestCase
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('category_to_do', ['to_do_id' => $todo->id]);
+    }
+
+    public function test_attach_rejects_a_related_row_outside_its_scope()
+    {
+        // Category syncs toDos, and ToDo::scopeAllowed hides other users' rows.
+        Gate::define('update-category', fn (?User $user) => !!$user);
+
+        $foreign = $this->createForeignToDo();
+        $category = Category::create(['name' => 'Cat A']);
+
+        $this->actingAs(User::where('email', 'user@example.com')->first());
+
+        $hidden = $this->json('POST', "/luminix-api/categories/{$category->id}/toDos/{$foreign->id}");
+        $missing = $this->json('POST', "/luminix-api/categories/{$category->id}/toDos/999999");
+
+        $hidden->assertStatus(404);
+        $missing->assertStatus(404);
+        $this->assertSame($missing->json('message'), $hidden->json('message'));
+
+        $this->assertDatabaseMissing('category_to_do', ['to_do_id' => $foreign->id]);
+    }
+
+    public function test_attach_accepts_a_related_row_inside_its_scope()
+    {
+        Gate::define('update-category', fn (?User $user) => !!$user);
+
+        $user = User::where('email', 'user@example.com')->first();
+        $this->actingAs($user);
+
+        $todo = $user->toDos()->create(['title' => 'Mine', 'description' => 'desc']);
+        $category = Category::create(['name' => 'Cat A']);
+
+        $this->json('POST', "/luminix-api/categories/{$category->id}/toDos/{$todo->id}")
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id'    => $todo->id,
+            'category_id' => $category->id,
+        ]);
     }
 }

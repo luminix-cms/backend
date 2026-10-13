@@ -174,7 +174,18 @@ class ResourceController extends Controller
     {
         $relation = $this->getRequestedRelation($request, $id);
 
-        $relation->getRelated()->findOrFail($itemId);
+        // Same reach check `luminix_sync` applies to each id given to sync.
+        $related = $relation->getRelated();
+        $permission = config('luminix.backend.security.permissions.index', 'read');
+
+        $related->newQuery()
+            ->where(function ($query) use ($related, $permission) {
+                if ($permission && $related->hasNamedScope('allowed')) {
+                    $query->allowed($permission);
+                }
+            })
+            ->whereKey($itemId)
+            ->firstOrFail();
 
         $relation->attach($itemId, $request->all());
 
