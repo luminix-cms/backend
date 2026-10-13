@@ -182,4 +182,24 @@ class PivotAttributesTest extends TestCase
             'approved'    => 1,
         ]);
     }
+
+    public function test_controller_pivot_attributes_apply_to_plain_ids_on_sync()
+    {
+        $this->app->bind(ToDoController::class, fn () => new class extends ToDoController {
+            protected function pivotAttributes(BelongsToMany $relation, array $attributes): array
+            {
+                return [...parent::pivotAttributes($relation, $attributes), 'approved' => true];
+            }
+        });
+
+        $this->json('POST', "/luminix-api/to-dos/{$this->todo->id}/categories/sync", [
+            $this->category->id,
+        ])->assertStatus(200);
+
+        $this->assertDatabaseHas('category_to_do', [
+            'to_do_id'    => $this->todo->id,
+            'category_id' => $this->category->id,
+            'approved'    => 1,
+        ]);
+    }
 }
