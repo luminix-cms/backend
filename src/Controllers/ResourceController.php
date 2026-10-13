@@ -174,7 +174,7 @@ class ResourceController extends Controller
         $relation->sync(
             collect($request->all())->mapWithKeys(function ($relationItem) use ($keyName, $relation) {
                 if (is_int($relationItem) || is_string($relationItem)) {
-                    return [$relationItem => []];
+                    return [$relationItem => $this->pivotAttributes($relation, [])];
                 }
 
                 return [
