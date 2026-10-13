@@ -35,11 +35,19 @@ class DestroyManyTest extends TestCase
         $this->json('DELETE', '/luminix-api/to-dos', [])->assertStatus(422);
     }
 
-    public function test_destroy_many_validates_that_ids_must_exist()
+    public function test_destroy_many_returns_404_when_ids_do_not_exist()
     {
         $this->actingAs(User::first());
 
         $this->json('DELETE', '/luminix-api/to-dos', ['ids' => [999]])
+            ->assertStatus(404);
+    }
+
+    public function test_destroy_many_validates_the_type_of_ids()
+    {
+        $this->actingAs(User::first());
+
+        $this->json('DELETE', '/luminix-api/to-dos', ['ids' => [[1]]])
             ->assertStatus(422);
     }
 

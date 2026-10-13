@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('category_to_do', function (Blueprint $table) {
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('to_do_id')->constrained()->onDelete('cascade');
+            $table->string('note')->nullable();
+            $table->boolean('approved')->default(false);
+            $table->timestamps();
         });
     }
 

@@ -16,11 +16,11 @@ class I18nTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        // Acting as John, try to read the seeded user (id=1).
-        // The gate `read-user` only allows a user to read their own record,
-        // so this triggers abort(401, __('luminix-backend::backend.unauthorized')).
+        // Acting as John, list users: the gate `read-user` only allows a user
+        // to read their own record, so the seeded user (id=1) on the page
+        // triggers abort(401, __('luminix-backend::backend.unauthorized')).
         $this->actingAs($john)
-            ->json('GET', '/luminix-api/users/1')
+            ->json('GET', '/luminix-api/users')
             ->assertStatus(401)
             ->assertJson(['message' => 'You are not authorized to perform this action.']);
     }

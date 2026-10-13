@@ -21,6 +21,13 @@ Gate::define('delete-post', fn(?User $user, Post $post) => $user->id === $post->
 
 Alias defaults to snake_case model name (`Post` → `post`, `ToDo` → `to_do`).
 
+The Gate receives the item loaded through `scopeBeforeLuminix`/`scopeAfterLuminix`: a `select`
+there that leaves out a column the Gate reads hands it `null` for that column.
+
+A Gate can deny an action, but it cannot hide a row from `index`: the listing answers `401` when
+the page holds a denied row. On id routes a denied read answers `404` like a missing id
+(-> `routes-and-contract.md`). Keep unreadable rows out of listings with `scopeAllowed('read')`.
+
 ## Row-level protection — `scopeAllowed()`
 
 Implement `scopeAllowed()` to answer one question: "which rows can this user reach for this
@@ -47,7 +54,7 @@ It is called automatically on the generated queries whenever the action has a pe
 | `update` | `update` | pre-write lookup only |
 | `destroy` / `destroyMany` | `delete` | pre-write lookup |
 | `restoreMany` | `update` | pre-write lookup |
-| `sync` / `attach` / `detach` | `update` | PARENT lookup only |
+| `sync` / `attach` / `detach` | `update` | PARENT lookup; related ids of `sync`/`attach` pass the RELATED model's `scopeAllowed(read)` |
 
 Custom `security.permissions` strings pass through to gate name and `scopeAllowed()` as-is. With
 the default map `scopeAllowed()` only ever receives `read`, `update` or `delete` — `create` never
@@ -84,10 +91,14 @@ class UserObserver
 }
 ```
 
+Pivot data sent to `sync`/`attach` is held to the relation's `withPivot()` columns -> *Relationship
+sync* in `customization.md`.
+
 ## Attribute searching protection
 
-`where[]` filtering excludes the model's `$hidden` columns automatically. Edge cases: list the
-model's filter-excluded attributes in `config/luminix/backend.php`:
+`where[]` and `order_by` share one exclusion: they never reach `$hidden` columns, nor columns left
+out of a non-empty `$visible`. A sort leaks as much as a filter — the order of the rows reveals the
+hidden values. When the model needs a different set, list it in `config/luminix/backend.php`:
 
 ```php
 return [
@@ -95,10 +106,13 @@ return [
         'filter' => [
             'exclude' => [
                 // add records here: {Full\ClassName}:{column1},{column2}...
-                'App\Models\Post:author_notes', // this entry REPLACES the default `$hidden` exclusion for the model
-                                                // -> repeat every `$hidden` column that must stay unfilterable
+                'App\Models\Post:author_notes', // this entry REPLACES the default `$hidden`/`$visible` exclusion
+                                                // -> repeat every hidden column that must stay unreachable
             ],
         ],
     ]
 ];
 ```
+
+An override of `scopeWhereMatchesFilter` or `scopeApplyOrderBy` replaces this check for the
+columns it handles itself.

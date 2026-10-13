@@ -93,6 +93,7 @@ public function boot()
 - Ao recuperar uma lista de itens, a permissão é verificada **para cada item individualmente**
 - O usuário deve ter permissão para todos os itens da lista
 - Se qualquer item negar a permissão, a requisição é abortada com uma resposta `401`
+- Esse `401` revela que a página contém um registro negado. Para que a listagem não exponha registros que o usuário não pode ler, oculte-os com o [`scopeAllowed('read')`](./query-permissions.md)
 
 ### Comportamento no `store`
 - No momento da criação ainda não existe registro, então o Gate `create-{apelido_modelo}` é verificado **sem instância do modelo** — a definição recebe apenas o usuário autenticado:
@@ -106,8 +107,13 @@ Gate::define('create-to_do', function (?User $user) {
 - Toda a autorização de criação acontece nos Gates e nas regras de validação; o [`scopeAllowed`](./query-permissions.md) não participa do `store`
 
 ### Códigos de resposta
-- Gate negado: `401` com a mensagem `unauthorized`
-- Registro oculto pelo [`scopeAllowed`](./query-permissions.md): `404` — para o usuário, o registro não existe
+- Registro inexistente ou oculto pelo [`scopeAllowed`](./query-permissions.md): `404` — para o usuário, o registro não existe
+- Gate negado em um registro que o usuário **não pode ler** (`read-{apelido_modelo}` também nega): `404`, idêntico ao de um id inexistente. Assim, quem não pode ler um registro não consegue descobrir que ele existe
+- Gate negado em um registro que o usuário **pode ler**: `401` com a mensagem `unauthorized`
+- `destroyMany`/`restoreMany`: ids que o usuário não pode ler são ignorados como se não existissem; se nenhum id sobrar, `404`
+
+### O que o Gate recebe
+- O Gate recebe o item carregado pelos escopos `scopeBeforeLuminix`/`scopeAfterLuminix`. Se um desses escopos aplicar um `select` que deixa de fora uma coluna lida pelo Gate, o Gate receberá `null` nessa coluna
 
 ### Depuração de Permissões
 - Use métodos do facade `Gate` como `allows()` e `denies()` para testar permissões:
@@ -142,11 +148,19 @@ Gate::define('update-department', function (User $user, Department $department) 
 
 ## Tradução da Mensagem de Erro
 
-Quando um Gate nega o acesso a um recurso, o pacote retorna uma resposta HTTP 401 com a mensagem padrão em inglês:
+Quando um Gate nega o acesso a um recurso que o usuário pode ler, o pacote retorna uma resposta HTTP 401 com a mensagem padrão em inglês:
 
 ```json
 {
     "message": "You are not authorized to perform this action."
+}
+```
+
+Um `where` ou `order_by` inválido responde `422` com a mensagem `invalid_filter` (com `app.debug` ligado, a resposta traz o detalhe do erro):
+
+```json
+{
+    "message": "The given filter or ordering is invalid."
 }
 ```
 
@@ -165,6 +179,7 @@ Isso criará o arquivo `lang/vendor/luminix-backend/en/backend.php` na sua aplic
 
 return [
     'unauthorized' => 'You are not authorized to perform this action.',
+    'invalid_filter' => 'The given filter or ordering is invalid.',
 ];
 ```
 
@@ -177,6 +192,7 @@ Para adicionar o português brasileiro, por exemplo, crie o arquivo `lang/vendor
 
 return [
     'unauthorized' => 'Você não tem permissão para realizar esta ação.',
+    'invalid_filter' => 'O filtro ou a ordenação informada é inválida.',
 ];
 ```
 

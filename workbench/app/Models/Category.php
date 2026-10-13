@@ -16,8 +16,18 @@ class Category extends Model
         'name',
     ];
 
+    protected $syncs = [
+        'toDos',
+    ];
+
+    protected $orderable = [
+        'to_dos_count',
+    ];
+
     public function toDos(): BelongsToMany
     {
-        return $this->belongsToMany(ToDo::class);
+        return $this->belongsToMany(ToDo::class)
+            ->withPivot('note')
+            ->withTimestamps();
     }
 }

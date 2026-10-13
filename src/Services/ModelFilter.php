@@ -4,6 +4,7 @@ namespace Luminix\Backend\Services;
 
 use Exception;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Macroable;
@@ -172,30 +173,35 @@ class ModelFilter {
 
     private function getValidAttributes(): Collection
     {
-        $excluded = collect(config('luminix.backend.api.filter.exclude', []));
-
-        $entry = $excluded->first(function ($entry) {
-            return Str::startsWith($entry, $this->model . ':');
-        });
-
-        if (!$entry) {
-            return $this->modelInfo->attributes
-                ->where('hidden', false)
-                ->where('appended', false)
-                ->pluck('name');
-        }
-
-        [, $columns] = explode(':', $entry);
-        $excludedColumns = explode(',', $columns);
+        $instance = new $this->model;
 
         return $this->modelInfo->attributes
             ->where('appended', false)
             ->pluck('name')
-            ->filter(function ($attribute) use ($excludedColumns) {
-                return !in_array($attribute, $excludedColumns);
-            })
+            ->reject(fn ($attribute) => static::excludes($instance, $attribute))
             ->values();
+    }
 
+    /**
+     * Whether `$attribute` is kept out of client-driven queries (`where` and
+     * `order_by`): the columns of the model's `filter.exclude` entry when it
+     * has one, its hidden attributes otherwise.
+     */
+    public static function excludes(Model $model, string $attribute): bool
+    {
+        $entry = collect(config('luminix.backend.api.filter.exclude', []))
+            ->first(fn ($entry) => Str::startsWith($entry, get_class($model) . ':'));
+
+        if ($entry) {
+            [, $columns] = explode(':', $entry);
+
+            return in_array($attribute, explode(',', $columns), true);
+        }
+
+        $visible = $model->getVisible();
+
+        return in_array($attribute, $model->getHidden(), true)
+            || (count($visible) > 0 && !in_array($attribute, $visible, true));
     }
 
     public function apply(Builder $query): Builder

@@ -18,7 +18,9 @@ Publish it with `php artisan vendor:publish --tag=luminix-config`.
 
 - `api.prefix` — every generated route sits under it -> `routes-and-contract.md`
 - `api.max_per_page` — `?per_page=` above it is a `422`, not a silent clamp -> `querying.md`
-- `api.filter.exclude` — which columns `where[]` may never reach -> `authorization.md`
+- `api.filter.exclude` — which columns `where[]` and `order_by` may never reach -> `authorization.md`
+- `api.filter.throw` — an invalid `where[]` or `order_by` answers `422`; off, it is ignored and
+  logged as a warning
 - `security.middleware` — `['web', 'auth']` for session-cookie auth (Blade-served SPA), `['api', 'auth']`
   for token auth; package default is `['api', 'auth']`
 - `security.permissions` — remaps endpoint → action, feeding both gate name and `scopeAllowed()`
