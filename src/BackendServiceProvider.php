@@ -68,33 +68,38 @@ class BackendServiceProvider extends ServiceProvider
         Validator::extend('luminix_sync', function ($attribute, $value, $parameters, $validator) {
             $class = $parameters[0];
             $relationName = $parameters[1];
+            $parentKey = $parameters[2] ?? null;
 
             $model = new $class;
             /** @var Relation */
             $relation = $model->{$relationName}();
+            $related = $relation->getRelated();
+            $keyName = $related->getKeyName();
 
-            $query = $relation->getRelated()
+            if (is_int($value) || is_string($value)) {
+                $id = $value;
+            } elseif (is_array($value) && isset($value[$keyName])) {
+                $id = $value[$keyName];
+            } else {
+                return false;
+            }
+
+            // With the parent's key, an id the parent already holds skips the related model's
+            // scope: the caller may update the parent, and keeping a link is not a new grant.
+            if (filled($parentKey)) {
+                $parent = $model->newQuery()->withoutGlobalScopes()->find($parentKey);
+
+                if ($parent && $parent->{$relationName}()->where($related->getQualifiedKeyName(), $id)->exists()) {
+                    return true;
+                }
+            }
+
+            return $related
                 ->newQuery()
                 ->where(function ($query) {
                     $query->allowed(config('luminix.backend.security.permissions.index', 'read'));
-                });
-
-            if (is_int($value) || is_string($value)) {
-                return $query
-                    ->where($relation->getRelated()->getKeyName(), $value)
-                    ->exists();
-            }
-
-            if (!is_array($value)) {
-                return false;
-            }
-
-            if (!isset($value[$relation->getRelated()->getKeyName()])) {
-                return false;
-            }
-
-            return $query
-                ->where($relation->getRelated()->getKeyName(), $value[$relation->getRelated()->getKeyName()])
+                })
+                ->where($keyName, $id)
                 ->exists();
 
         });

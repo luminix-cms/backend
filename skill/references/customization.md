@@ -115,4 +115,10 @@ class UserController extends ResourceController {
 
 It runs on `attach` and on every `sync` item; a plain key in `sync` arrives with `$attributes = []`.
 
+Each key must be visible through the related model's `scopeAllowed()` (permission `index`, `read` by
+default), else `422`. Keys the parent already holds skip that check, so resending the current
+collection succeeds even when it holds a row the caller cannot see; a new key still goes through the
+scope. The skip covers the pivot data sent with a held key too (`position`, say): the link belongs
+to the parent the caller may update.
+
 > Required for `BelongsToMany.sync()` from `@luminix/core`.
