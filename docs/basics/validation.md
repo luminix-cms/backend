@@ -143,15 +143,20 @@ O Luminix Backend trata automaticamente os erros de validação, retornando uma 
 
 ## Regra de Validação `luminix_sync`
 
-O Luminix registra automaticamente a regra de validação `luminix_sync`, usada internamente para validar dados de sincronização de relacionamentos via a operação `sync`. A regra aceita dois argumentos: a classe do modelo pai e o nome do relacionamento.
+O Luminix registra automaticamente a regra de validação `luminix_sync`, usada internamente para validar dados de sincronização de relacionamentos via a operação `sync`. A regra aceita dois argumentos: a classe do modelo pai e o nome do relacionamento. Um terceiro argumento, opcional, é a chave do registro pai.
 
 ```php
 'luminix_sync:App\Models\User,roles'
+'luminix_sync:App\Models\User,roles,42'
 ```
 
 Ela verifica se:
 1. O relacionamento existe no modelo e está listado em `$syncs`
 2. Cada item enviado corresponde a um registro do modelo relacionado alcançável pelo `scopeAllowed('read')` desse modelo (o `attach` aplica a mesma verificação ao id associado e responde `404` se ela falhar)
+
+Com a chave do pai (o endpoint `sync` sempre a envia), os itens que o pai já possui dispensam o `scopeAllowed` do modelo relacionado. Assim, reenviar a coleção atual de um registro que contém um item fora do escopo de quem edita responde `200` e mantém o item. Um item novo fora do escopo continua sendo recusado com `422`. Sem a chave do pai, todos os itens passam pelo `scopeAllowed`.
+
+A isenção vale também para os dados de pivot enviados junto com um item já ligado (como `position`): o vínculo pertence ao registro pai, que quem edita já pode atualizar.
 
 Normalmente você não precisa usá-la manualmente, mas ela pode ser útil em validações personalizadas de formulários que replicam o comportamento de sync:
 
