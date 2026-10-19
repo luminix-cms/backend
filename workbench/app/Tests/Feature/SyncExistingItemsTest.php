@@ -2,6 +2,7 @@
 
 namespace Workbench\App\Tests\Feature;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Workbench\App\Models\Category;
 use Workbench\App\Models\ToDo;
@@ -113,6 +114,34 @@ class SyncExistingItemsTest extends TestCase
 
         $this->assertDatabaseHas('category_to_do', ['to_do_id' => $todo->id, 'category_id' => $visible->id]);
         $this->assertDatabaseMissing('category_to_do', ['to_do_id' => $todo->id, 'category_id' => $hidden->id]);
+    }
+
+    public function test_each_resent_item_costs_one_query()
+    {
+        // The parent and the keys it holds load at most once per request, never once per item
+        $this->assertSame(4, $this->queriesToResend(5, hidden: false) - $this->queriesToResend(1, hidden: false));
+        $this->assertSame(4, $this->queriesToResend(5, hidden: true) - $this->queriesToResend(1, hidden: true));
+    }
+
+    protected function queriesToResend(int $count, bool $hidden): int
+    {
+        $todo = $this->ownToDo();
+        $ids = collect(range(1, $count))->map(fn () => Category::create(['name' => 'Held'])->id)->all();
+        $todo->categories()->attach($ids);
+
+        if ($hidden) {
+            Category::$hiddenIds = array_merge(Category::$hiddenIds, $ids);
+        }
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $this->json('POST', "/luminix-api/to-dos/{$todo->id}/categories/sync", $ids)
+            ->assertStatus(200);
+
+        DB::disableQueryLog();
+
+        return count(DB::getQueryLog());
     }
 
     public function test_the_rule_without_a_parent_key_checks_the_scope_alone()

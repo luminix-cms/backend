@@ -56,7 +56,8 @@ Order of checks differs per action — matters when asserting in tests:
 - **`sync`/`attach`/`detach`**: authorized as UPDATE OF PARENT — parent lookup via scoped
   `findItem('update')`, then gate `update-{alias}` with the parent (same `404`/`401` rule as
   `update`), then write, then unscoped refetch. The related ids must pass the related model's
-  `scopeAllowed(permissions.index)`: `sync` answers `422` for any that does not, `attach` answers
-  `404`. `detach` takes any id already in the pivot.
+  `scopeAllowed(permissions.index)`: `attach` answers `404` for one that does not, `sync` answers
+  `422` for any that does not, save an id the parent already holds (-> *Relationship sync* in
+  `customization.md`). `detach` takes any id already in the pivot.
 - **`index`**: gate `read-{alias}` per row of the page, any denial = `401`. That `401` tells the
   caller a denied row exists; only `scopeAllowed('read')` keeps rows out of a listing unseen.

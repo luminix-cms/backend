@@ -65,7 +65,10 @@ class BackendServiceProvider extends ServiceProvider
 
 
     private function extendValidator() {
-        Validator::extend('luminix_sync', function ($attribute, $value, $parameters, $validator) {
+        // Keys each parent holds, per validator: the rule runs once per item of the payload.
+        $heldKeys = new \WeakMap();
+
+        Validator::extend('luminix_sync', function ($attribute, $value, $parameters, $validator) use ($heldKeys) {
             $class = $parameters[0];
             $relationName = $parameters[1];
             $parentKey = $parameters[2] ?? null;
@@ -84,23 +87,38 @@ class BackendServiceProvider extends ServiceProvider
                 return false;
             }
 
-            // With the parent's key, an id the parent already holds skips the related model's
-            // scope: the caller may update the parent, and keeping a link is not a new grant.
-            if (filled($parentKey)) {
-                $parent = $model->newQuery()->withoutGlobalScopes()->find($parentKey);
-
-                if ($parent && $parent->{$relationName}()->where($related->getQualifiedKeyName(), $id)->exists()) {
-                    return true;
-                }
-            }
-
-            return $related
+            $allowed = $related
                 ->newQuery()
                 ->where(function ($query) {
                     $query->allowed(config('luminix.backend.security.permissions.index', 'read'));
                 })
                 ->where($keyName, $id)
                 ->exists();
+
+            if ($allowed || blank($parentKey) || !(is_int($id) || is_string($id))) {
+                return $allowed;
+            }
+
+            // With the parent's key, an id the parent already holds skips the related model's
+            // scope: the caller may update the parent, and keeping a link is not a new grant.
+            // The held keys load on the first id the scope refuses, once per validation.
+            $cacheKey = implode(',', $parameters);
+            $cache = $heldKeys[$validator] ?? [];
+
+            if (!array_key_exists($cacheKey, $cache)) {
+                $parent = $model->newQuery()->withoutGlobalScopes()->find($parentKey);
+
+                $cache[$cacheKey] = $parent
+                    ? $parent->{$relationName}()
+                        ->pluck($related->getQualifiedKeyName())
+                        ->mapWithKeys(fn ($key) => [(string) $key => true])
+                        ->all()
+                    : [];
+
+                $heldKeys[$validator] = $cache;
+            }
+
+            return isset($cache[$cacheKey][(string) $id]);
 
         });
     }
