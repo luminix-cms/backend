@@ -14,6 +14,8 @@ use Luminix\Backend\Services\ModelFinder;
  * @method static string toAlias(string $class)
  * @method static string toClass(string $alias)
  * @method static bool isLuminixModel(string|object $class)
+ * @method static string|null aliasFromRouteName(string|null $name)
+ * @method static string|null actionFromRouteName(string|null $name)
  * 
  */
 class Finder extends Facade
