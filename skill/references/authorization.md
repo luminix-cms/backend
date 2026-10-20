@@ -54,7 +54,7 @@ It is called automatically on the generated queries whenever the action has a pe
 | `update` | `update` | pre-write lookup only |
 | `destroy` / `destroyMany` | `delete` | pre-write lookup |
 | `restoreMany` | `update` | pre-write lookup |
-| `sync` / `attach` / `detach` | `update` | PARENT lookup; related ids of `sync`/`attach` pass the RELATED model's `scopeAllowed(read)` |
+| `sync` / `attach` / `detach` | `update` | PARENT lookup; related ids of `sync`/`attach` pass the RELATED model's `scopeAllowed(read)`; `sync` skips the ids the parent already holds |
 
 Custom `security.permissions` strings pass through to gate name and `scopeAllowed()` as-is. With
 the default map `scopeAllowed()` only ever receives `read`, `update` or `delete` — `create` never

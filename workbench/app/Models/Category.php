@@ -2,6 +2,7 @@
 
 namespace Workbench\App\Models;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -29,5 +30,15 @@ class Category extends Model
         return $this->belongsToMany(ToDo::class)
             ->withPivot('note')
             ->withTimestamps();
+    }
+
+    /** Ids hidden by scopeAllowed, set by contract tests. Empty leaves every row visible. */
+    public static array $hiddenIds = [];
+
+    public function scopeAllowed(Builder $query, string $permission)
+    {
+        if (static::$hiddenIds) {
+            $query->whereNotIn('id', static::$hiddenIds);
+        }
     }
 }

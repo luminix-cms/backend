@@ -141,7 +141,7 @@ class ResourceController extends Controller
 
         if ($action === 'sync') {
             Validator::make($request->all(), [
-                '*' => 'luminix_sync:' . $class . ',' . $relationName,
+                '*' => 'luminix_sync:' . $class . ',' . $relationName . ',' . $item->getKey(),
             ])->validate();
         }
 

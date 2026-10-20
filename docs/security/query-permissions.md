@@ -81,6 +81,8 @@ Um filtro de linhas não tem como expressar "pode criar": no momento do `store`,
 
 Os registros relacionados enviados ao `sync` e ao `attach` precisam passar pelo `scopeAllowed('read')` **do modelo relacionado**: o `sync` responde `422` a um id fora do escopo e o `attach` responde `404`, como para um id inexistente. Assim, um usuário não associa ao seu registro um item de outro dono. O `detach` aceita qualquer id já presente na tabela pivô.
 
+No `sync`, as chaves que o registro pai já possui dispensam essa checagem: reenviar a coleção atual funciona mesmo que ela contenha um item que o usuário não enxerga, por exemplo um associado por um administrador. Itens novos continuam passando pelo escopo. A isenção cobre também os dados de pivot enviados com uma chave já ligada, como `position`: o vínculo pertence ao registro pai, que o usuário pode atualizar.
+
 ## Conceitos-Chave
 
 ### Tipos de Permissão
